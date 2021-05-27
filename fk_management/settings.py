@@ -65,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',  # debug-toolbar
+    'django_currentuser.middleware.ThreadLocalUserMiddleware',  # get_current_authenticated_user
 ]
 
 ROOT_URLCONF = 'fk_management.urls'
