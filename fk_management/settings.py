@@ -144,7 +144,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # debug-toolbar
-INTERNAL_IPS = ['127.0.0.1', "172.22.0.1", "172.25.0.1"]
+INTERNAL_IPS = [
+    '0.0.0.0', '127.0.0.1',
+    "172.22.0.4", "172.23.0.4", "172.24.0.4",
+    "172.25.0.4", "172.26.0.4", "172.27.0.4",
+]
 
 # allauth
 SITE_ID = 1

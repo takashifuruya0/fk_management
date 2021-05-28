@@ -1,1 +1,18 @@
-hello, world
+<html>
+  <body>
+    <p>hello, world</p>
+
+    <p>User: {{request.user}}</p>
+
+    <p>
+      <a href="/auth/logout">ログアウト</a>
+    </p>
+    <p>
+      <a href="/auth/login">ログイン</a>
+    </p>
+    <p>
+      <a href="{% url 'kakeibo:top' %}">家計簿</a>
+    </p>
+  </body>
+</html>
+
