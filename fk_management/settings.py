@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
+env = environ.Env(DEBUG=(bool, False),)  # set default values and casting
+environ.Env.read_env('.env')  # reading .env file
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -137,10 +141,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # debug-toolbar
-INTERNAL_IPS = ['127.0.0.1', "172.22.0.1"]
+INTERNAL_IPS = ['127.0.0.1', "172.22.0.1", "172.25.0.1"]
 
 # allauth
 SITE_ID = 1

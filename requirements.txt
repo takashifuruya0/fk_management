@@ -15,6 +15,7 @@ django-rest-framework==0.1.0
 djangorestframework==3.12.4
 idna==2.10
 oauthlib==3.1.0
+psycopg2==2.8.6
 py-moneyed==1.2
 pycparser==2.20
 PyJWT==2.1.0

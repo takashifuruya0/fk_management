@@ -1,0 +1,37 @@
+version: '3'
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    command: >
+      bash -c '
+        python3 manage.py migrate --settings=fk_management.environment.develop &&
+        python3 manage.py collectstatic --clear --no-input  --settings=fk_management.environment.develop &&
+        python3 manage.py runserver 0.0.0.0:8000 --settings=fk_management.environment.develop '
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/home/fk_management
+    depends_on:
+      - db
+
+  web:
+    image: nginx:1.21
+    volumes:
+      - .:/etc/nginx/conf.d
+      - ./static:/var/www/html/static
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+
+volumes:
+    postgres_data:
