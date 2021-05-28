@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    #
+    # others
     'debug_toolbar',  # debug-toolbar
     'django_extensions',
     # Django REST Framework
