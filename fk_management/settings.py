@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'debug_toolbar',  # debug-toolbar
     'django_extensions',
     "django_bootstrap5",
+    "import_export",
     # 'fontawesome-free',
     # Django REST Framework
     'rest_framework',
@@ -154,7 +155,7 @@ INTERNAL_IPS = [
 
 # allauth
 SITE_ID = 1
-LOGIN_URL = "/auths/login"
+LOGIN_URL = "/auth/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_ON_GET = True
