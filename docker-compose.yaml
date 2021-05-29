@@ -14,7 +14,7 @@ services:
     command: >
       bash -c '
         python3 manage.py migrate --settings=fk_management.environment.develop &&
-        python3 manage.py collectstatic --clear --no-input  --settings=fk_management.environment.develop &&
+        python3 manage.py collectstatic --no-input  --settings=fk_management.environment.develop &&
         python3 manage.py runserver 0.0.0.0:8000 --settings=fk_management.environment.develop '
     ports:
       - 8000:8000

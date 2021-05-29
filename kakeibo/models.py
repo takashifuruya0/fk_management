@@ -40,7 +40,8 @@ class Resource(BaseModel):
 class Usage(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255)
-    is_expense = models.BooleanField("支出フラグ")
+    is_expense = models.BooleanField("支出フラグ", default=True)
+    is_shared = models.BooleanField("共通フラグ", default=False)
 
 
 class Way(BaseModel):
@@ -52,7 +53,7 @@ class Way(BaseModel):
     resource_to = models.ForeignKey(
         Resource, related_name="resource_to", null=True, blank=True, verbose_name="From", on_delete=models.CASCADE
     )
-    is_expense = models.BooleanField("支出フラグ")
+    is_expense = models.BooleanField("支出フラグ", default=True)
 
 
 class Event(BaseModel):

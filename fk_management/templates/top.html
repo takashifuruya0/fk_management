@@ -1,18 +1,9 @@
-<html>
-  <body>
-    <p>hello, world</p>
+{% extends "base.html" %}
 
-    <p>User: {{request.user}}</p>
+{% block title %}
+top
+{% endblock %}
 
-    <p>
-      <a href="/auth/logout">ログアウト</a>
-    </p>
-    <p>
-      <a href="/auth/login">ログイン</a>
-    </p>
-    <p>
-      <a href="{% url 'kakeibo:top' %}">家計簿</a>
-    </p>
-  </body>
-</html>
-
+{% block page %}
+top
+{% endblock %}

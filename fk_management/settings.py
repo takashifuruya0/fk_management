@@ -55,6 +55,8 @@ INSTALLED_APPS = [
     # others
     'debug_toolbar',  # debug-toolbar
     'django_extensions',
+    "django_bootstrap5",
+    # 'fontawesome-free',
     # Django REST Framework
     'rest_framework',
     'rest_framework.authtoken',
