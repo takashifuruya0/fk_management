@@ -1,9 +1,52 @@
 {% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
 
 {% block title %}
 top
 {% endblock %}
 
-{% block page %}
+{% block page-title %}
 top
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-6">
+      <h2>message</h2>
+      <p>hello, world</p>
+      <p>User: {{request.user}}</p>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h2>リンク</h2>
+        </div>
+        <div class="card-body">
+          <ul>
+            {% if request.user.is_authenticated %}
+            <li>
+              <a href="/auth/logout">ログアウト</a>
+            </li>
+            {% else %}
+            <li>
+              <a href="/auth/login">ログイン</a>
+            </li>
+            {% endif %}
+            <li>
+              <a href="{% url 'admin:index' %}">Admin</a>
+            </li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          {% bootstrap_button button_type="submit" content="OK" %}
+          {% bootstrap_button button_type="reset" content="Cancel" button_class="btn-warning" %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

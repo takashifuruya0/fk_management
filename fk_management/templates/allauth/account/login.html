@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load account socialaccount %}
+{% load i18n %}
+
+
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block page-title %}
+Login
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-6 offset-sm-3">
+      <div class="card">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="card-header bg-success text-white">
+            <h2 class="card-title">ログイン</h2>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">Social Sign In</h3>
+            {% get_providers as socialaccount_providers %}
+
+            {% if socialaccount_providers %}
+            <div class="socialaccount_ballot">
+              <a class="btn btn-outline-primary" href="/auth/google/login/?process=login">
+                <i class="fab fa-google"></i> Google
+              </a>
+            </div>
+            <hr>
+            <h3 class="card-title">Sign In</h3>
+            {% include "socialaccount/snippets/login_extra.html" %}
+
+            {% else %}
+            <p>{% blocktrans %}If you have not created an account yet, then please
+            <a href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}</p>
+            {% endif %}
+
+            <form class="login" method="POST" action="{% url 'account_login' %}">
+              {% csrf_token %}
+              {{ form.as_p }}
+              {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+              {% endif %}
+
+              <button class="btn btn-primary primaryAction" type="submit">Sign In</button>
+              <a href="{{ signup_url }}" class="btn btn-secondary">Sign Up</a>
+            </form>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

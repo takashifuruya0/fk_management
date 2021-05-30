@@ -80,7 +80,10 @@ ROOT_URLCONF = 'fk_management.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["fk_management/templates",],
+        'DIRS': [
+            "fk_management/templates",
+            os.path.join(BASE_DIR, 'fk_management', 'templates', 'allauth')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

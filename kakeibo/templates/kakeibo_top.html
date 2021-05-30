@@ -1,9 +1,32 @@
 {% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
 
 {% block title %}
 kakeibo
 {% endblock %}
 
-{% block page %}
+{% block page-title %}
 kakeibo
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Kakeibo</h2>
+        </div>
+        <div class="card-body">
+          家計簿一覧
+        </div>
+        <div class="card-footer">
+          {% bootstrap_button button_type="reset" content="一覧" button_class="btn-info" %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
