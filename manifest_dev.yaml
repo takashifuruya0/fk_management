@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: fk-management-container
-          image: tfuruya/fk_management:0.1
+          image: tfuruya/fk_management:0.2
           imagePullPolicy: Always
           command: [
               "python3"
