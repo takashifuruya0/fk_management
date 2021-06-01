@@ -22,11 +22,11 @@ Login
       <div class="card">
         <form method="POST">
           {% csrf_token %}
-          <div class="card-header bg-success text-white">
-            <h2 class="card-title">ログイン</h2>
+          <div class="card-header bg-primary text-white">
+            <h2 class="card-title">Login</h2>
           </div>
           <div class="card-body">
-            <h3 class="card-title">Social Sign In</h3>
+            <h3 class="card-title">Social Login</h3>
             {% get_providers as socialaccount_providers %}
 
             {% if socialaccount_providers %}
@@ -36,7 +36,7 @@ Login
               </a>
             </div>
             <hr>
-            <h3 class="card-title">Sign In</h3>
+            <h3 class="card-title">Login</h3>
             {% include "socialaccount/snippets/login_extra.html" %}
 
             {% else %}
@@ -46,12 +46,12 @@ Login
 
             <form class="login" method="POST" action="{% url 'account_login' %}">
               {% csrf_token %}
-              {{ form.as_p }}
+              {% bootstrap_form form %}
               {% if redirect_field_value %}
               <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
               {% endif %}
 
-              <button class="btn btn-primary primaryAction" type="submit">Sign In</button>
+              <button class="btn btn-primary primaryAction" type="submit">Login</button>
               <a href="{{ signup_url }}" class="btn btn-secondary">Sign Up</a>
             </form>
           </div>

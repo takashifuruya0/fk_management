@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load account socialaccount %}
+{% load i18n %}
+
+
+
+{% block title %}
+Sign Up
+{% endblock %}
+
+{% block page-title %}
+Sign Up
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-6 offset-sm-3">
+      <div class="card">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="card-header bg-primary text-white">
+            <h2 class="card-title">Sign Up</h2>
+          </div>
+          <div class="card-body">
+            <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+              {% csrf_token %}
+              {% bootstrap_form form %}
+              {% bootstrap_form_errors form %}
+              {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+              {% endif %}
+              <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

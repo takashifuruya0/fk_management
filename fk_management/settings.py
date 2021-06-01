@@ -187,6 +187,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"  # mandatory / optional / none
 AUTH_USER_MODEL = "accounts.CustomUser"
+SOCIALACCOUNT_AUTO_SIGNUP = False
 #ACCOUNT_FORMS = {
 #    'signup': 'accounts.forms.CustomSignupForm',
 #}
