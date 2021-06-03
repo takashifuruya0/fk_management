@@ -3,6 +3,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
+from kakeibo.models import *
 # Create your views here.
 
 
@@ -21,4 +22,7 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
     template_name = "kakeibo_top.html"
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context["resouces"] = Resource.objects.filter(is_active=True)
+        context["ways"] = Way.objects.filter(is_active=True)
+        return context

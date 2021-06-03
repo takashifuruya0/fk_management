@@ -33,35 +33,47 @@ class BaseModel(models.Model):
 
 class Resource(BaseModel):
     name = models.CharField("名前", max_length=255)
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     is_investment = models.BooleanField("投資フラグ")
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Usage(BaseModel):
     name = models.CharField("名前", max_length=255)
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     is_expense = models.BooleanField("支出フラグ", default=True)
     is_shared = models.BooleanField("共通フラグ", default=False)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Way(BaseModel):
     name = models.CharField("名前", max_length=255)
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     resource_form = models.ForeignKey(
         Resource, related_name="resource_from", null=True, blank=True, verbose_name="From", on_delete=models.CASCADE
     )
     resource_to = models.ForeignKey(
-        Resource, related_name="resource_to", null=True, blank=True, verbose_name="From", on_delete=models.CASCADE
+        Resource, related_name="resource_to", null=True, blank=True, verbose_name="To", on_delete=models.CASCADE
     )
     is_expense = models.BooleanField("支出フラグ", default=True)
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Event(BaseModel):
     name = models.CharField("名前", max_length=255)
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     is_closed = models.BooleanField("修了フラグ", default=False)
     date = models.DateField("日付")
     sum_plan = models.IntegerField("計画総額")
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Credit(BaseModel):
@@ -72,14 +84,14 @@ class Credit(BaseModel):
     date = models.DateField("日付")
     debit_date = models.DateField("引き落とし日")
     name = models.CharField("名前", max_length=255)
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     card = models.CharField("カード", max_length=255, choices=CHOICES_CARD)
 
 
 class SharedKakeibo(BaseModel):
     fee = models.IntegerField("金額")
     date = models.DateField("日付")
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     paid_by = models.ForeignKey(get_user_model(), verbose_name="支払者", on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
 
@@ -87,7 +99,7 @@ class SharedKakeibo(BaseModel):
 class Kakeibo(BaseModel):
     fee = models.IntegerField("金額")
     date = models.DateField("日付")
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     way = models.ForeignKey(Way, verbose_name="種別", on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
     shared = models.ForeignKey(SharedKakeibo, verbose_name="共通家計簿", on_delete=models.CASCADE, null=True, blank=True)
@@ -104,7 +116,7 @@ class CronKakeibo(BaseModel):
         ("yearly_10", "年次（10月）"), ("yearly_11", "年次（11月）"), ("yearly_12", "年次（12月）"),
     )
     fee = models.IntegerField("金額")
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     way = models.ForeignKey(Way, verbose_name="種別", on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
     is_coping_to_shared = models.BooleanField("共通コピーフラグ")
@@ -117,5 +129,8 @@ class Target(BaseModel):
     )
     val = models.IntegerField("値")
     date = models.DateField("日付")
-    memo = models.CharField("備考", max_length=255)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
     kind = models.CharField("種類", max_length=255, choices=CHOICES_KIND)
+
+    def __str__(self) -> str:
+        return "Target_{}".format(self.date)
