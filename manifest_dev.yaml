@@ -83,7 +83,7 @@ kind: Service
 metadata:
   name: fk-management-externalip
 spec:
-  type: LoadBalancer # <- ClusterIPから変更
+  type: ClusterIP # <- ClusterIPから変更
   ports:
     - name: "http-port"
       protocol: "TCP"
