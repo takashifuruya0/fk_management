@@ -23,6 +23,6 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["resouces"] = Resource.objects.filter(is_active=True)
+        context["resources"] = Resource.objects.filter(is_active=True)
         context["ways"] = Way.objects.filter(is_active=True)
         return context

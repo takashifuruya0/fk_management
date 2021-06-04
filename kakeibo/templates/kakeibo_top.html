@@ -21,6 +21,11 @@ kakeibo
         </div>
         <div class="card-body">
           家計簿一覧
+          <ul>
+            {% for resource in resources %}
+            <li>{{resource.name}}</li>
+            {% endfor %}
+          </ul>
         </div>
         <div class="card-footer">
           {% bootstrap_button button_type="reset" content="一覧" button_class="btn-info" %}
