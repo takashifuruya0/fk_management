@@ -19,13 +19,14 @@ from django.conf import settings
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    path("", TemplateView.as_view(template_name="top.html"), name="top"),
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls, name="admin"),
     path('auth/', include('allauth.urls')),
+    path("kakeibo/", include("kakeibo.urls")),
+    path("", TemplateView.as_view(template_name="top.html"), name="top"),
 ]
 
 if settings.DEBUG:
      import debug_toolbar
-     urlpatterns = [
+     urlpatterns += [
          path('__debug__/', include(debug_toolbar.urls)),
-     ] + urlpatterns
+     ]

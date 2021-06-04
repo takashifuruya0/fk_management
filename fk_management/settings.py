@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'h)kw2#3knd9ft)2q(9w@n(imv(gox4$hz&la^)1qntq@)!ze01'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -55,12 +55,16 @@ INSTALLED_APPS = [
     # others
     'debug_toolbar',  # debug-toolbar
     'django_extensions',
+    "django_bootstrap5",
+    "import_export",
+    # 'fontawesome-free',
     # Django REST Framework
     'rest_framework',
     'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
+    "kolo.middleware.KoloMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -77,7 +81,10 @@ ROOT_URLCONF = 'fk_management.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ["fk_management/templates",],
+        'DIRS': [
+            "fk_management/templates",
+            os.path.join(BASE_DIR, 'fk_management', 'templates', 'allauth')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,15 +147,27 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
+# staticファイルのURL
 STATIC_URL = '/static/'
+# project全体のstaticファイル格納場所
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "staticfiles"),
+)
+# collectstatic の格納場所
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # debug-toolbar
-INTERNAL_IPS = ['127.0.0.1', "172.22.0.1", "172.25.0.1"]
+INTERNAL_IPS = [
+    '0.0.0.0', '127.0.0.1',
+    "172.22.0.4", "172.23.0.4", "172.24.0.4",
+    "172.25.0.4", "172.26.0.4", "172.27.0.4",
+    "172.28.0.4", "172.29.0.4", "172.27.30.4",
+    "172.31.0.4",
+]
 
 # allauth
 SITE_ID = 1
-LOGIN_URL = "/auths/login"
+LOGIN_URL = "/auth/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_ON_GET = True
@@ -169,6 +188,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"  # mandatory / optional / none
 AUTH_USER_MODEL = "accounts.CustomUser"
+SOCIALACCOUNT_AUTO_SIGNUP = False
 #ACCOUNT_FORMS = {
 #    'signup': 'accounts.forms.CustomSignupForm',
 #}

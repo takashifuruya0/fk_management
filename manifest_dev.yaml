@@ -1,0 +1,106 @@
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: sample-volume-pv
+# spec:
+#   storageClassName: ""
+#   capacity:
+#     storage: 10G
+#   accessModes:
+#     - ReadWriteOnce
+#   gcePersistentDisk:
+#     pdName: sample-gce-nfs-disk
+#     fsType: ext4
+
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   # 任意のPVC名を設定します
+#   name: sample-volume-pvc
+# spec:
+#   accessModes:
+#     - ReadWriteOnce # 下記参照
+#   # PVにて設定したものと同様の値を設定します
+#   storageClassName: ""
+#   resources:
+#     requests:
+#       # 作成したボリュームの容量と合わせます
+#       storage: 10Gi
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-configmap
+data:
+  message: "Hello, ConfigMap"
+  message2: "OK"
+  message3: "NG"
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fk-management-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fk-management-app
+  template:
+    metadata:
+      labels:
+        app: fk-management-app
+    spec:
+      containers:
+        - name: fk-management-container
+          image: tfuruya/fk_management:0.2
+          imagePullPolicy: Always
+          command: [
+              "python3"
+          ]
+          args: [
+              "manage.py", "runserver", "0.0.0.0:8000"
+          ]
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: "0.5"
+            requests:
+              memory: 32Mi
+              cpu: "0.1"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fk-management-externalip
+spec:
+  type: ClusterIP # <- ClusterIPから変更
+  ports:
+    - name: "http-port"
+      protocol: "TCP"
+      port: 80
+      targetPort: 8000
+#      nodePort: 30001
+  selector:
+    app: fk-management-app
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  type: ExternalName
+  externalName: my.database.example.com
+

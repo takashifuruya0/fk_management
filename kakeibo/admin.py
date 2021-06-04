@@ -1,16 +1,22 @@
 from django.contrib import admin
 from kakeibo.models import *
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 # Register your models here.
 
 
-# class TestmodelAdmin(admin.ModelAdmin):
-#     list_display = [
-#         "memo", "created_by", "created_at", "last_updated_by", "last_updated_at"
-#     ]
-#
-#
-# admin.site.register(Testmodel, TestmodelAdmin)
-admin.site.register(Resource)
+# Resources
+class ResourceResource(resources.ModelResource):
+    class Meta:
+        model = Resource
+
+
+# ModelAdmin
+class ResourceAdmin(ImportExportModelAdmin):
+    resource_class = ResourceResource
+
+
+admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Way)
 admin.site.register(Credit)
 admin.site.register(Usage)
