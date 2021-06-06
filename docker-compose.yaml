@@ -1,14 +1,26 @@
 version: '3'
 services:
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+#  db:
+#    image: postgres:13
+#    environment:
+#      POSTGRES_USER: ${DB_USER}
+#      POSTGRES_PASSWORD: ${DB_PASSWORD}
+#      POSTGRES_DB: ${DB_NAME}
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
 
+  db2:
+    image: gcr.io/cloudsql-docker/gce-proxy:1.16
+    volumes:
+      - ~/Documents/Local/gcloud/testiam.json:/config
+    ports:
+      - 6543:5432
+    command: [
+      "/cloud_sql_proxy",
+      "-instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432",
+      "-credential_file=/config"
+    ]
+# docker run -d --name "cloudsql" -v ~/Documents/Local/gcloud/testiam.json:/config -p 127.0.0.1:6543:5432 gcr.io/cloudsql-docker/gce-proxy:1.16 /cloud_sql_proxy -instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432 -credential_file=/config
   backend:
     build: .
     command: >
@@ -22,6 +34,7 @@ services:
       - .:/home/fk_management
     depends_on:
       - db
+      - db2
 
   web:
     image: nginx:1.21
