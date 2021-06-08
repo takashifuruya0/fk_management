@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
@@ -26,3 +26,31 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
         context["resources"] = Resource.objects.filter(is_active=True)
         context["ways"] = Way.objects.filter(is_active=True)
         return context
+
+
+class KakeiboList(MyUserPasssesTestMixin, ListView):
+    template_name = "kakeibo_list.html"
+    model = Kakeibo
+
+
+class KakeiboDetail(MyUserPasssesTestMixin, DetailView):
+    template_name = "kakeibo_detail.html"
+    model = Kakeibo
+
+
+class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
+    template_name = "kakeibo_create.html"
+    model = Kakeibo
+    fields = ("date", "fee", "way", 'usage', "memo")
+
+    def get_success_url(self):
+        return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
+
+
+class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
+    template_name = "kakeibo_update.html"
+    model = Kakeibo
+    fields = ("date", "fee", "way", 'usage', "memo")
+
+    def get_success_url(self):
+        return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})

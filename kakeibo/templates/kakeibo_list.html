@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}
+Kakeibo List
+{% endblock %}
+
+{% block page-title %}
+Kakeibo List
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Kakeibo List</h2>
+        </div>
+        <div class="card-body">
+          家計簿一覧
+          <table class="table">
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Fee</th>
+              <th>Way</th>
+            </tr>
+            {% for object in object_list %}
+            <tr>
+              <td>
+                <a href="{%url 'kakeibo:kakeibo_detail' pk=object.pk%}">{{object.pk}}</a>
+              </td>
+              <td>{{object.date}}</td>
+              <td>{{object.fee}}</td>
+              <td>{{object.way}}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_create'%}">新規追加</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

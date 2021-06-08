@@ -4,11 +4,11 @@
 {% bootstrap_javascript %}
 
 {% block title %}
-kakeibo
+Kakeibo Create
 {% endblock %}
 
 {% block page-title %}
-kakeibo
+Kakeibo Create
 {% endblock %}
 
 {% block body %}
@@ -17,15 +17,17 @@ kakeibo
     <div class="col-12">
       <div class="card">
         <div class="card-header bg-primary text-white">
-          <h2 class="card-title">Kakeibo</h2>
+          <h2 class="card-title">Kakeibo Create</h2>
         </div>
         <div class="card-body">
-          リソース一覧
-          <ul>
-            {% for resource in resources %}
-            <li>{{resource.name}}</li>
-            {% endfor %}
-          </ul>
+          家計簿作成
+          <form method="POST" class="form">
+            <table class="table">
+              {% csrf_token %}
+              {{form.as_table}}
+            </table>
+            <input type="submit" value="送信" class="btn btn-primary">
+          </form>
         </div>
         <div class="card-footer">
           <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_list'%}">家計簿一覧</a>

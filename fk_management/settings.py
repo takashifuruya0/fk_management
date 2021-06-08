@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import environ
 env = environ.Env(DEBUG=(bool, False),)  # set default values and casting
-environ.Env.read_env('.env')  # reading .env file
+environ.Env.read_env('env/.env')  # reading .env file
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

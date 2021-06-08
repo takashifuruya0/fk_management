@@ -64,7 +64,9 @@ class Way(BaseModel):
 
     def __str__(self) -> str:
         # return self.name
-        return "{} ({}→{})".format(self.name, self.resource_from, self.resource_to)
+        rf = "" if self.resource_from is None else self.resource_from
+        rt = "" if self.resource_to is None else self.resource_to
+        return "{} ({}→{})".format(self.name, rf, rt)
 
 
 class Event(BaseModel):

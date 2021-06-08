@@ -14,13 +14,13 @@ services:
     volumes:
       - ~/Documents/Local/gcloud/testiam.json:/config
     ports:
-      - 6543:5432
+      - 5432:5432
     command: [
       "/cloud_sql_proxy",
       "-instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432",
       "-credential_file=/config"
     ]
-# docker run -d --name "cloudsql" -v ~/Documents/Local/gcloud/testiam.json:/config -p 127.0.0.1:6543:5432 gcr.io/cloudsql-docker/gce-proxy:1.16 /cloud_sql_proxy -instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432 -credential_file=/config
+
   backend:
     build: .
     command: >
@@ -33,7 +33,6 @@ services:
     volumes:
       - .:/home/fk_management
     depends_on:
-      - db
       - db2
 
   web:
@@ -45,6 +44,6 @@ services:
       - 80:80
     depends_on:
       - backend
-
-volumes:
-    postgres_data:
+#
+#volumes:
+#    postgres_data:
