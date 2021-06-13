@@ -14,13 +14,14 @@ kakeibo
 {% block body %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-12">
+    <!--基本メニュ-->
+    <div class="col-md-8">
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Kakeibo</h2>
         </div>
         <div class="card-body">
-          家計簿一覧
+          リソース一覧
           <ul>
             {% for resource in resources %}
             <li>{{resource.name}}</li>
@@ -28,10 +29,50 @@ kakeibo
           </ul>
         </div>
         <div class="card-footer">
-          {% bootstrap_button button_type="reset" content="一覧" button_class="btn-info" %}
+          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_list'%}">家計簿一覧</a>
         </div>
       </div>
     </div>
+
+    <!--Chart.js-->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h2 class="card-title">Chart.js</h2>
+        </div>
+        <div class="card-body">
+          <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4"></script>
+          <canvas id="chart" width="500" height="500"></canvas>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<!--Chart.js-->
+<script>
+let ctx = document.getElementById("chart").getContext("2d");
+
+let chart = new Chart(ctx, {
+  type: "bar",
+  data: {
+     labels: ["2020/Q1", "2020/Q2", "2020/Q3", "2020/Q4"],
+     datasets: [
+        {
+          label: "Gross volume ($)",
+          backgroundColor: "#79AEC8",
+          borderColor: "#417690",
+          data: [26900, 28700, 27300, 29200]
+        }
+     ]
+  },
+  options: {
+     title: {
+        text: "Gross Volume in 2020",
+        display: true
+     }
+  }
+});
+</script>
 {% endblock %}

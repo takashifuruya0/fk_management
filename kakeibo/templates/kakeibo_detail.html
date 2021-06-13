@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}
+Kakeibo Detail
+{% endblock %}
+
+{% block page-title %}
+Kakeibo Detail
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Kakeibo Detail</h2>
+        </div>
+        <div class="card-body">
+          家計簿詳細
+          <table class="table">
+            <tr>
+              <th>Date</th>
+              <td>{{object.date}}</td>
+            </tr>
+            <tr>
+              <th>Fee</th>
+              <td>{{object.fee}}</td>
+            </tr>
+            <tr>
+              <th>Usage</th>
+              <td>{{object.usage}}</td>
+            </tr>
+            <tr>
+              <th>Way</th>
+              <td>{{object.way}}</td>
+            </tr>
+            <tr>
+              <th>Resource From</th>
+              <td>{{object.way.resource_from |default:"-"}}</td>
+            </tr>
+            <tr>
+              <th>Resource To</th>
+              <td>{{object.way.resource_to |default:"-"}}</td>
+            </tr>
+            <tr>
+              <th>Memo</th>
+              <td>{{object.memo}}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_update' pk=object.pk%}">家計簿更新</a>
+          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_list'%}">家計簿一覧</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

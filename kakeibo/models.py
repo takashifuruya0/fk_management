@@ -53,16 +53,20 @@ class Usage(BaseModel):
 class Way(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    resource_form = models.ForeignKey(
+    resource_from = models.ForeignKey(
         Resource, related_name="resource_from", null=True, blank=True, verbose_name="From", on_delete=models.CASCADE
     )
     resource_to = models.ForeignKey(
         Resource, related_name="resource_to", null=True, blank=True, verbose_name="To", on_delete=models.CASCADE
     )
     is_expense = models.BooleanField("支出フラグ", default=True)
+    is_transfer = models.BooleanField("振替フラグ", default=True)
 
     def __str__(self) -> str:
-        return self.name
+        # return self.name
+        rf = "" if self.resource_from is None else self.resource_from
+        rt = "" if self.resource_to is None else self.resource_to
+        return "{} ({}→{})".format(self.name, rf, rt)
 
 
 class Event(BaseModel):
