@@ -159,6 +159,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # debug-toolbar
 INTERNAL_IPS = [
     '0.0.0.0', '127.0.0.1',
+    "172.16.0.4", "172.17.0.4", "172.18.0.4",
+    "172.19.0.4", "172.20.0.4", "172.21.0.4",
     "172.22.0.4", "172.23.0.4", "172.24.0.4",
     "172.25.0.4", "172.26.0.4", "172.27.0.4",
     "172.28.0.4", "172.29.0.4", "172.27.30.4",
@@ -192,3 +194,6 @@ SOCIALACCOUNT_AUTO_SIGNUP = False
 #ACCOUNT_FORMS = {
 #    'signup': 'accounts.forms.CustomSignupForm',
 #}
+
+
+ENVIRONMENT = "default"

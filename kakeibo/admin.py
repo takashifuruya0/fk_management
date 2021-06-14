@@ -66,6 +66,10 @@ class UsageAdmin(ImportExportModelAdmin):
     ]
 
 
+class BudgetAdmin(admin.ModelAdmin):
+    list_display = ["pk", "date", "takashi", "hoko"]
+
+
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Way, WayAdmin)
 admin.site.register(Credit)
@@ -75,3 +79,4 @@ admin.site.register(SharedKakeibo)
 admin.site.register(CronKakeibo)
 admin.site.register(Kakeibo)
 admin.site.register(Target)
+admin.site.register(Budget, BudgetAdmin)

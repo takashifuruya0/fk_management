@@ -11,3 +11,5 @@ DATABASES = {
         "ATOMIC_REQUESTS": True,
     }
 }
+
+ENVIRONMENT = "develop"

@@ -138,3 +138,13 @@ class Target(BaseModel):
 
     def __str__(self) -> str:
         return "Target_{}".format(self.date)
+
+
+class Budget(BaseModel):
+    date = models.DateField("日付")
+    takashi = models.IntegerField("敬士予算")
+    hoko = models.IntegerField("朋子予算")
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return "予算_{}".format(self.date)
