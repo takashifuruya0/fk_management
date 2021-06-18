@@ -25,8 +25,9 @@ Kakeibo List
             <tr>
               <th>ID</th>
               <th>Date</th>
-              <th>Fee</th>
+              <th>Usage</th>
               <th>Way</th>
+              <th>Fee</th>
             </tr>
             {% for object in object_list %}
             <tr>
@@ -34,12 +35,29 @@ Kakeibo List
                 <a href="{%url 'kakeibo:kakeibo_detail' pk=object.pk%}">{{object.pk}}</a>
               </td>
               <td>{{object.date}}</td>
-              <td>{{object.fee}}</td>
+              <td>{{object.usage}}</td>
               <td>{{object.way}}</td>
+              <td>{{object.fee}}</td>
             </tr>
             {% endfor %}
           </table>
-        </div>
+          {% bootstrap_pagination page_obj url="/kakeibo/kakeibo?page=1" size="sm" %}
+<!--          <div class="pagination">-->
+<!--            <span class="step-links">-->
+<!--              {% if page_obj.has_previous %}-->
+<!--              <a href="?page=1">&laquo; first</a>-->
+<!--              <a href="?page={{ page_obj.previous_page_number }}">previous</a>-->
+<!--              {% endif %}-->
+<!--            <span class="current">-->
+<!--                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.-->
+<!--            </span>-->
+<!--            {% if page_obj.has_next %}-->
+<!--                <a href="?page={{ page_obj.next_page_number }}">next</a>-->
+<!--                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>-->
+<!--            {% endif %}-->
+<!--            </span>-->
+<!--          </div>-->
+<!--        </div>-->
         <div class="card-footer">
           <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_create'%}">新規追加</a>
         </div>

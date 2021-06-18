@@ -31,6 +31,7 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
 class KakeiboList(MyUserPasssesTestMixin, ListView):
     template_name = "kakeibo_list.html"
     model = Kakeibo
+    paginate_by = 20
 
 
 class KakeiboDetail(MyUserPasssesTestMixin, DetailView):
@@ -45,6 +46,12 @@ class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
 
     def get_success_url(self):
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
+
+    def get_form(self, form_class=None):
+        form = super().get_form()
+        form.fields['date'].widget.attrs['readonly'] = 'readonly'
+        form.fields['date'].widget.attrs['class'] = 'datepicker'
+        return form
 
 
 class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
