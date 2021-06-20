@@ -1,0 +1,110 @@
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sample-configmap
+data:
+  message: "Hello, ConfigMap"
+  message2: "OK"
+  message3: "NG"
+  DB_HOST: "127.0.0.1"
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fk-management-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fk-management-app
+  template:
+    metadata:
+      labels:
+        app: fk-management-app
+    spec:
+      containers:
+        - name: fk-management-container
+          image: tfuruya/fk_management:$VERSION
+          imagePullPolicy: Always
+          command:
+            - "python3"
+          args: [
+              "manage.py", "runserver", "0.0.0.0:8000", "--settings=fk_management.environment.develop"
+          ]
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: test
+              mountPath: "/home/fk_management/env"
+              readOnly: true
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: "0.5"
+            requests:
+              memory: 32Mi
+              cpu: "0.1"
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.16
+          imagePullPolicy: Always
+          command:
+            - "/cloud_sql_proxy"
+          args:
+            - "-instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432"
+          ports:
+            - containerPort: 5432
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: "0.5"
+            requests:
+              memory: 32Mi
+              cpu: "0.1"
+      volumes:
+        - name: test
+          configMap:
+            name: test
+
+#      volumes:
+#        # Podレベルでボリュームを設定し、Pod内のコンテナにマウントします。
+#        - name: config
+#          configMap:
+#            # マウントしたいConfigMapの名前を指定します。
+#            name: game-demo
+#            # ファイルとして作成するConfigMapのキーの配列
+#            items:
+#              - key: "game.properties"
+#                path: "game.properties"
+#              - key: "user-interface.properties"
+#                path: "user-interface.properties"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fk-management-externalip
+spec:
+  type: ClusterIP # <- ClusterIPから変更
+  ports:
+    - name: "http-port"
+      protocol: "TCP"
+      port: 80
+      targetPort: 8000
+  selector:
+    app: fk-management-app
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+spec:
+  type: ExternalName
+  externalName: my.database.example.com
+
