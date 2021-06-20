@@ -2,6 +2,8 @@
 {% load django_bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
+{% load humanize %}
+{% load my_templatetags %}
 
 {% block title %}
 Kakeibo List
@@ -37,7 +39,7 @@ Kakeibo List
               <td>{{object.date}}</td>
               <td>{{object.usage}}</td>
               <td>{{object.way}}</td>
-              <td>{{object.fee}}</td>
+              <td>{{object.fee |yen}}</td>
             </tr>
             {% endfor %}
           </table>

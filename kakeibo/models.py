@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.db.models import Sum, Avg
 from django_currentuser.middleware import get_current_authenticated_user
 from django.contrib.auth import get_user_model
 from django_currentuser.db.models import CurrentUserField
@@ -38,6 +39,16 @@ class Resource(BaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def total(self):
+        sum_from = Kakeibo.objects.select_related('way').filter(way__resource_from=self).aggregate(sum=Sum('fee'))['sum']
+        sum_to = Kakeibo.objects.select_related('way').filter(way__resource_to=self).aggregate(sum=Sum('fee'))['sum']
+        if sum_from and sum_to:
+            val = sum_to - sum_from
+        else:
+            val = sum_to if sum_to else 0
+        return val
 
 
 class Usage(BaseModel):

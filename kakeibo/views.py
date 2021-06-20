@@ -24,9 +24,16 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["resources"] = Resource.objects.filter(is_active=True).iterator()
-        context["ways"] = Way.objects.filter(is_active=True).iterator();
-        context["chart_header"] = ["test", "test2", "sample", "hello"]
-        context["chart_data"] = [2000, 3000, 5000, 1000]
+        # context["ways"] = Way.objects.filter(is_active=True).iterator()
+        # context["chart_header"] = [r.name for r in Resource.objects.filter(is_active=True)]
+        # context["chart_data"] = [r.total for r in Resource.objects.filter(is_active=True)]
+        # context["resources"] = list()
+        context["chart_header"] = list()
+        context["chart_data"] = list()
+        for r in Resource.objects.filter(is_active=True):
+            context["chart_header"].append(r.name)
+            context["chart_data"].append(r.total)
+            # context["resources"].append(r)
         return context
 
 
@@ -36,13 +43,12 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Kakeibo.objects.all().select_related('way', 'usage')
+        return Kakeibo.objects.all().select_related('way', 'usage').order_by('-date')
 
 
 class KakeiboDetail(MyUserPasssesTestMixin, DetailView):
     template_name = "kakeibo_detail.html"
     model = Kakeibo
-    
 
 
 class KakeiboCreate(MyUserPasssesTestMixin, CreateView):

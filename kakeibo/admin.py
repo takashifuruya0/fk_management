@@ -38,6 +38,12 @@ class UsageResource(resources.ModelResource):
         exclude = ["created_by", "created_at", "last_updated_by", "last_updated_at"]
 
 
+class KakeiboResource(resources.ModelResource):
+    class Meta:
+        model = Kakeibo
+        exclude = ["created_by", "created_at", "last_updated_by", "last_updated_at"]
+
+
 # ModelAdmin
 class ResourceAdmin(ImportExportModelAdmin):
     resource_class = ResourceResource
@@ -70,6 +76,13 @@ class BudgetAdmin(admin.ModelAdmin):
     list_display = ["pk", "date", "takashi", "hoko"]
 
 
+class KakeiboAdmin(ImportExportModelAdmin):
+    resource_class = KakeiboResource
+    list_display = [
+        "pk", "date", "usage", "way", "fee", "memo"
+    ]
+
+
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Way, WayAdmin)
 admin.site.register(Credit)
@@ -77,6 +90,6 @@ admin.site.register(Usage, UsageAdmin)
 admin.site.register(Event)
 admin.site.register(SharedKakeibo)
 admin.site.register(CronKakeibo)
-admin.site.register(Kakeibo)
+admin.site.register(Kakeibo, KakeiboAdmin)
 admin.site.register(Target)
 admin.site.register(Budget, BudgetAdmin)

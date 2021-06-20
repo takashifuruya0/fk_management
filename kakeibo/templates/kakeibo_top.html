@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load humanize %}
+{% load my_templatetags %}
 {% load django_bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
@@ -22,11 +24,14 @@ kakeibo
         </div>
         <div class="card-body">
           リソース一覧
-          <ul>
+          <table class="table">
             {% for resource in resources %}
-            <li>{{resource.name}}</li>
+            <tr>
+              <th>{{resource.name}}</th>
+              <td>{{resource.total |yen}}</td>
+            </tr>
             {% endfor %}
-          </ul>
+          </table>
         </div>
         <div class="card-footer">
           <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_list'%}">家計簿一覧</a>

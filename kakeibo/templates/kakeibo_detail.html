@@ -2,6 +2,8 @@
 {% load django_bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
+{% load humanize %}
+{% load my_templatetags %}
 
 {% block title %}
 Kakeibo Detail
@@ -28,7 +30,7 @@ Kakeibo Detail
             </tr>
             <tr>
               <th>Fee</th>
-              <td>{{object.fee}}</td>
+              <td>{{object.fee |yen}}</td>
             </tr>
             <tr>
               <th>Usage</th>
