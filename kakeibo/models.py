@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from datetime import date
 from django.db.models import Sum, Avg
 from django_currentuser.middleware import get_current_authenticated_user
 from django.contrib.auth import get_user_model
@@ -44,6 +45,21 @@ class Resource(BaseModel):
     def total(self):
         sum_from = Kakeibo.objects.select_related('way').filter(way__resource_from=self).aggregate(sum=Sum('fee'))['sum']
         sum_to = Kakeibo.objects.select_related('way').filter(way__resource_to=self).aggregate(sum=Sum('fee'))['sum']
+        if sum_from and sum_to:
+            val = sum_to - sum_from
+        else:
+            val = sum_to if sum_to else 0
+        return val
+
+    @property
+    def diff_this_month(self):
+        today = date.today()
+        sum_from = Kakeibo.objects.select_related('way') \
+            .filter(way__resource_from=self, date__month=today.month, date__year=today.year) \
+            .aggregate(sum=Sum('fee'))['sum']
+        sum_to = Kakeibo.objects.select_related('way') \
+            .filter(way__resource_to=self, date__month=today.month, date__year=today.year) \
+            .aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
         else:

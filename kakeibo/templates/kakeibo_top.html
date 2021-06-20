@@ -14,6 +14,7 @@ kakeibo
 {% endblock %}
 
 {% block body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
 <div class="container-fluid">
   <div class="row">
     <!--基本メニュ-->
@@ -25,10 +26,16 @@ kakeibo
         <div class="card-body">
           リソース一覧
           <table class="table">
+            <tr>
+              <th>リソース</th>
+              <th>合計</th>
+              <th>今月収支</th>
+            </tr>
             {% for resource in resources %}
             <tr>
               <th>{{resource.name}}</th>
               <td>{{resource.total |yen}}</td>
+              <td>{{resource.diff_this_month |yen}}</td>
             </tr>
             {% endfor %}
           </table>
@@ -46,8 +53,9 @@ kakeibo
           <h2 class="card-title">Chart.js</h2>
         </div>
         <div class="card-body">
-          <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
-          <canvas id="chart" width="500" height="500"></canvas>
+          <canvas id="chart_bar" width="500" height="500"></canvas>
+          <hr>
+          <canvas id="chart_pie" width="500" height="500"></canvas>
         </div>
       </div>
     </div>
@@ -57,7 +65,7 @@ kakeibo
 
 <!--Chart.js-->
 <script>
-let ctx = document.getElementById("chart").getContext("2d");
+let ctx = document.getElementById("chart_bar").getContext("2d");
 
 let chart = new Chart(ctx, {
   type: "bar",
@@ -82,6 +90,36 @@ let chart = new Chart(ctx, {
         beginAtZero: true
       }
     }
+  }
+});
+
+let ctx_pie = document.getElementById("chart_pie").getContext("2d");
+
+let chart_pie = new Chart(ctx_pie, {
+  type: "pie",
+  data: {
+     labels: [{% for ch in chart_header %}"{{ch}}",{% endfor %}],
+     datasets: [
+        {
+          label: "Yen (¥)",
+          data: [{% for cd in chart_data %}{{cd}},{% endfor %}],
+          backgroundColor: [
+          "#2ecc71",
+          "#3498db",
+          "#95a5a6",
+          "#9b59b6",
+          "#f1c40f",
+          "#e74c3c",
+          "#34495e",
+         ]
+        }
+     ]
+  },
+  options: {
+    title: {
+      text: "Pie",
+      display: true
+    },
   }
 });
 </script>
