@@ -3,7 +3,9 @@ from django.views.generic import TemplateView, CreateView, UpdateView, ListView,
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
-from kakeibo.models import *
+from dal import autocomplete
+from kakeibo.models import Kakeibo, Usage, Resource, Way
+from kakeibo.forms import KakeiboForm, KakeiboSearchForm
 # Create your views here.
 
 
@@ -40,6 +42,14 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
     def get_queryset(self):
         return Kakeibo.objects.all().select_related('way', 'usage').order_by('-date')
 
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'form': KakeiboForm(),
+            "search_form": KakeiboSearchForm(),
+        })
+        return context
+
 
 class KakeiboDetail(MyUserPasssesTestMixin, DetailView):
     template_name = "kakeibo_detail.html"
@@ -49,22 +59,42 @@ class KakeiboDetail(MyUserPasssesTestMixin, DetailView):
 class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
     template_name = "kakeibo_create.html"
     model = Kakeibo
-    fields = ("date", "fee", "way", 'usage', "memo")
+    form_class = KakeiboForm
+    # fields = ("date", "fee", "way", 'usage', "memo")
 
     def get_success_url(self):
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
-
-    def get_form(self, form_class=None):
-        form = super().get_form()
-        form.fields['date'].widget.attrs['readonly'] = 'readonly'
-        form.fields['date'].widget.attrs['class'] = 'datepicker'
-        return form
 
 
 class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     template_name = "kakeibo_update.html"
     model = Kakeibo
-    fields = ("date", "fee", "way", 'usage', "memo")
+    form_class = KakeiboForm
 
     def get_success_url(self):
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
+
+
+# =============================
+# Autocomplete
+# =============================
+class UsageAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Usage.objects.none()
+        qs = Usage.objects.filter(is_active=True)
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs
+
+
+class WayAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Way.objects.none()
+        qs = Way.objects.filter(is_active=True)
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs

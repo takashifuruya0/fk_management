@@ -16,18 +16,35 @@ Kakeibo List
 {% block body %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2">
+    <div class="col-md-4">
       <div class="card">
         <div class="card-header bg-info">
-          <h2 class="card-title">Menu</h2>
+          <h2 class="card-title">Search</h2>
         </div>
         <div class="card-body">
-          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_create'%}">新規追加</a>
+          <form class="form" method="GET">
+            {{search_form.as_p}}
+            <input type="submit" class="btn btn-primary" value="検索">
+          </form>
+        </div>
+      </div>
+      <hr>
+      <div class="card">
+        <div class="card-header bg-info">
+          <h2 class="card-title">Create</h2>
+        </div>
+        <div class="card-body">
+<!--          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_create'%}">新規追加</a>-->
+          <form class="form" method="POST" action="{% url 'kakeibo:kakeibo_create' %}">
+            {{form.as_p}}
+            {% csrf_token %}
+            <input type="submit" class="btn btn-primary" value="登録">
+          </form>
         </div>
       </div>
     </div>
 
-    <div class="col-md-10">
+    <div class="col-md-8">
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Kakeibo List</h2>
@@ -56,11 +73,16 @@ Kakeibo List
           </table>
         </div>
         <div class="card-footer">
-          {% bootstrap_pagination page_obj url="/kakeibo/kakeibo?page=1" size="sm" %}
+          {% bootstrap_pagination page_obj url="/kakeibo/kakeibo?page=1" size="md" %}
         </div>
       </div>
     </div>
 
   </div>
 </div>
+{% endblock %}
+
+{% block js %}
+{{ form.media }}
+{{ search_form.media }}
 {% endblock %}

@@ -2,6 +2,7 @@
 # from django.conf.urls import url
 from django.urls import include, path
 from kakeibo.views import KakeiboTop, KakeiboList, KakeiboDetail, KakeiboCreate, KakeiboUpdate
+from kakeibo.views import UsageAutocomplete, WayAutocomplete
 
 app_name = 'kakeibo'
 urlpatterns = [
@@ -10,4 +11,6 @@ urlpatterns = [
     path('kakeibo/<int:pk>', KakeiboDetail.as_view(), name="kakeibo_detail"),
     path('kakeibo/<int:pk>/edit', KakeiboUpdate.as_view(), name="kakeibo_update"),
     path('kakeibo/create', KakeiboCreate.as_view(), name="kakeibo_create"),
+    path('autocomplete/usage', UsageAutocomplete.as_view(), name="autocomplete_usage"),
+    path('autocomplete/way', WayAutocomplete.as_view(), name="autocomplete_way"),
 ]

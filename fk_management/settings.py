@@ -35,6 +35,8 @@ ALLOWED_HOSTS = ["*",]
 # Application definition
 
 INSTALLED_APPS = [
+    'dal',  # before django.contrib.admin and grappelli if present:
+    'dal_select2',  # before django.contrib.admin and grappelli if present:
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
