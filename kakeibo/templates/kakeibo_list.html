@@ -16,13 +16,24 @@ Kakeibo List
 {% block body %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-12">
+    <div class="col-md-2">
+      <div class="card">
+        <div class="card-header bg-info">
+          <h2 class="card-title">Menu</h2>
+        </div>
+        <div class="card-body">
+          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_create'%}">新規追加</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-10">
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Kakeibo List</h2>
         </div>
         <div class="card-body">
-          家計簿一覧
+          
           <table class="table">
             <tr>
               <th>ID</th>
@@ -43,28 +54,13 @@ Kakeibo List
             </tr>
             {% endfor %}
           </table>
-          {% bootstrap_pagination page_obj url="/kakeibo/kakeibo?page=1" size="sm" %}
-<!--          <div class="pagination">-->
-<!--            <span class="step-links">-->
-<!--              {% if page_obj.has_previous %}-->
-<!--              <a href="?page=1">&laquo; first</a>-->
-<!--              <a href="?page={{ page_obj.previous_page_number }}">previous</a>-->
-<!--              {% endif %}-->
-<!--            <span class="current">-->
-<!--                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.-->
-<!--            </span>-->
-<!--            {% if page_obj.has_next %}-->
-<!--                <a href="?page={{ page_obj.next_page_number }}">next</a>-->
-<!--                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>-->
-<!--            {% endif %}-->
-<!--            </span>-->
-<!--          </div>-->
-<!--        </div>-->
+        </div>
         <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_create'%}">新規追加</a>
+          {% bootstrap_pagination page_obj url="/kakeibo/kakeibo?page=1" size="sm" %}
         </div>
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}
