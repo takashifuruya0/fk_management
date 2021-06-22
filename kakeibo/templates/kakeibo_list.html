@@ -19,19 +19,20 @@ Kakeibo List
     <div class="col-md-4">
       <div class="card">
         <div class="card-header bg-info">
-          <h2 class="card-title">Search</h2>
+          <h2 class="card-title"><i class="fas fa-search"></i> Search</h2>
         </div>
         <div class="card-body">
           <form class="form" method="GET">
             {{search_form.as_p}}
             <input type="submit" class="btn btn-primary" value="検索">
+            <a href="{% url 'kakeibo:kakeibo_list' %}" class="btn btn-secondary">リセット</a>
           </form>
         </div>
       </div>
       <hr>
       <div class="card">
         <div class="card-header bg-info">
-          <h2 class="card-title">Create</h2>
+          <h2 class="card-title"><i class="fas fa-plus"></i> Create</h2>
         </div>
         <div class="card-body">
 <!--          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_create'%}">新規追加</a>-->
@@ -47,7 +48,7 @@ Kakeibo List
     <div class="col-md-8">
       <div class="card">
         <div class="card-header bg-primary text-white">
-          <h2 class="card-title">Kakeibo List</h2>
+          <h2 class="card-title"><i class="fas fa-list"></i> Kakeibo List</h2>
         </div>
         <div class="card-body">
           
@@ -72,8 +73,48 @@ Kakeibo List
             {% endfor %}
           </table>
         </div>
+        {{params}}
         <div class="card-footer">
-          {% bootstrap_pagination page_obj url="/kakeibo/kakeibo?page=1" size="md" %}
+          {% if page_obj.has_other_pages %}
+          <nav>
+            <ul class="pagination">
+              <!--previous-->
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{%url 'kakeibo:kakeibo_list'%}?page={{page_obj.previous_page_number}}{{params}}"
+                >&laquo;</a>
+              </li>
+              {% else %}
+              <li class="page-item disabled"><a class="page-link">&laquo;</a></li>
+              {% endif %}
+              <!--pages-->
+              {% for i in page_obj.paginator.page_range %}
+              {% if page_obj.number == i %}
+              <li class="page-item active">
+                <a class="page-link" href="#">{{i}}</a>
+              </li>
+              {% else %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{%url 'kakeibo:kakeibo_list'%}?page={{page_obj.next_page_number}}{{params}}"
+                >{{i}}</a>
+              </li>
+              {% endif %}
+              {% endfor %}
+              <!--next-->
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link"
+                   href="{%url 'kakeibo:kakeibo_list'%}?page={{page_obj.next_page_number}}{{params}}"
+                >&raquo;</a>
+              </li>
+              {% else %}
+              <li class="page-item disabled"><a class="page-link">&raquo;</a></li>
+              {% endif %}
+            </ul>
+          </nav>
+          {% endif %}
         </div>
       </div>
     </div>

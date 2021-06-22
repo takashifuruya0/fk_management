@@ -40,13 +40,35 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        return Kakeibo.objects.all().select_related('way', 'usage').order_by('-date')
+        q = Kakeibo.objects.filter(is_active=True)
+        # date
+        if self.request.GET.get('date_from', None) and self.request.GET.get('date_to', None):
+            q = q.filter(date__range=(self.request.GET['date_from'], self.request.GET['date_to']))
+        elif self.request.GET.get('date_from', None):
+            q = q.filter(date__gte=self.request.GET['date_from'])
+        elif self.request.GET.get('date_to', None):
+            q = q.filter(date__lte=self.request.GET['date_to'])
+        # usage
+        if self.request.GET.getlist('usages', None):
+            print("usages: {}".format(self.request.GET.getlist('usages', None)))
+            q = q.filter(usage__in=self.request.GET.getlist('usages'))
+        # way
+        if self.request.GET.getlist('ways', None):
+            print("ways: {}".format(self.request.GET.getlist('ways', None)))
+            q = q.filter(way__in=self.request.GET.getlist('ways'))
+        return q.select_related('way', 'usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
+        params = ""
+        for k, vs in dict(self.request.GET).items():
+            if not k == "page":
+                for v in vs:
+                    params = params + "&{}={}".format(k, v)
         context.update({
             'form': KakeiboForm(),
-            "search_form": KakeiboSearchForm(),
+            "search_form": KakeiboSearchForm(self.request.GET),
+            "params": params
         })
         return context
 
