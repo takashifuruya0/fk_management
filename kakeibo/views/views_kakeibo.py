@@ -3,7 +3,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, ListView,
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
-from dal import autocomplete
+from django.db.models import Q
 from kakeibo.models import Kakeibo, Usage, Resource, Way
 from kakeibo.forms import KakeiboForm, KakeiboSearchForm
 # Create your views here.
@@ -56,6 +56,19 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
         if self.request.GET.getlist('ways', None):
             print("ways: {}".format(self.request.GET.getlist('ways', None)))
             q = q.filter(way__in=self.request.GET.getlist('ways'))
+        # types
+        if self.request.GET.getlist('types', None):
+            types = self.request.GET.getlist('types', None)
+            c1 = Q()
+            c2 = Q()
+            c3 = Q()
+            if "振替" in types:
+                c1 = Q(way__is_transfer=True)
+            if "支出" in types:
+                c2 = Q(way__is_expense=True, way__is_transfer=False)
+            if "収入" in types:
+                c3 = Q(way__is_expense=False, way__is_transfer=False)
+            q = q.filter(c1 | c2 | c3)
         return q.select_related('way', 'usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -96,27 +109,3 @@ class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
 
-
-# =============================
-# Autocomplete
-# =============================
-class UsageAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated:
-            return Usage.objects.none()
-        qs = Usage.objects.filter(is_active=True)
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs
-
-
-class WayAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated:
-            return Way.objects.none()
-        qs = Way.objects.filter(is_active=True)
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs

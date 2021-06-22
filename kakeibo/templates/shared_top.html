@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load my_templatetags %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}
+共通家計簿
+{% endblock %}
+
+{% block page-title %}
+共通家計簿
+{% endblock %}
+
+{% block body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
+<div class="container-fluid">
+  <div class="row">
+    <!--基本メニュ-->
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">共通家計簿</h2>
+        </div>
+        <div class="card-body">
+          今月の状況
+
+          <div class="progress" style="height:25px">
+            <div class="progress-bar" role="progressbar" style="width: 60%"
+                 aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">敬士</div>
+            <div class="progress-bar bg-success" role="progressbar" style="width: 40%"
+                 aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">朋子</div>
+          </div>
+          <div class="progress" style="height:25px">
+            <div class="progress-bar bg-warning" role="progressbar" style="width: 90%"
+                 aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">予算</div>
+            <div class="progress-bar bg-danger" role="progressbar" style="width: 10%"
+                 aria-valuenow="10" aria-valuemin="0" aria-valuemax="100">Over</div>
+          </div>
+
+          <table class="table">
+            <tr>
+              <th>支出</th>
+              <td>150,000</td>
+            </tr>
+            <tr>
+              <th>予算</th>
+              <td>160,000</td>
+            </tr>
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">レコード一覧</a>
+        </div>
+      </div>
+    </div>
+
+    <!--Chart.js-->
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h2 class="card-title">Chart.js</h2>
+        </div>
+        <div class="card-body">
+          <canvas id="chart_bar" width="500" height="500"></canvas>
+          <hr>
+          <canvas id="chart_pie" width="500" height="500"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!--Chart.js-->
+<script>
+let ctx = document.getElementById("chart_bar").getContext("2d");
+
+let chart = new Chart(ctx, {
+  type: "bar",
+  data: {
+     labels: ["予算（朋子）", "支払（朋子）", "予算（敬士）", "支払（敬士）"],
+     datasets: [
+        {
+          label: "精算",
+          backgroundColor: "#79AEC8",
+          borderColor: "#417690",
+          data: [0, 20000, 0, 0]
+        },
+        {
+          label: "予算",
+          backgroundColor: "#C879AE",
+          borderColor: "#904176",
+          data: [60000, 0, 100000, 0]
+        },
+        {
+          label: "赤字",
+          backgroundColor: "#AEC879",
+          borderColor: "#904176",
+          data: [5000, 0, 5000, 0]
+        },
+        {
+          label: "支払",
+          backgroundColor: "#5ED91E",
+          borderColor: "#904176",
+          data: [0, 45000, 0, 105000]
+        },
+     ],
+  },
+  options: {
+    title: {
+      text: "Gross Volume in 2020",
+      display: true
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        stacked: true,
+      },
+      x: {
+        stacked: true,
+      }
+    }
+  }
+});
+
+let ctx_pie = document.getElementById("chart_pie").getContext("2d");
+
+let chart_pie = new Chart(ctx_pie, {
+  type: "pie",
+  data: {
+     labels: ["食費", "家賃", "電気", "水道", "ガス", "日用消耗品"],
+     datasets: [
+        {
+          label: "Yen (¥)",
+          data: [30000, 104000, 5000, 7500, 3500, 10000],
+          backgroundColor: [
+          "#2ecc71",
+          "#3498db",
+          "#95a5a6",
+          "#9b59b6",
+          "#f1c40f",
+          "#e74c3c",
+          "#34495e",
+         ]
+        }
+     ]
+  },
+  options: {
+    title: {
+      text: "Pie",
+      display: true
+    },
+  }
+});
+</script>
+{% endblock %}

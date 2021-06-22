@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load humanize %}
+{% load my_templatetags %}
+
+{% block title %}
+共通家計簿 詳細
+{% endblock %}
+
+{% block page-title %}
+共通家計簿 詳細
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">共通家計簿 詳細</h2>
+        </div>
+        <div class="card-body">
+          共通家計簿詳細
+          <table class="table">
+            <tr>
+              <th>Date</th>
+              <td>{{object.date}}</td>
+            </tr>
+            <tr>
+              <th>Fee</th>
+              <td>{{object.fee |yen}}</td>
+            </tr>
+            <tr>
+              <th>Usage</th>
+              <td>{{object.usage}}</td>
+            </tr>
+            <tr>
+              <th>Paid By</th>
+              <td>{{object.paid_by}}</td>
+            </tr>
+            <tr>
+              <th>Memo</th>
+              <td>{{object.memo}}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-info" href="{%url 'kakeibo:shared_update' pk=object.pk%}">共通家計簿更新</a>
+          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">共通家計簿一覧</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

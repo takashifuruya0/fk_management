@@ -10,4 +10,7 @@ class CustomUser(AbstractUser):
     class Meta(AbstractUser.Meta): 
         db_table = 'custom_user'
 
+    def __str__(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
 
