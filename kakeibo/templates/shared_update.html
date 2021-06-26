@@ -15,24 +15,23 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-12">
-      <div class="card">
-        <div class="card-header bg-primary text-white">
-          <h2 class="card-title">共通家計簿 更新</h2>
-        </div>
-        <div class="card-body">
-          共通家計簿 更新
-          <form method="POST" class="form">
+      <form method="POST" class="form">
+        <div class="card bg-light">
+          <div class="card-header">
+            <h2 class="card-title">共通家計簿 更新</h2>
+          </div>
+          <div class="card-body">
             <table class="table">
               {% csrf_token %}
               {{form.as_table}}
             </table>
+          </div>
+          <div class="card-footer">
             <input type="submit" value="送信" class="btn btn-primary">
-          </form>
+            <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">共通家計簿一覧</a>
+          </div>
         </div>
-        <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">共通家計簿一覧</a>
-        </div>
-      </div>
+      </form>
     </div>
   </div>
 </div>

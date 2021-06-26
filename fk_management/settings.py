@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     "django_bootstrap5",
     "import_export",
     'bootstrap_datepicker_plus',
-    # 'fontawesome-free',
+    "mathfilters",
     # Django REST Framework
     'rest_framework',
     'rest_framework.authtoken',
@@ -199,5 +199,66 @@ SOCIALACCOUNT_AUTO_SIGNUP = False
 #    'signup': 'accounts.forms.CustomSignupForm',
 #}
 
-
 ENVIRONMENT = "default"
+
+# messages framework
+from django.contrib.messages import constants as messages
+MESSAGE_TAGS = {
+    messages.DEBUG: 'info',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format':
+                '%(asctime)s [%(levelname)s] [%(process)d-%(thread)d] [%(module)s:%(lineno)d] %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        # 'logfile': {
+        #     'level': 'INFO',
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'maxBytes': 50000,
+        #     'backupCount': 2,
+        #     'formatter': 'verbose',
+        #     'filename': "/var/log/gunicorn/logfile",
+        # },
+        # 'elogfile': {
+        #     'level': 'ERROR',
+        #     'class': 'logging.handlers.RotatingFileHandler',
+        #     'maxBytes': 50000,
+        #     'backupCount': 2,
+        #     'formatter': 'verbose',
+        #     'filename': "/var/log/gunicorn/elogfile",
+        # },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    }
+}

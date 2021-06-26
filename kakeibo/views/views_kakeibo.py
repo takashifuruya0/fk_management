@@ -78,6 +78,8 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
             if not k == "page":
                 for v in vs:
                     params = params + "&{}={}".format(k, v)
+        if params:
+            messages.info(self.request, "検索結果を表示します。{}".format(params))
         context.update({
             'form': KakeiboForm(),
             "search_form": KakeiboSearchForm(self.request.GET),

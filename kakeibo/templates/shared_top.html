@@ -17,12 +17,15 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
 <div class="container-fluid">
   <div class="row">
+    <div class="col-12">
+
+    </div>
     <!--基本メニュ-->
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-header bg-warning">
+    <div class="col-md-5">
+      <div class="card bg-light">
+        <div class="card-header {%if is_black %}border-dark{% else %}border-danger{% endif %}">
           <h2 class="card-title">
-            共通家計簿（{{today}}）
+            共通家計簿（{{target_ym.year}}年{{target_ym.month}}月）
             {%if is_black %}
             <span class="badge bg-dark">黒字</span>
             {% else %}
@@ -31,7 +34,39 @@
           </h2>
         </div>
         <div class="card-body">
-          <h4>支出</h4>
+          <h4>表示年月</h4>
+          <form class="form" method="GET" action="">
+            <input type="month" name="target_ym" value="">
+            <input type="submit" class="btn btn-primary btn-sm" value="送信">
+          </form>
+          <hr>
+          <h4>精算</h4>
+          <p>{{seisan.hoko |yen}}</p>
+          <hr>
+          <h4>内訳</h4>
+          <table class="table">
+            {% for gbu in group_by_usage %}
+            <tr>
+              <th>{{gbu.usage__name}}</th>
+              <td>{{gbu.sum |yen}}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">レコード一覧</a>
+        </div>
+      </div>
+    </div>
+
+    <!--Chart.js-->
+    <div class="col-md-7">
+      <div class="card bg-light">
+        <div class="card-header border-primary">
+          <h2 class="card-title">Chart.js</h2>
+        </div>
+        <div class="card-body">
+          <h4>支出： {{payment.total |yen}}</h4>
           <div class="progress" style="height:25px">
             <div class="progress-bar" role="progressbar" style="width: {{p_payment.takashi}}%"
                  aria-valuenow="{{p_budget.takashi}}" aria-valuemin="0" aria-valuemax="100"
@@ -41,7 +76,7 @@
             >朋子：{{payment.hoko |yen}}</div>
           </div>
           <hr>
-          <h4>予算</h4>
+          <h4>予算：{{budget.total |yen}}</h4>
           <div class="progress" style="height:25px">
             <div class="progress-bar" role="progressbar" style="width: {{p_budget.takashi}}%"
                  aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
@@ -55,36 +90,15 @@
             >Over：{{diff |yen_no_color}}</div>
             {% endif %}
           </div>
-
           <hr>
-          <h4>内訳</h4>
-          <table class="table">
-            <tr>
-              <th>支出</th>
-              <td>{{payment.total |yen}}</td>
-            </tr>
-            <tr>
-              <th>予算</th>
-              <td>{{budget.total |yen}}</td>
-            </tr>
-          </table>
-        </div>
-        <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">レコード一覧</a>
-        </div>
-      </div>
-    </div>
-
-    <!--Chart.js-->
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header bg-success text-white">
-          <h2 class="card-title">Chart.js</h2>
-        </div>
-        <div class="card-body">
-          <canvas id="chart_bar" width="500" height="500"></canvas>
-          <hr>
-          <canvas id="chart_pie" width="500" height="500"></canvas>
+          <div class="row">
+            <div class="col-md-6">
+              <canvas id="chart_bar" width="500" height="500"></canvas>
+            </div>
+            <div class="col-md-6">
+              <canvas id="chart_pie" width="500" height="500"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -109,7 +123,7 @@ let chart = new Chart(ctx, {
           label: "精算",
           backgroundColor: "#79AEC8",
           borderColor: "#417690",
-          data: [0, {{seisan}}, 0, 0]
+          data: [0, {{seisan.hoko}}, 0, {{seisan.takashi}}]
         },
         {
           label: "予算",
@@ -153,11 +167,13 @@ let ctx_pie = document.getElementById("chart_pie").getContext("2d");
 let chart_pie = new Chart(ctx_pie, {
   type: "pie",
   data: {
-     labels: ["食費", "家賃", "電気", "水道", "ガス", "日用消耗品"],
+     //labels: ["食費", "家賃", "電気", "水道", "ガス", "日用消耗品"],
+     labels: [{% for gbu in group_by_usage %}"{{gbu.usage__name}}",{% endfor %}],
      datasets: [
         {
           label: "Yen (¥)",
-          data: [30000, 104000, 5000, 7500, 3500, 10000],
+          //data: [30000, 104000, 5000, 7500, 3500, 10000],
+          data: [{% for gbu in group_by_usage %}{{gbu.sum}},{% endfor %}],
           backgroundColor: [
           "#2ecc71",
           "#3498db",

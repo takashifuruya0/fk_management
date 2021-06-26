@@ -22,7 +22,6 @@ Kakeibo Detail
           <h2 class="card-title">Kakeibo Detail</h2>
         </div>
         <div class="card-body">
-          家計簿詳細
           <table class="table">
             <tr>
               <th>Date</th>
@@ -55,8 +54,12 @@ Kakeibo Detail
           </table>
         </div>
         <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_update' pk=object.pk%}">家計簿更新</a>
-          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_list'%}">家計簿一覧</a>
+          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_update' pk=object.pk%}">
+            <i class="fas fa-edit"></i> 家計簿更新
+          </a>
+          <a class="btn btn-secondary" href="{%url 'kakeibo:kakeibo_list'%}">
+            <i class="fas fa-list"></i> 家計簿一覧
+          </a>
         </div>
       </div>
     </div>

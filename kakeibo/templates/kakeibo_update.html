@@ -16,22 +16,23 @@ Kakeibo Update
   <div class="row">
     <div class="col-12">
       <div class="card">
-        <div class="card-header bg-primary text-white">
-          <h2 class="card-title">Kakeibo Update</h2>
-        </div>
-        <div class="card-body">
-          家計簿更新
-          <form method="POST" class="form">
+        <form method="POST" class="form">
+          <div class="card-header bg-primary text-white">
+            <h2 class="card-title">Kakeibo Update</h2>
+          </div>
+          <div class="card-body">
             <table class="table">
               {% csrf_token %}
               {{form.as_table}}
             </table>
+          </div>
+          <div class="card-footer">
             <input type="submit" value="送信" class="btn btn-primary">
-          </form>
-        </div>
-        <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_list'%}">家計簿一覧</a>
-        </div>
+            <a class="btn btn-secondary" href="{%url 'kakeibo:kakeibo_list'%}">
+              <i class="fas fa-list"></i> 家計簿一覧
+            </a>
+          </div>
+        </form>
       </div>
     </div>
   </div>

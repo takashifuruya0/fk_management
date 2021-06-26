@@ -17,12 +17,11 @@
 <div class="container-fluid">
   <div class="row">
     <div class="col-12">
-      <div class="card">
-        <div class="card-header bg-primary text-white">
+      <div class="card bg-light">
+        <div class="card-header">
           <h2 class="card-title">共通家計簿 詳細</h2>
         </div>
         <div class="card-body">
-          共通家計簿詳細
           <table class="table">
             <tr>
               <th>Date</th>
@@ -47,8 +46,12 @@
           </table>
         </div>
         <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:shared_update' pk=object.pk%}">共通家計簿更新</a>
-          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">共通家計簿一覧</a>
+          <a class="btn btn-info" href="{%url 'kakeibo:shared_update' pk=object.pk%}">
+            <i class="fas fa-edit"></i> 共通家計簿更新
+          </a>
+          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">
+            <i class="fas fa-list"></i> 共通家計簿一覧
+          </a>
         </div>
       </div>
     </div>

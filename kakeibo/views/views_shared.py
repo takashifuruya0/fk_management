@@ -3,8 +3,9 @@ from django.views.generic import TemplateView, CreateView, UpdateView, ListView,
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
-from datetime import date
+from datetime import date, datetime
 from django.db.models import Sum
+from django.contrib import messages
 import math
 from kakeibo.models import SharedKakeibo, Budget, Usage
 from kakeibo.forms import SharedForm, SharedSearchForm
@@ -16,31 +17,51 @@ class SharedTop(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        today = date.today()
-        records_this_month = SharedKakeibo.objects.filter(is_active=True, date__year=today.year, date__month=today.month)
+        # year, month
+        if self.request.GET.get("target_ym", None):
+            target_ym = datetime.strptime(self.request.GET["target_ym"], "%Y-%m").date()
+        else:
+            target_ym = date.today()
+        records_this_month = SharedKakeibo.objects.filter(
+            is_active=True, date__year=target_ym.year, date__month=target_ym.month
+        )
         # budget
         budget = Budget.objects.latest('date')
+        if records_this_month.exists():
+            # Payment
+            payment_total = records_this_month.aggregate(sum=Sum('fee'))['sum']
+            payment_hoko = records_this_month.filter(paid_by__last_name="朋子").aggregate(sum=Sum('fee'))['sum']
+            payment_takashi = payment_total - payment_hoko
+            # Payment (%)
+            pp_takashi = math.floor(100 * payment_takashi / payment_total)
+            pp_hoko = 100 - pp_takashi
+        else:
+            # Payment
+            payment_total = payment_hoko = payment_takashi = 0
+            # Payment (%)
+            pp_takashi = pp_hoko = 0
         # Black/Red
-        # sum_this_month = records_this_month.aggregate(sum=Sum('fee'))['sum']
-        payment_total = 171000
-        payment_hoko = 36000
-        payment_takashi = 135000
-        pp_takashi = math.floor(100 * payment_takashi / payment_total)
-        pp_hoko = 100 - pp_takashi
         diff = payment_total - budget.total
         is_black = diff < 0
         if is_black:
-            seisan = budget.hoko + diff - payment_hoko
-            # over
+            # seisan
+            seisan_hoko = budget.hoko + diff - payment_hoko
+            seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
+            # budget (%)
             p_takashi = math.floor(100 * budget.takashi / budget.total)
             p_hoko = 100 - p_takashi
             p_over = 0
         else:
-            seisan = budget.hoko + diff/2 - payment_hoko
-            # over
+            # seisan
+            seisan_hoko = budget.hoko + diff/2 - payment_hoko
+            seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
+            # budget (%)
             p_over = math.floor(100 * abs(diff) / (budget.total + diff))
             p_takashi = math.floor(100 * budget.takashi / (budget.total + diff))
             p_hoko = 100 - p_takashi - p_over
+        seisan_hoko = 0 if seisan_hoko < 0 else math.floor(seisan_hoko/1000)*1000
+        # usage
+        group_by_usage = records_this_month.values('usage__name').annotate(sum=Sum('fee')).order_by('-sum')
         # return
         context.update({
             "budget": budget,
@@ -51,7 +72,7 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             },
             "diff": diff,
             "is_black": is_black,
-            "today": today,
+            "target_ym": target_ym,
             "payment": {
                 "takashi": payment_takashi,
                 "hoko": payment_hoko,
@@ -61,7 +82,11 @@ class SharedTop(LoginRequiredMixin, TemplateView):
                 "takashi": pp_takashi,
                 "hoko": pp_hoko,
             },
-            "seisan": seisan,
+            "seisan": {
+                "takashi": seisan_takashi,
+                "hoko": seisan_hoko,
+            },
+            "group_by_usage": group_by_usage,
         })
         return context
 
@@ -82,7 +107,6 @@ class SharedList(LoginRequiredMixin, ListView):
             q = q.filter(date__lte=self.request.GET['date_to'])
         # usage
         if self.request.GET.getlist('usages', None):
-            print("usages: {}".format(self.request.GET.getlist('usages', None)))
             q = q.filter(usage__in=self.request.GET.getlist('usages'))
         return q.select_related('paid_by', 'usage').order_by('-date')
 
@@ -93,6 +117,8 @@ class SharedList(LoginRequiredMixin, ListView):
             if not k == "page":
                 for v in vs:
                     params = params + "&{}={}".format(k, v)
+        if params:
+            messages.info(self.request, "検索結果を表示します。{}".format(params))
         context.update({
             'form': SharedForm(),
             "search_form": SharedSearchForm(self.request.GET),
