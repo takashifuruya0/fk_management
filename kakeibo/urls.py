@@ -14,8 +14,8 @@ urlpatterns = [
     path('shared/<int:pk>/edit', SharedUpdate.as_view(), name="shared_update"),
     path('shared/create', SharedCreate.as_view(), name="shared_create"),
     # mine
-    path('', KakeiboTop.as_view(), name="top"),
-    path('kakeibo', KakeiboList.as_view(), name="kakeibo_list"),
+    path('kakeibo', KakeiboTop.as_view(), name="kakeibo_top"),
+    path('kakeibo/list', KakeiboList.as_view(), name="kakeibo_list"),
     path('kakeibo/<int:pk>', KakeiboDetail.as_view(), name="kakeibo_detail"),
     path('kakeibo/<int:pk>/edit', KakeiboUpdate.as_view(), name="kakeibo_update"),
     path('kakeibo/create', KakeiboCreate.as_view(), name="kakeibo_create"),

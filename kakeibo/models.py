@@ -173,5 +173,9 @@ class Budget(BaseModel):
     hoko = models.IntegerField("朋子予算")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
 
+    @property
+    def total(self):
+        return self.takashi + self.hoko
+
     def __str__(self):
         return "予算_{}".format(self.date)

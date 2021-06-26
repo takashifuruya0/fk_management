@@ -3,8 +3,10 @@ from django.views.generic import TemplateView, CreateView, UpdateView, ListView,
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
-from django.db.models import Q
-from kakeibo.models import Kakeibo, Usage, Resource, Way, SharedKakeibo
+from datetime import date
+from django.db.models import Sum
+import math
+from kakeibo.models import SharedKakeibo, Budget, Usage
 from kakeibo.forms import SharedForm, SharedSearchForm
 # Create your views here.
 
@@ -14,12 +16,53 @@ class SharedTop(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["resources"] = Resource.objects.filter(is_active=True).iterator()
-        context["chart_header"] = list()
-        context["chart_data"] = list()
-        for r in Resource.objects.filter(is_active=True):
-            context["chart_header"].append(r.name)
-            context["chart_data"].append(r.total)
+        today = date.today()
+        records_this_month = SharedKakeibo.objects.filter(is_active=True, date__year=today.year, date__month=today.month)
+        # budget
+        budget = Budget.objects.latest('date')
+        # Black/Red
+        # sum_this_month = records_this_month.aggregate(sum=Sum('fee'))['sum']
+        payment_total = 171000
+        payment_hoko = 36000
+        payment_takashi = 135000
+        pp_takashi = math.floor(100 * payment_takashi / payment_total)
+        pp_hoko = 100 - pp_takashi
+        diff = payment_total - budget.total
+        is_black = diff < 0
+        if is_black:
+            seisan = budget.hoko + diff - payment_hoko
+            # over
+            p_takashi = math.floor(100 * budget.takashi / budget.total)
+            p_hoko = 100 - p_takashi
+            p_over = 0
+        else:
+            seisan = budget.hoko + diff/2 - payment_hoko
+            # over
+            p_over = math.floor(100 * abs(diff) / (budget.total + diff))
+            p_takashi = math.floor(100 * budget.takashi / (budget.total + diff))
+            p_hoko = 100 - p_takashi - p_over
+        # return
+        context.update({
+            "budget": budget,
+            'p_budget': {
+                "takashi": p_takashi,
+                "hoko": p_hoko,
+                "over": p_over,
+            },
+            "diff": diff,
+            "is_black": is_black,
+            "today": today,
+            "payment": {
+                "takashi": payment_takashi,
+                "hoko": payment_hoko,
+                "total": payment_total,
+            },
+            "p_payment": {
+                "takashi": pp_takashi,
+                "hoko": pp_hoko,
+            },
+            "seisan": seisan,
+        })
         return context
 
 

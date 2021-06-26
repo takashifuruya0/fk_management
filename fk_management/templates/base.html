@@ -43,13 +43,14 @@
                <i class="fas fa-people-carry"></i> 共通家計簿
               </a>
             </li>
+            {% if request.user.is_staff %}
             <!--kakeibo-->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
                 <i class="fas fa-yen-sign"></i> Kakeibo
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{%url 'kakeibo:top'%}">
+                <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_top'%}">
                   <i class="fas fa-tachometer-alt"></i> KakeiboDashboard
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
@@ -64,7 +65,7 @@
                 <i class="fas fa-coins"></i> Asset
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{%url 'kakeibo:top'%}">
+                <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_top'%}">
                   <i class="fas fa-tachometer-alt"></i> AssetDashboard
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
@@ -79,7 +80,7 @@
                 <i class="fas fa-briefcase"></i> Work
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{%url 'kakeibo:top'%}">
+                <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_top'%}">
                   <i class="fas fa-tachometer-alt"></i> WorkDashboard
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
@@ -87,6 +88,7 @@
                 <li><a class="dropdown-item" href="#">Opportunity</a></li>
               </ul>
             </li>
+            {% endif %}
           </ul>
           <!--other-->
           <ul class="navbar-nav">
