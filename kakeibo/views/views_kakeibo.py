@@ -69,6 +69,9 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
             if "収入" in types:
                 c3 = Q(way__is_expense=False, way__is_transfer=False)
             q = q.filter(c1 | c2 | c3)
+        # memo
+        if self.request.GET.get("memo", None):
+            q = q.filter(memo__icontains=self.request.GET["memo"])
         return q.select_related('way', 'usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):

@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
 from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
 from django.contrib import messages
 import math
@@ -20,13 +21,19 @@ class SharedTop(LoginRequiredMixin, TemplateView):
         # year, month
         if self.request.GET.get("target_ym", None):
             target_ym = datetime.strptime(self.request.GET["target_ym"], "%Y-%m").date()
+            last_ym = None
         else:
             target_ym = date.today()
         records_this_month = SharedKakeibo.objects.filter(
             is_active=True, date__year=target_ym.year, date__month=target_ym.month
         )
+        # last month
+        last_ym = target_ym - relativedelta(months=1)
+        records_last_month = SharedKakeibo.objects.filter(
+            is_active=True, date__year=last_ym.year, date__month=last_ym.month
+        )
         # budget
-        budget = Budget.objects.latest('date')
+        budget = Budget.objects.filter(date__lte=target_ym).latest('date')
         if records_this_month.exists():
             # Payment
             payment_total = records_this_month.aggregate(sum=Sum('fee'))['sum']
@@ -61,7 +68,8 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             p_hoko = 100 - p_takashi - p_over
         seisan_hoko = 0 if seisan_hoko < 0 else math.floor(seisan_hoko/1000)*1000
         # usage
-        group_by_usage = records_this_month.values('usage__name').annotate(sum=Sum('fee')).order_by('-sum')
+        group_by_usage_tm = records_this_month.values('usage__name').annotate(sum=Sum('fee')).order_by('-sum')
+        group_by_usage_lm = records_last_month.values('usage__name').annotate(sum=Sum('fee')).order_by('-sum')
         # return
         context.update({
             "budget": budget,
@@ -86,7 +94,10 @@ class SharedTop(LoginRequiredMixin, TemplateView):
                 "takashi": seisan_takashi,
                 "hoko": seisan_hoko,
             },
-            "group_by_usage": group_by_usage,
+            "group_by_usage": {
+                "tm": group_by_usage_tm,
+                "lm": group_by_usage_lm,
+            }
         })
         return context
 
@@ -108,6 +119,9 @@ class SharedList(LoginRequiredMixin, ListView):
         # usage
         if self.request.GET.getlist('usages', None):
             q = q.filter(usage__in=self.request.GET.getlist('usages'))
+        # memo
+        if self.request.GET.get("memo", None):
+            q = q.filter(memo__icontains=self.request.GET("memo"))
         return q.select_related('paid_by', 'usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):

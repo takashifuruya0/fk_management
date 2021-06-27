@@ -17,7 +17,7 @@
 {% block body %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOne">
@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    <div class="col-md-8">
+    <div class="col-lg-8">
       <div class="card bg-light">
         <div class="card-header">
           <h2 class="card-title"><i class="fas fa-list"></i> 共通家計簿一覧</h2>
@@ -68,12 +68,13 @@
         <div class="card-body">
           
           <table class="table">
-            <tr>
+            <tr class="table-light">
               <th>ID</th>
               <th>Date</th>
               <th>Usage</th>
               <th>PaidBy</th>
               <th>Fee</th>
+              <th>Memo</th>
             </tr>
             {% for object in object_list %}
             <tr>
@@ -84,6 +85,7 @@
               <td>{{object.usage}}</td>
               <td>{{object.paid_by}}</td>
               <td>{{object.fee |yen}}</td>
+              <td>{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}
           </table>

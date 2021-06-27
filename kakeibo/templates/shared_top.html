@@ -21,7 +21,7 @@
 
     </div>
     <!--基本メニュ-->
-    <div class="col-md-5">
+    <div class="col-lg-5">
       <div class="card bg-light">
         <div class="card-header {%if is_black %}border-dark{% else %}border-danger{% endif %}">
           <h2 class="card-title">
@@ -45,7 +45,7 @@
           <hr>
           <h4>内訳</h4>
           <table class="table">
-            {% for gbu in group_by_usage %}
+            {% for gbu in group_by_usage.tm %}
             <tr>
               <th>{{gbu.usage__name}}</th>
               <td>{{gbu.sum |yen}}</td>
@@ -54,16 +54,16 @@
           </table>
         </div>
         <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">レコード一覧</a>
+          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_list'%}">レコード一覧</a>
         </div>
       </div>
     </div>
 
     <!--Chart.js-->
-    <div class="col-md-7">
+    <div class="col-lg-7">
       <div class="card bg-light">
         <div class="card-header border-primary">
-          <h2 class="card-title">Chart.js</h2>
+          <h2 class="card-title">ダッシュボード</h2>
         </div>
         <div class="card-body">
           <h4>支出： {{payment.total |yen}}</h4>
@@ -112,7 +112,7 @@ let ctx = document.getElementById("chart_bar").getContext("2d");
 const diff = {{diff}};
 let diff_half = 0;
 if (diff > 0) {
-  diff_half = diff /2;
+  diff_half = Math.round(diff/2);
 }
 let chart = new Chart(ctx, {
   type: "bar",
@@ -168,12 +168,12 @@ let chart_pie = new Chart(ctx_pie, {
   type: "pie",
   data: {
      //labels: ["食費", "家賃", "電気", "水道", "ガス", "日用消耗品"],
-     labels: [{% for gbu in group_by_usage %}"{{gbu.usage__name}}",{% endfor %}],
+     labels: [{% for gbu in group_by_usage.tm %}"{{gbu.usage__name}}",{% endfor %}],
      datasets: [
         {
           label: "Yen (¥)",
           //data: [30000, 104000, 5000, 7500, 3500, 10000],
-          data: [{% for gbu in group_by_usage %}{{gbu.sum}},{% endfor %}],
+          data: [{% for gbu in group_by_usage.tm %}{{gbu.sum}},{% endfor %}],
           backgroundColor: [
           "#2ecc71",
           "#3498db",

@@ -18,15 +18,15 @@ kakeibo
 <div class="container-fluid">
   <div class="row">
     <!--基本メニュ-->
-    <div class="col-md-8">
+    <div class="col-lg-5">
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Kakeibo</h2>
         </div>
         <div class="card-body">
-          リソース一覧
+
           <table class="table">
-            <tr>
+            <tr class="table-primary">
               <th>リソース</th>
               <th>合計</th>
               <th>今月収支</th>
@@ -49,15 +49,20 @@ kakeibo
     </div>
 
     <!--Chart.js-->
-    <div class="col-md-4">
+    <div class="col-lg-7">
       <div class="card">
-        <div class="card-header bg-success text-white">
+        <div class="card-header bg-primary text-white">
           <h2 class="card-title">Chart.js</h2>
         </div>
         <div class="card-body">
-          <canvas id="chart_bar" width="500" height="500"></canvas>
-          <hr>
-          <canvas id="chart_pie" width="500" height="500"></canvas>
+          <div class="row">
+            <div class="col-lg-6">
+              <canvas id="chart_bar" width="500" height="500"></canvas>
+            </div>
+            <div class="col-lg-6">
+              <canvas id="chart_pie" width="500" height="500"></canvas>
+            </div>
+          </div>
         </div>
       </div>
     </div>

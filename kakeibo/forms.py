@@ -39,6 +39,7 @@ class KakeiboSearchForm(forms.Form):
         label="用途", required=False,
         widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_usage')
     )
+    memo = forms.CharField(label="メモ", required=False)
 
 
 class SharedForm(forms.ModelForm):
@@ -71,3 +72,4 @@ class SharedSearchForm(forms.Form):
         label="用途", required=False,
         widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_shared_usage')
     )
+    memo = forms.CharField(label="メモ", required=False)

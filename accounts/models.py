@@ -11,6 +11,6 @@ class CustomUser(AbstractUser):
         db_table = 'custom_user'
 
     def __str__(self):
-        return "{} {}".format(self.first_name, self.last_name)
+        return "{}".format(self.last_name)
 
 

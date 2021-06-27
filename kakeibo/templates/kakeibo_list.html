@@ -17,7 +17,7 @@ Kakeibo List
 {% block body %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOne">
@@ -60,20 +60,20 @@ Kakeibo List
       </div>
     </div>
 
-    <div class="col-md-8">
+    <div class="col-lg-8">
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h2 class="card-title"><i class="fas fa-list"></i> Kakeibo List</h2>
         </div>
         <div class="card-body">
-          
           <table class="table">
-            <tr>
+            <tr class="table-primary">
               <th>ID</th>
               <th>Date</th>
               <th>Usage</th>
               <th>Way</th>
               <th>Fee</th>
+              <th>Memo</th>
             </tr>
             {% for object in object_list %}
             <tr>
@@ -84,6 +84,7 @@ Kakeibo List
               <td>{{object.usage}}</td>
               <td>{{object.way}}</td>
               <td>{{object.fee |yen}}</td>
+              <td>{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}
           </table>
