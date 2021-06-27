@@ -25,9 +25,12 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["resources"] = Resource.objects.filter(is_active=True).iterator()
-        context["chart_header"] = list()
-        context["chart_data"] = list()
+        context.update({
+            "resources": Resource.objects.filter(is_active=True).iterator(),
+            "chart_header": list(),
+            "chart_data": list(),
+            "form": KakeiboForm(),
+        })
         for r in Resource.objects.filter(is_active=True):
             context["chart_header"].append(r.name)
             context["chart_data"].append(r.total)

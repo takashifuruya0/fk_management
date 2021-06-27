@@ -70,6 +70,15 @@ class UsageAdmin(ImportExportModelAdmin):
         "pk", "name", "is_expense", "is_shared",
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
+    readonly_fields = ["_count_kakeibo", "_count_shared"]
+
+    def _count_kakeibo(self, obj):
+        return obj.kakeibo_set.count()
+    _count_kakeibo.short_description = 'レコード数（家計簿）'
+
+    def _count_shared(self, obj):
+        return obj.shared_kakeibo_set.count()
+    _count_shared.short_description = 'レコード数（共通家計簿）'
 
 
 class BudgetAdmin(admin.ModelAdmin):

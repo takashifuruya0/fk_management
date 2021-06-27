@@ -1,0 +1,19 @@
+<!-- Create -->
+<div class="accordion-item">
+  <h4 class="accordion-header" id="headingTwo">
+    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+      <h4><i class="fas fa-plus"></i> Create</h4>
+    </button>
+  </h4>
+  <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+    <div class="accordion-body">
+      <form class="form" method="POST" action="{% url 'kakeibo:kakeibo_create' %}">
+        {{form.as_p}}
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary" value="登録">
+          <i class="fas fa-plus"></i> 登録
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

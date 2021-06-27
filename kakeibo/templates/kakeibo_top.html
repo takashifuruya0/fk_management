@@ -50,6 +50,9 @@ kakeibo
 
     <!--Chart.js-->
     <div class="col-lg-7">
+      <div class="accordion" id="accordionExample">
+        {% include 'accordion_kakeibo_form.html' %}
+      </div>
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Chart.js</h2>
@@ -130,4 +133,8 @@ let chart_pie = new Chart(ctx_pie, {
   }
 });
 </script>
+{% endblock %}
+
+{% block js %}
+{{ form.media }}
 {% endblock %}
