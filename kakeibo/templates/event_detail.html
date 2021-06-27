@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load humanize %}
+{% load my_templatetags %}
+
+{% block title %}
+Event Detail
+{% endblock %}
+
+{% block page-title %}
+Event Detail
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Event Detail</h2>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <tr>
+              <th>Date</th>
+              <td>{{object.date}}</td>
+            </tr>
+            <tr>
+              <th>Name</th>
+              <td>{{object.name}}</td>
+            </tr>
+            <tr>
+              <th>Memo</th>
+              <td>{{object.memo}}</td>
+            </tr>
+            <tr>
+              <th>SumPlan</th>
+              <td>{{object.sum_plan |yen}}</td>
+            </tr>
+            <tr>
+              <th>SumActual</th>
+              <td>{{object.sum_actual |yen}}</td>
+            </tr>
+            <tr>
+              <th>Is Closed</th>
+              <td>
+                {% if object.is_closed %}
+                <span class="badge bg-danger"><i class="fas fa-door-closed"></i> Closed</span>
+                {% else %}
+                <span class="badge bg-success"><i class="fas fa-door-open"></i> Open</span>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-info" href="{%url 'kakeibo:event_update' pk=object.pk%}">
+            <i class="fas fa-edit"></i> 更新
+          </a>
+          <a class="btn btn-secondary" href="{%url 'kakeibo:event_list'%}">
+            <i class="fas fa-list"></i> イベント一覧
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

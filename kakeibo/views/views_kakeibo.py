@@ -4,8 +4,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
 from django.db.models import Q
-from kakeibo.models import Kakeibo, Usage, Resource, Way
-from kakeibo.forms import KakeiboForm, KakeiboSearchForm
+from django.db import transaction
+from kakeibo.models import Kakeibo, Usage, Resource, Way, SharedKakeibo, Event
+from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm
 # Create your views here.
 
 
@@ -108,6 +109,20 @@ class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
     def get_success_url(self):
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
 
+    def form_valid(self, form):
+        with transaction.atomic():
+            res = super(KakeiboCreate, self).form_valid(form)
+            kakeibo = self.object
+            if form.cleaned_data['is_shared']:
+                shared = SharedKakeibo(
+                    date=kakeibo.date, fee=kakeibo.fee, usage=kakeibo.usage,
+                    memo=kakeibo.memo, paid_by=self.request.user
+                )
+                shared.save()
+                kakeibo.shared = shared
+                kakeibo.save()
+        return res
+
 
 class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     template_name = "kakeibo_update.html"
@@ -117,3 +132,34 @@ class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     def get_success_url(self):
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
 
+
+# =================================
+# Event
+# =================================
+class EventList(MyUserPasssesTestMixin, ListView):
+    template_name = "event_list.html"
+    model = Event
+    paginate_by = 20
+
+
+class EventDetail(MyUserPasssesTestMixin, DetailView):
+    template_name = "event_detail.html"
+    model = Event
+
+
+class EventCreate(MyUserPasssesTestMixin, CreateView):
+    template_name = "event_create.html"
+    model = Event
+    form_class = EventForm
+
+    def get_success_url(self):
+        return reverse("kakeibo:event_detail", kwargs={"pk": self.object.pk})
+
+
+class EventUpdate(MyUserPasssesTestMixin, UpdateView):
+    template_name = "event_update.html"
+    model = Event
+    form_class = EventForm
+
+    def get_success_url(self):
+        return reverse("kakeibo:event_detail", kwargs={"pk": self.object.pk})

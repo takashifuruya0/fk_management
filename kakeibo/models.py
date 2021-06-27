@@ -43,8 +43,10 @@ class Resource(BaseModel):
 
     @property
     def total(self):
-        sum_from = Kakeibo.objects.select_related('way').filter(way__resource_from=self).aggregate(sum=Sum('fee'))['sum']
-        sum_to = Kakeibo.objects.select_related('way').filter(way__resource_to=self).aggregate(sum=Sum('fee'))['sum']
+        sum_from = Kakeibo.objects.select_related('way').filter(
+            way__resource_from=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
+        sum_to = Kakeibo.objects.select_related('way').filter(
+            way__resource_to=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
         else:
@@ -55,10 +57,10 @@ class Resource(BaseModel):
     def diff_this_month(self):
         today = date.today()
         sum_from = Kakeibo.objects.select_related('way') \
-            .filter(way__resource_from=self, date__month=today.month, date__year=today.year) \
+            .filter(way__resource_from=self, date__month=today.month, date__year=today.year, is_active=True) \
             .aggregate(sum=Sum('fee'))['sum']
         sum_to = Kakeibo.objects.select_related('way') \
-            .filter(way__resource_to=self, date__month=today.month, date__year=today.year) \
+            .filter(way__resource_to=self, date__month=today.month, date__year=today.year, is_active=True) \
             .aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
@@ -99,12 +101,16 @@ class Way(BaseModel):
 class Event(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    is_closed = models.BooleanField("修了フラグ", default=False)
+    is_closed = models.BooleanField("終了フラグ", default=False)
     date = models.DateField("日付")
     sum_plan = models.IntegerField("計画総額")
 
     def __str__(self) -> str:
         return self.name
+
+    @property
+    def sum_actual(self):
+        return self.kakeibo_set.filter(is_active=True).aggregate(sum=Sum('fee'))['sum']
 
 
 class Credit(BaseModel):

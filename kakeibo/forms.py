@@ -1,13 +1,19 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from kakeibo.models import Kakeibo, Usage, Way, SharedKakeibo
+from kakeibo.models import Kakeibo, Usage, Way, SharedKakeibo, Event
 from dal import autocomplete
 
 
 class KakeiboForm(forms.ModelForm):
+    is_shared = forms.BooleanField(label="共通へコピー")
+    event = forms.ModelChoiceField(
+        label="イベント", queryset=Event.objects.filter(is_active=True, is_closed=False).order_by('-date'),
+        required=False,
+    )
+
     class Meta:
         model = Kakeibo
-        fields = ("date", "fee", "way", 'usage', "memo")
+        fields = ("date", "fee", "way", 'usage', "memo", "event", "is_shared")
         widgets = {
             'usage': autocomplete.ModelSelect2(url='kakeibo:autocomplete_usage'),
             'way': autocomplete.ModelSelect2(url='kakeibo:autocomplete_way'),
@@ -73,3 +79,12 @@ class SharedSearchForm(forms.Form):
         widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_shared_usage')
     )
     memo = forms.CharField(label="メモ", required=False)
+
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ("date", "name", "memo", 'sum_plan', "is_closed")
+        widgets = {
+            'date': forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker"})
+        }

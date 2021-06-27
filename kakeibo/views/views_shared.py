@@ -21,9 +21,9 @@ class SharedTop(LoginRequiredMixin, TemplateView):
         # year, month
         if self.request.GET.get("target_ym", None):
             target_ym = datetime.strptime(self.request.GET["target_ym"], "%Y-%m").date()
-            last_ym = None
         else:
             target_ym = date.today()
+        initial_val = "{}-{}".format(target_ym.year, str(target_ym.month).zfill(2))
         records_this_month = SharedKakeibo.objects.filter(
             is_active=True, date__year=target_ym.year, date__month=target_ym.month
         )
@@ -97,7 +97,9 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             "group_by_usage": {
                 "tm": group_by_usage_tm,
                 "lm": group_by_usage_lm,
-            }
+            },
+            "form": SharedForm(),
+            "initial_val": initial_val,
         })
         return context
 

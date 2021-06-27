@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}
+Event Update
+{% endblock %}
+
+{% block page-title %}
+Event Update
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <form method="POST" class="form">
+          <div class="card-header bg-primary text-white">
+            <h2 class="card-title">Event Update</h2>
+          </div>
+          <div class="card-body">
+            <table class="table">
+              {% csrf_token %}
+              {{form.as_table}}
+            </table>
+          </div>
+          <div class="card-footer">
+            <input type="submit" value="送信" class="btn btn-primary">
+            <a class="btn btn-secondary" href="{%url 'kakeibo:event_list'%}">
+              <i class="fas fa-list"></i> イベント一覧
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{{ form.media }}
+{% endblock %}

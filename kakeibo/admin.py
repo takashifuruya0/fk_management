@@ -51,6 +51,7 @@ class ResourceAdmin(ImportExportModelAdmin):
         "pk", "name", "is_investment",
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
+    search_fields = ("name", )
 
 
 class WayAdmin(ImportExportModelAdmin):
@@ -61,6 +62,7 @@ class WayAdmin(ImportExportModelAdmin):
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
     list_filter = ["is_expense", "is_transfer"]
+    search_fields = ("name",)
     # list_editable = ["name", "is_expense", "is_transfer", "resource_from", "resource_to",]
 
 
@@ -71,6 +73,7 @@ class UsageAdmin(ImportExportModelAdmin):
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
     readonly_fields = ["_count_kakeibo", "_count_shared"]
+    search_fields = ("name", )
 
     def _count_kakeibo(self, obj):
         return obj.kakeibo_set.count()
@@ -90,7 +93,22 @@ class KakeiboAdmin(ImportExportModelAdmin):
     list_display = [
         "pk", "date", "usage", "way", "fee", "memo"
     ]
+    autocomplete_fields = ("way", "usage")
+    list_filter = ("way__is_transfer", "way__is_expense", "usage", "date", )
 
+
+class CronKakeiboAdmin(admin.ModelAdmin):
+    list_display = [
+        "pk", "usage", "way", "fee", "memo", "is_coping_to_shared", "kind"
+    ]
+    autocomplete_fields = ("way", "usage")
+
+
+class CreditAdmin(admin.ModelAdmin):
+    list_display = [
+        "pk", "debit_date", "date", "fee", "memo", "card"
+    ]
+    list_filter = ("debit_date", "card")
 
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Way, WayAdmin)
@@ -98,7 +116,7 @@ admin.site.register(Credit)
 admin.site.register(Usage, UsageAdmin)
 admin.site.register(Event)
 admin.site.register(SharedKakeibo)
-admin.site.register(CronKakeibo)
+admin.site.register(CronKakeibo, CronKakeiboAdmin)
 admin.site.register(Kakeibo, KakeiboAdmin)
 admin.site.register(Target)
 admin.site.register(Budget, BudgetAdmin)
