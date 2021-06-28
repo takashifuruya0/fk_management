@@ -1,0 +1,19 @@
+<!-- Create -->
+<div class="accordion-item">
+  <h4 class="accordion-header" id="headingCIF">
+    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCIF" aria-expanded="true" aria-controls="collapseCIF">
+      <i class="fas fa-plus"></i>&nbsp;Credit Import
+    </button>
+  </h4>
+  <div id="collapseCIF" class="accordion-collapse collapse" aria-labelledby="headingCIF" data-bs-parent="#accordionExample">
+    <div class="accordion-body">
+      <form class="form" method="POST" action="{% url 'kakeibo:kakeibo_create' %}">
+        {{credit_import_form.as_p}}
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary" value="登録">
+          <i class="fas fa-plus"></i> 登録
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

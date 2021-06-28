@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
 from django.db.models import Q
 from django.db import transaction
-from kakeibo.models import Kakeibo, Usage, Resource, Way, SharedKakeibo, Event
-from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm
+from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event
+from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm
 # Create your views here.
 
 
@@ -31,6 +31,7 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
             "chart_header": list(),
             "chart_data": list(),
             "form": KakeiboForm(),
+            "credit_import_form": CreditImportForm(),
         })
         for r in Resource.objects.filter(is_active=True):
             context["chart_header"].append(r.name)

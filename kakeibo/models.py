@@ -4,6 +4,7 @@ from datetime import date
 from django.db.models import Sum, Avg
 from django_currentuser.middleware import get_current_authenticated_user
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django_currentuser.db.models import CurrentUserField
 
 
@@ -114,15 +115,15 @@ class Event(BaseModel):
 
 
 class Credit(BaseModel):
-    CHOICES_CARD = (
-        (k, k) for k in ("SFC", "GoldPoint", "SFC（家族）")
-    )
+    # CHOICES_CARD = (
+    #     (k, k) for k in ("SFC", "GoldPoint", "SFC（家族）")
+    # )
     fee = models.IntegerField("金額")
     date = models.DateField("日付")
     debit_date = models.DateField("引き落とし日")
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    card = models.CharField("カード", max_length=255, choices=CHOICES_CARD)
+    card = models.CharField("カード", max_length=255, choices=settings.CHOICES_CARD)
 
 
 class SharedKakeibo(BaseModel):
@@ -145,29 +146,19 @@ class Kakeibo(BaseModel):
 
 
 class CronKakeibo(BaseModel):
-    CHOICES_KIND = (
-        ("monthly", "月次"),
-        ("yearly_01", "年次（1月）"), ("yearly_02", "年次（2月）"), ("yearly_03", "年次（3月）"),
-        ("yearly_04", "年次（4月）"), ("yearly_05", "年次（5月）"), ("yearly_06", "年次（6月）"),
-        ("yearly_07", "年次（7月）"), ("yearly_08", "年次（8月）"), ("yearly_09", "年次（9月）"),
-        ("yearly_10", "年次（10月）"), ("yearly_11", "年次（11月）"), ("yearly_12", "年次（12月）"),
-    )
     fee = models.IntegerField("金額")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
     way = models.ForeignKey(Way, verbose_name="種別", on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
     is_coping_to_shared = models.BooleanField("共通コピーフラグ")
-    kind = models.CharField("種類", max_length=255, choices=CHOICES_KIND)
+    kind = models.CharField("種類", max_length=255, choices=settings.CHOICES_KIND_CRON_KAKEIBO)
 
 
 class Target(BaseModel):
-    CHOICES_KIND = (
-        (k, k) for k in ("総資産", )
-    )
     val = models.IntegerField("値")
     date = models.DateField("日付")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    kind = models.CharField("種類", max_length=255, choices=CHOICES_KIND)
+    kind = models.CharField("種類", max_length=255, choices=settings.CHOICES_KIND_TARGET)
 
     def __str__(self) -> str:
         return "Target_{}".format(self.date)
