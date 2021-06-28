@@ -17,7 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
 <div class="container-fluid">
   <div class="row">
-    <div class="col-9">
+    <div class="col-12 col-lg-9">
       <h2>
         共通家計簿（{{target_ym.year}}/{{target_ym.month}}）
         {%if is_black %}
@@ -27,7 +27,7 @@
         {% endif %}
       </h2>
     </div>
-    <div class="col-3">
+    <div class="col-12 col-lg-3">
       <form class="form" method="GET" action="">
         <input type="month" name="target_ym" value="{{initial_val}}">
         <input type="submit" class="btn btn-primary btn-sm" value="送信">
@@ -50,24 +50,24 @@
       <div class="progress" style="height:25px">
         <div class="progress-bar" role="progressbar" style="width: {{p_payment.takashi}}%"
              aria-valuenow="{{p_budget.takashi}}" aria-valuemin="0" aria-valuemax="100"
-        >敬士 ：{{payment.takashi |yen}}</div>
+        >敬士/{{payment.takashi |yen}}</div>
         <div class="progress-bar bg-success" role="progressbar" style="width: {{p_payment.hoko}}%"
              aria-valuenow="{{p_budget.hoko}}" aria-valuemin="0" aria-valuemax="100"
-        >朋子：{{payment.hoko |yen}}</div>
+        >朋子/{{payment.hoko |yen}}</div>
       </div>
       <hr>
       <h4>予算：{{budget.total |yen}}</h4>
       <div class="progress" style="height:25px">
         <div class="progress-bar" role="progressbar" style="width: {{p_budget.takashi}}%"
              aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-        >敬士 ：{{budget.takashi |yen}}</div>
+        >敬士/{{budget.takashi |yen}}</div>
         <div class="progress-bar bg-success" role="progressbar" style="width: {{p_budget.hoko}}%"
              aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-        >朋子：{{budget.hoko |yen}}</div>
+        >朋子/{{budget.hoko |yen}}</div>
         {% if not is_black %}
         <div class="progress-bar bg-danger" role="progressbar" style="width: {{p_budget.over}}%"
              aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
-        >Over：{{diff |yen_no_color}}</div>
+        >{{diff |yen_no_color}}</div>
         {% endif %}
       </div>
     </div>
