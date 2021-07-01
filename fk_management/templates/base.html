@@ -10,7 +10,7 @@
   <head>
     <title>{% block title %}{% endblock %}</title>
     <!-- Required meta tags -->
-    <meta charset="utf-8">
+<!--    <meta charset="utf-8">-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
     <link rel="icon" href="{%static 'favicon.ico'%}">
     <script src="https://kit.fontawesome.com/0e8797feee.js" crossorigin="anonymous"></script>
@@ -76,6 +76,9 @@
                 </a></li>
                 <li><a class="dropdown-item" href="{%url 'kakeibo:event_list'%}">
                   <i class="fas fa-list"></i>&nbsp;Event
+                </a></li>
+                <li><a href="{%url 'kakeibo:credit_link'%}" class="dropdown-item">
+                  <i class="far fa-credit-card"></i>&nbsp;Credit Link
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item disabled" href="#">

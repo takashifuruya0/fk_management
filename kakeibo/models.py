@@ -115,15 +115,15 @@ class Event(BaseModel):
 
 
 class Credit(BaseModel):
-    # CHOICES_CARD = (
-    #     (k, k) for k in ("SFC", "GoldPoint", "SFC（家族）")
-    # )
     fee = models.IntegerField("金額")
     date = models.DateField("日付")
     debit_date = models.DateField("引き落とし日")
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
     card = models.CharField("カード", max_length=255, choices=settings.CHOICES_CARD)
+
+    def __str__(self):
+        return "({}) {}".format(self.date, self.name)
 
 
 class SharedKakeibo(BaseModel):

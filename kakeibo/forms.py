@@ -1,3 +1,5 @@
+# coding: UTF-8
+
 from django import forms
 from django.contrib.auth import get_user_model
 from kakeibo.models import Kakeibo, Usage, Way, SharedKakeibo, Event
@@ -103,16 +105,16 @@ class EventForm(forms.ModelForm):
 
 
 class CreditImportForm(forms.Form):
-    file = forms.FileField(label="ファイル", required=True, widget=forms.FileInput(attrs={"class": "form-control"}))
+    file = forms.FileField(
+        label="ファイル", required=True, widget=forms.FileInput(attrs={"class": "form-control"})
+    )
     date_debit = forms.DateField(
         label="請求年月", required=True,
-        widget=forms.DateInput(attrs={"type": "month", "class": "form-control"})
+        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
     )
     card = forms.ChoiceField(label="カード", required=True, widget=forms.Select(attrs={"class": "form-control"}))
 
     def __init__(self, *args, **kwargs):
         self.base_fields['card'].choices = settings.CHOICES_CARD
-        print(settings.CHOICES_CARD)
-        print(self.base_fields['card'].choices)
         super().__init__(*args, **kwargs)
 

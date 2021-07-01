@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 import environ
 env = environ.Env(DEBUG=(bool, False),)  # set default values and casting
 environ.Env.read_env('env/.env')  # reading .env file
@@ -68,7 +69,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "kolo.middleware.KoloMiddleware",
+    # "kolo.middleware.KoloMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -237,6 +238,7 @@ LOGGING = {
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'stream': sys.stdout,
         },
         # 'logfile': {
         #     'level': 'INFO',

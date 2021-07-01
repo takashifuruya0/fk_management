@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load humanize %}
+{% load mathfilters %}
+{% load my_templatetags %}
+
+{% block title %}
+Credit Link
+{% endblock %}
+
+{% block page-title %}
+Credit Link
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title"><i class="far fa-credit-card"></i>&nbsp;Credit Link</h2>
+        </div>
+
+        <div class="card-body">
+          <label class="badge rounded-pill bg-primary">合計: {{total |yen}}</label>
+          <label class="badge rounded-pill bg-primary">件数: {{object_list |length}}</label>
+          <label class="badge rounded-pill bg-primary">支払月: {{debit_date |default:""}}</label>
+          <hr>
+          <form action="{%url 'kakeibo:credit_link'%}" method="POST" class="form">
+            {% csrf_token %}
+            <table class="table">
+              <tr class="table-primary">
+                <th>Date</th>
+                <th>Name</th>
+                <th>Fee</th>
+<!--                <th>Memo</th>-->
+                <th>Targets</th>
+<!--                <th>SubTargets</th>-->
+                <th>New</th>
+              </tr>
+              {% for object in object_list %}
+              {% with ido=forloop.counter0 c=object.targets_count d=object.subtargets_count%}
+              <tr class="{% if c == 1 %}{% elif d == 1%}table-warning{% else %}table-danger{% endif %}">
+                <td>{{object.date}}</td>
+                <td>{{object.name}}</td>
+                <td>{{object.fee |yen}}</td>
+<!--                <td>{{object.memo}}</td>-->
+                <td>
+                  <span class="badge bg-{% if c == 1 %}success{% elif c == 0%}warning{% else %}danger{% endif %}">
+                    日付一致：{{c}}件
+                  </span>
+                  <ul>
+                    {% for t in object.targets %}
+                    <li>
+                      <input name="id_{{ido}}" type="checkbox" value="{{t.pk}}" {%if c == 1%}checked{%endif%}>
+                      {{t.pk}}: {{t.usage.name}}, {{t.memo |default:""}}
+                    </li>
+                    {% endfor %}
+                  </ul>
+<!--                </td>-->
+<!--                <td>-->
+                  {% if c == 1 and d == 0 %}
+                  {% else %}
+                  <span class="badge bg-{% if d == 1 %}success{% elif d == 0%}warning{% else %}danger{% endif %}">
+                    日付不一致：{{d}}件
+                  </span>
+                  <ul>
+                    {% for t in object.subtarget %}
+                    <li>
+                      <input name="id_{{ido}}" type="checkbox" value="{{t.pk}}" {%if d == 1%}checked{%endif%}>
+                      {{t.pk}}: {{t.date}} {{t.usage.name}}, {{t.memo |default:""}}
+                    </li>
+                    {% endfor %}
+                  </ul>
+                  {% endif %}
+                </td>
+                <td>
+                  {%if d == 0 and c == 0%}
+                  <p>
+                    <input name="id_{{ido}}" type="checkbox" value="new" checked>&nbsp;新規作成
+                  </p>
+                  <p>
+                    <select name="usage_{{ido}}">
+                      {% for u in usages %}
+                      <option value="{{u.pk}}">{{u.name}}</option>
+                      {% endfor %}
+                    </select>
+                  </p>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endwith %}
+              {% endfor %}
+            </table>
+            <button class="btn btn-primary" type="submit">登録</button>
+          </form>
+        </div>
+        <div class="card-footer">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

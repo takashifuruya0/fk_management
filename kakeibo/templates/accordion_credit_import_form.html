@@ -7,8 +7,10 @@
   </h4>
   <div id="collapseCIF" class="accordion-collapse collapse" aria-labelledby="headingCIF" data-bs-parent="#accordionExample">
     <div class="accordion-body">
-      <form class="form" method="POST" action="{% url 'kakeibo:kakeibo_create' %}">
+      <form class="form" method="POST" action="{% url 'kakeibo:credit_import' %}" enctype="multipart/form-data">
         {{credit_import_form.as_p}}
+<!--        <input type="date" name="date_debit" class="datepicker" value="" readonly="readonly" id="id_date_readcsv" class="form-control" required="true">-->
+<!--        <input type="file" class="dropify" name="file">-->
         {% csrf_token %}
         <button type="submit" class="btn btn-primary" value="登録">
           <i class="fas fa-plus"></i> 登録

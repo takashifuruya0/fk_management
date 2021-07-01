@@ -5,7 +5,21 @@ from import_export.admin import ImportExportModelAdmin
 # Register your models here.
 
 
+# ===========================
+# Inline
+# ===========================
+class KakeiboInline(admin.TabularInline):
+    model = Kakeibo
+    verbose_name = "関連家計簿"
+    verbose_name_plural = "関連家計簿"
+    fields = ("date", "usage", "fee")
+    readonly_fields = ("date", "usage", "fee")
+    can_delete = False
+
+
+# ===========================
 # Resources
+# ===========================
 class ResourceResource(resources.ModelResource):
     class Meta:
         model = Resource
@@ -106,13 +120,20 @@ class CronKakeiboAdmin(admin.ModelAdmin):
 
 class CreditAdmin(admin.ModelAdmin):
     list_display = [
-        "pk", "debit_date", "date", "fee", "memo", "card"
+        "pk", "_debit_month", "date", "name", "fee", "card"
     ]
-    list_filter = ("debit_date", "card")
+    list_filter = ("card", )
+    search_fields = ("name", "memo")
+    inlines = [KakeiboInline, ]
+
+    def _debit_month(self, obj):
+        return "{}年{}月".format(obj.debit_date.year, obj.debit_date.month)
+    _debit_month.short_description = "請求年月"
+
 
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Way, WayAdmin)
-admin.site.register(Credit)
+admin.site.register(Credit, CreditAdmin)
 admin.site.register(Usage, UsageAdmin)
 admin.site.register(Event)
 admin.site.register(SharedKakeibo)
