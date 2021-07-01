@@ -28,10 +28,6 @@ class CreditImport(MyUserPasssesTestMixin, View):
     def post(self, request, *args, **kwargs):
         form = CreditImportForm(request.POST, request.FILES)
         if form.is_valid():
-            # res = redirect('kakeibo:credit_link')
-            # res['location'] += "?debit_date={}".format(form.cleaned_data['date_debit'])
-            # return res
-
             # CSVの読み込み
             data = form.cleaned_data['file']
             try:
@@ -43,17 +39,19 @@ class CreditImport(MyUserPasssesTestMixin, View):
                 logger.error(e)
                 return redirect('kakeibo:kakeibo_top')
             # 読み込み成功後
-            import_data = []
-            way_card = Way.objects.get(name__icontains="カード")
+            card = form.cleaned_data['card']
             credit_list = []
             for line in csv_file:
                 logger.warning("line: {}".format(line))
                 if len(line) < 6:
+                    if form.cleaned_data['card'] == "SFC":
+                        if line[0] == '古屋\u3000朋子\u3000様':
+                            card = "SFC（家族）"
+                        else:
+                            card = "SFC"
                     logger.warning("SKIP (len<6): {}".format(line))
-                    continue
-                if line[5] == "":
+                elif line[5] == "":
                     logger.warning("SKIP (line[5] == ''): {}".format(line))
-                    pass
                 elif line[0] == "" and line[1] == "":
                     # 合計
                     total = int(line[5])
@@ -62,45 +60,18 @@ class CreditImport(MyUserPasssesTestMixin, View):
                     fee = int(line[5])
                     name = line[1]
                     memo = line[6]
-                    # Targets
-                    targets = Kakeibo.objects.filter(
-                        is_active=True, way=way_card, fee=fee, date=date_card, credit=None,
-                    ).select_related('way', 'usage')
-                    # Sub Targets
-                    date_range = (date_card-relativedelta(days=2), date_card+relativedelta(days=2))
-                    targets2 = Kakeibo.objects.filter(
-                        is_active=True, way=way_card, fee=fee, date__range=date_range, credit=None,
-                    ).exclude(pk__in=[t.pk for t in targets]).select_related('way', 'usage')
-                    # credit
                     credit = Credit(
                         date=date_card, fee=fee, debit_date=form.cleaned_data['date_debit'],
-                        name=name, memo=memo, card=form.cleaned_data['card'],
+                        name=name, memo=memo, card=card,
                     )
                     credit_list.append(credit)
-                    # import_data
-                    import_data.append({
-                        "pk": 1,
-                        "date": date_card,
-                        "name": name,
-                        "fee": fee,
-                        "memo": memo,
-                        "targets_count": targets.count(),
-                        "subtargets_count": targets2.count(),
-                        "targets": targets,
-                        "subtarget": targets2,
-                    })
             # Credit一括作成
             Credit.objects.bulk_create(credit_list)
-            messages.success(self.request, "{}件のCredit取込に成功しました".format(len(credit_list)))
-            # return
-            context = {
-                "object_list": import_data,
-                "total": total,
-                "debit_date": form.cleaned_data['date_debit'],
-                "card": form.cleaned_data['card'],
-                "usages": Usage.objects.filter(is_expense=True, is_active=True),
-            }
-            return render(request, "credit_link.html", context)
+            messages.success(self.request, "{}件のCredit取込に成功しました-->{:,}円".format(len(credit_list), total))
+            # redirect
+            res = redirect('kakeibo:credit_link')
+            res['location'] += "?debit_date={}".format(form.cleaned_data['date_debit'])
+            return res
         else:
             # Invalid時はKakeiboTopへView
             messages.error(self.request, "失敗 {}".format(form.errors))
@@ -131,7 +102,7 @@ class CreditLink(MyUserPasssesTestMixin, TemplateView):
         # total
         total = credits_unlinked.aggregate(sum=Sum('fee'))['sum']
         # loop
-        for c in credits_unlinked:
+        for c in credits_unlinked.order_by('-date'):
             # Targets
             targets = Kakeibo.objects.filter(
                 is_active=True, way=way_card, fee=c.fee, date=c.date, credit=None,
@@ -148,6 +119,7 @@ class CreditLink(MyUserPasssesTestMixin, TemplateView):
                 "name": c.name,
                 "fee": c.fee,
                 "memo": c.memo,
+                "card": c.card,
                 "targets_count": targets.count(),
                 "subtargets_count": targets2.count(),
                 "targets": targets,
@@ -165,9 +137,39 @@ class CreditLink(MyUserPasssesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         logger.info(request.POST)
+        way_card = Way.objects.get(name="カード払い")
+        num_add = 0
+        num_link = 0
+        num_delete = 0
         for r in request.POST:
-            logger.info(r)
+            # credit.pk をチェック
             if r[0:3] == "id_":
-                logger.info("{}-->{}".format(r, r[3:]))
-        messages.success(request, "{}件の紐付け、{}件の作成に成功しました".format(1, 1))
+                pk = r[3:]
+                credit = Credit.objects.get(pk=pk)
+                # 紐付ける家計簿
+                target = request.POST.get(r, None)
+                if target == "new":
+                    # kakeibo作成
+                    usage = Usage.objects.get(pk=request.POST.get("usage_{}".format(pk)))
+                    kakeibo = Kakeibo(
+                        fee=credit.fee, date=credit.date, way=way_card, memo=credit.name, usage=usage, credit=credit
+                    )
+                    kakeibo.save()
+                    num_add += 1
+                elif target == "delete":
+                    # credit削除
+                    credit.delete()
+                    num_delete += 1
+                elif target:
+                    # kakeibo紐付け
+                    kakeibo = Kakeibo.objects.get(pk=target)
+                    kakeibo.credit = credit
+                    kakeibo.save()
+                    num_link += 1
+                else:
+                    raise Exception('Kakeibo was Not found ')
+        if num_link > 0 or num_add >0:
+            messages.success(request, "{}件の紐付け、{}件の作成に成功しました".format(num_link, num_add))
+        if num_delete > 0:
+            messages.info(request, "{}件のCredit削除を実施しました".format(num_delete))
         return redirect("kakeibo:credit_link")

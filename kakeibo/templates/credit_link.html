@@ -25,25 +25,44 @@ Credit Link
         </div>
 
         <div class="card-body">
-          <label class="badge rounded-pill bg-primary">合計: {{total |yen}}</label>
-          <label class="badge rounded-pill bg-primary">件数: {{object_list |length}}</label>
-          <label class="badge rounded-pill bg-primary">支払月: {{debit_date |default:""}}</label>
+          <div class="row">
+            <div class="col-8">
+              <label class="badge rounded-pill bg-primary">合計: {{total |yen}}</label>
+              <label class="badge rounded-pill bg-primary">件数: {{object_list |length}}</label>
+              <label class="badge rounded-pill bg-primary">支払月: {{debit_date |date |default:"-"}}</label>
+            </div>
+            <div class="col-4">
+              <form class="form" method="GET" action="">
+                <input type="date" name="debit_date" value="{{initial_val}}">
+                <input type="submit" class="btn btn-primary btn-sm" value="送信">
+              </form>
+            </div>
+          </div>
           <hr>
           <form action="{%url 'kakeibo:credit_link'%}" method="POST" class="form">
             {% csrf_token %}
             <table class="table">
               <tr class="table-primary">
+                <th>Card</th>
                 <th>Date</th>
                 <th>Name</th>
                 <th>Fee</th>
-<!--                <th>Memo</th>-->
                 <th>Targets</th>
 <!--                <th>SubTargets</th>-->
                 <th>New</th>
               </tr>
               {% for object in object_list %}
-              {% with ido=forloop.counter0 c=object.targets_count d=object.subtargets_count%}
+              {% with ido=object.pk c=object.targets_count d=object.subtargets_count%}
               <tr class="{% if c == 1 %}{% elif d == 1%}table-warning{% else %}table-danger{% endif %}">
+                <td>
+                  {% if object.card == "SFC（家族）" %}
+                  <span class="badge bg-info rounded-pill">家族</span>
+                  {% elif object.card == "SFC" %}
+                  <span class="badge bg-primary rounded-pill">SFC</span>
+                  {% else %}
+                  <span class="badge bg-secondary rounded-pill">その他</span>
+                  {% endif %}
+                </td>
                 <td>{{object.date}}</td>
                 <td>{{object.name}}</td>
                 <td>{{object.fee |yen}}</td>
@@ -60,8 +79,6 @@ Credit Link
                     </li>
                     {% endfor %}
                   </ul>
-<!--                </td>-->
-<!--                <td>-->
                   {% if c == 1 and d == 0 %}
                   {% else %}
                   <span class="badge bg-{% if d == 1 %}success{% elif d == 0%}warning{% else %}danger{% endif %}">
@@ -80,10 +97,11 @@ Credit Link
                 <td>
                   {%if d == 0 and c == 0%}
                   <p>
-                    <input name="id_{{ido}}" type="checkbox" value="new" checked>&nbsp;新規作成
+                    <input name="id_{{ido}}" type="radio" value="new">&nbsp;新規作成
+                    <input name="id_{{ido}}" type="radio" value="delete">&nbsp;削除
                   </p>
                   <p>
-                    <select name="usage_{{ido}}">
+                    <select name="usage_{{ido}}" class="form-control" >
                       {% for u in usages %}
                       <option value="{{u.pk}}">{{u.name}}</option>
                       {% endfor %}
