@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 import environ
 env = environ.Env(DEBUG=(bool, False),)  # set default values and casting
 environ.Env.read_env('env/.env')  # reading .env file
@@ -68,7 +69,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "kolo.middleware.KoloMiddleware",
+    # "kolo.middleware.KoloMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -237,6 +238,7 @@ LOGGING = {
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
+            'stream': sys.stdout,
         },
         # 'logfile': {
         #     'level': 'INFO',
@@ -262,3 +264,18 @@ LOGGING = {
         },
     }
 }
+
+# Model Choice: Generator不可
+CHOICES_CARD = (
+    ("SFC", "SFC"), ("SFC（家族）", "SFC（家族）"), ("GoldPoint", "GoldPoint")
+)
+CHOICES_KIND_CRON_KAKEIBO = (
+    ("monthly", "月次"),
+    ("yearly_01", "年次（1月）"), ("yearly_02", "年次（2月）"), ("yearly_03", "年次（3月）"),
+    ("yearly_04", "年次（4月）"), ("yearly_05", "年次（5月）"), ("yearly_06", "年次（6月）"),
+    ("yearly_07", "年次（7月）"), ("yearly_08", "年次（8月）"), ("yearly_09", "年次（9月）"),
+    ("yearly_10", "年次（10月）"), ("yearly_11", "年次（11月）"), ("yearly_12", "年次（12月）"),
+)
+CHOICES_KIND_TARGET = (
+    ("総資産", "総資産"),
+)

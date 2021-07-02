@@ -1,5 +1,5 @@
 from dal import autocomplete
-from kakeibo.models import Kakeibo, Usage, Resource, Way
+from kakeibo.models import Kakeibo, Usage, Resource, Way, Event
 # Create your views here.
 
 

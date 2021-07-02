@@ -7,54 +7,55 @@
 {% load my_templatetags %}
 
 {% block title %}
-共通家計簿一覧
+Event List
 {% endblock %}
 
 {% block page-title %}
-共通家計簿一覧
+Event List
 {% endblock %}
 
 {% block body %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-lg-4">
-      <div class="accordion" id="accordionExample">
-        {% include 'accordion_shared_search_form.html' %}
-        {% include 'accordion_shared_form.html' %}
-      </div>
-    </div>
-
-    <div class="col-lg-8">
-      <div class="card bg-light">
-        <div class="card-header">
-          <h2 class="card-title"><i class="fas fa-list"></i> 共通家計簿一覧</h2>
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title"><i class="fas fa-list"></i> Event List</h2>
         </div>
         <div class="card-body">
-          
           <table class="table">
-            <tr class="table-light">
+            <tr class="table-primary">
               <th>ID</th>
               <th>Date</th>
-              <th>Usage</th>
-              <th>PaidBy</th>
-              <th>Fee</th>
+              <th>Status</th>
+              <th>Name</th>
+              <th>Plan</th>
+              <th>Actual</th>
               <th>Memo</th>
             </tr>
             {% for object in object_list %}
             <tr>
               <td>
-                <a href="{%url 'kakeibo:shared_detail' pk=object.pk%}">{{object.pk}}</a>
+                <a href="{%url 'kakeibo:event_detail' pk=object.pk%}">{{object.pk}}</a>
               </td>
               <td>{{object.date}}</td>
-              <td>{{object.usage}}</td>
-              <td>{{object.paid_by}}</td>
-              <td>{{object.fee |yen}}</td>
+              <td>
+                {% if object.is_closed %}
+                <span class="badge bg-danger"><i class="fas fa-door-closed"></i> Closed</span>
+                {% else %}
+                <span class="badge bg-success"><i class="fas fa-door-open"></i> Open</span>
+                {% endif %}
+              </td>
+              <td>{{object.name}}</td>
+              <td>{{object.sum_plan |yen}}</td>
+              <td>{{object.sum_actual |yen}}</td>
               <td>{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}
           </table>
         </div>
         <div class="card-footer">
+          <a href="{%url 'kakeibo:event_create'%}" class="btn btn-secondary">イベント作成</a>
           {% if page_obj.has_other_pages %}
           <nav>
             <ul class="pagination">
@@ -62,7 +63,7 @@
               {% if page_obj.has_previous %}
               <li class="page-item">
                 <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{page_obj.previous_page_number}}{{params}}"
+                   href="{%url 'kakeibo:event_list'%}?page={{page_obj.previous_page_number}}{{params}}"
                 >&laquo;</a>
               </li>
               {% else %}
@@ -72,7 +73,7 @@
               {% if page_obj.number|sub:5 > 0 %}
               <li class="page-item">
                 <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page=1{{params}}"
+                   href="{%url 'kakeibo:event_list'%}?page=1{{params}}"
                 >1</a>
               </li>
               {% endif %}
@@ -85,7 +86,7 @@
               {% elif page_obj.number|sub:i < 5 and page_obj.number|sub:i > -5 %}
               <li class="page-item">
                 <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{i}}{{params}}"
+                   href="{%url 'kakeibo:event_list'%}?page={{i}}{{params}}"
                 >{{i}}</a>
               </li>
               {% elif page_obj.number|sub:i == 5 or page_obj.number|sub:i == -5 %}
@@ -98,7 +99,7 @@
               {% if not page_obj.number == page_obj.paginator.num_pages %}
               <li class="page-item">
                 <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{page_obj.paginator.num_pages}}{{params}}"
+                   href="{%url 'kakeibo:event_list'%}?page={{page_obj.paginator.num_pages}}{{params}}"
                 >{{page_obj.paginator.num_pages}}</a>
               </li>
               {% endif %}
@@ -106,7 +107,7 @@
               {% if page_obj.has_next %}
               <li class="page-item">
                 <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{page_obj.next_page_number}}{{params}}"
+                   href="{%url 'kakeibo:event_list'%}?page={{page_obj.next_page_number}}{{params}}"
                 >&raquo;</a>
               </li>
               {% else %}
@@ -124,6 +125,4 @@
 {% endblock %}
 
 {% block js %}
-{{ form.media }}
-{{ search_form.media }}
 {% endblock %}

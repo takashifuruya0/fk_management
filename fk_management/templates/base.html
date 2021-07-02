@@ -9,6 +9,9 @@
 <html>
   <head>
     <title>{% block title %}{% endblock %}</title>
+    <!-- Required meta tags -->
+<!--    <meta charset="utf-8">-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
     <link rel="icon" href="{%static 'favicon.ico'%}">
     <script src="https://kit.fontawesome.com/0e8797feee.js" crossorigin="anonymous"></script>
     <!--datepicker-->
@@ -26,7 +29,7 @@
     </script>
   </head>
   <body>
-    <nav class="navbar navbar-expand-sm bg-light navbar-light navbar-toggleable-sm">
+    <nav class="navbar navbar-expand-lg bg-light navbar-light navbar-toggleable-lg">
       <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'top' %}">
           <img src="{% static 'menta.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
@@ -40,16 +43,16 @@
             <!--shared-->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="fas fa-people-carry"></i> 共通家計簿
+                <i class="fas fa-people-carry"></i>&nbsp;共通家計簿
               </a>
               <ul class="dropdown-menu">
-                <li>
-                  <a class="dropdown-item" href="{%url 'kakeibo:shared_top'%}">
-                    <i class="fas fa-tachometer-alt"></i> ダッシュボード
-                  </a>
-                </li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_top'%}">
+                    <i class="fas fa-tachometer-alt"></i>&nbsp;ダッシュボード
+                </a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_list' %}">レコード一覧</a></li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_list' %}">
+                  <i class="fas fa-list"></i>&nbsp;レコード一覧
+                </a></li>
               </ul>
             </li>
 <!--            <li class="nav-item">-->
@@ -61,45 +64,65 @@
             <!--kakeibo-->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="fas fa-yen-sign"></i> Kakeibo
+                <i class="fas fa-yen-sign"></i>&nbsp;Kakeibo
               </a>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_top'%}">
                   <i class="fas fa-tachometer-alt"></i> KakeiboDashboard
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_list' %}">Kakeibo</a></li>
-                <li><a class="dropdown-item" href="#">Usage</a></li>
-                <li><a class="dropdown-item" href="#">Event</a></li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_list'%}">
+                  <i class="fas fa-list"></i>&nbsp;Kakeibo
+                </a></li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:event_list'%}">
+                  <i class="fas fa-list"></i>&nbsp;Event
+                </a></li>
+                <li><a href="{%url 'kakeibo:credit_link'%}" class="dropdown-item">
+                  <i class="far fa-credit-card"></i>&nbsp;Credit Link
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item disabled" href="#">
+                  <i class="fas fa-flag-usa"></i>&nbsp;USD
+                </a></li>
               </ul>
             </li>
             <!--asset-->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="fas fa-coins"></i> Asset
+                <i class="fas fa-coins"></i>&nbsp;Asset
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_top'%}">
-                  <i class="fas fa-tachometer-alt"></i> AssetDashboard
+                <li><a class="dropdown-item disabled" href="{%url 'kakeibo:kakeibo_top'%}">
+                  <i class="fas fa-tachometer-alt"></i>&nbsp;AssetDashboard
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Stock</a></li>
-                <li><a class="dropdown-item" href="#">Entry</a></li>
-                <li><a class="dropdown-item" href="#">Order</a></li>
+                <li><a class="dropdown-item disabled" href="#">
+                  <i class="fas fa-list"></i>&nbsp;Stock
+                </a></li>
+                <li><a class="dropdown-item disabled" href="#">
+                  <i class="fas fa-list"></i>&nbsp;Entry
+                </a></li>
+                <li><a class="dropdown-item disabled" href="#">
+                  <i class="fas fa-list"></i>&nbsp;Order
+                </a></li>
               </ul>
             </li>
             <!--work-->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="fas fa-briefcase"></i> Work
+                <i class="fas fa-briefcase"></i>&nbsp;Work
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{%url 'kakeibo:kakeibo_top'%}">
-                  <i class="fas fa-tachometer-alt"></i> WorkDashboard
+                <li><a class="dropdown-item disabled" href="{%url 'kakeibo:kakeibo_top'%}">
+                  <i class="fas fa-tachometer-alt"></i>&nbsp;WorkDashboard
                 </a></li>
                 <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Client</a></li>
-                <li><a class="dropdown-item" href="#">Opportunity</a></li>
+                <li><a class="dropdown-item disabled" href="#">
+                  <i class="fas fa-list"></i>&nbsp;Client
+                </a></li>
+                <li><a class="dropdown-item disabled" href="#">
+                  <i class="fas fa-list"></i>&nbsp;Opportunity
+                </a></li>
               </ul>
             </li>
             {% endif %}

@@ -59,7 +59,7 @@ spec:
     spec:
       containers:
         - name: fk-management-container
-          image: tfuruya/fk_management:0.5
+          image: tfuruya/fk_management:0.53
           imagePullPolicy: Always
           command:
             - "python3"
@@ -129,6 +129,22 @@ spec:
   selector:
     app: fk-management-app
 
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fk-management-externalip2
+spec:
+  type: NodePort # <- ClusterIPから変更
+  ports:
+    - name: "http-port"
+      protocol: "TCP"
+      port: 80
+      targetPort: 8000
+      nodePort: 30002
+  selector:
+    app: fk-management-app
 
 #---
 #

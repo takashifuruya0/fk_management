@@ -51,6 +51,22 @@ Kakeibo Detail
               <th>Memo</th>
               <td>{{object.memo}}</td>
             </tr>
+            {% if object.shared %}
+            <tr>
+              <th>Shared</th>
+              <td>
+                <a href="{%url 'kakeibo:shared_detail' pk=object.shared.pk%}">{{object.shared}}</a>
+              </td>
+            </tr>
+            {% endif %}
+            {% if object.event %}
+            <tr>
+              <th>Event</th>
+              <td>
+                <a href="{%url 'kakeibo:shared_detail' pk=object.event.pk%}">{{object.event}}</a>
+              </td>
+            </tr>
+            {% endif %}
           </table>
         </div>
         <div class="card-footer">
