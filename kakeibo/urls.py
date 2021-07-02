@@ -5,7 +5,7 @@ from kakeibo.views.views_kakeibo import KakeiboTop, KakeiboList, KakeiboDetail, 
 from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, EventDetail
 from kakeibo.views.views_autocomplete import UsageAutocomplete, WayAutocomplete, SharedUsageAutocomplete
 from kakeibo.views.views_shared import SharedTop, SharedList, SharedDetail, SharedCreate, SharedUpdate
-from kakeibo.views.views_credit import CreditImport, CreditLink
+from kakeibo.views.views_credit import CreditImport, CreditLink, CreditLinkFromKakeibo
 
 app_name = 'kakeibo'
 urlpatterns = [
@@ -32,6 +32,7 @@ urlpatterns = [
     path('autocomplete/shared/usage', SharedUsageAutocomplete.as_view(), name="autocomplete_shared_usage"),
     # credit
     path('credit/import', CreditImport.as_view(), name="credit_import"),
-    path('credit/link', CreditLink.as_view(), name="credit_link")
+    path('credit/link', CreditLink.as_view(), name="credit_link"),
+    path('credit/link_from_kakeibo', CreditLinkFromKakeibo.as_view(), name="credit_link_from_kakeibo")
 
 ]

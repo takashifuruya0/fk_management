@@ -26,12 +26,16 @@ Credit Link
 
         <div class="card-body">
           <div class="row">
-            <div class="col-8">
+            <div class="col-6">
+              <h4>Credit --> Kakeibo</h4>
               <label class="badge rounded-pill bg-primary">合計: {{total |yen}}</label>
               <label class="badge rounded-pill bg-primary">件数: {{object_list |length}}</label>
               <label class="badge rounded-pill bg-primary">支払月: {{debit_date |date |default:"-"}}</label>
             </div>
             <div class="col-4">
+              <a href="{% url 'kakeibo:credit_link_from_kakeibo' %}" class="btn btn-info">家計簿から紐付け</a>
+            </div>
+            <div class="col-2">
               <form class="form" method="GET" action="">
                 <input type="date" name="debit_date" value="{{initial_val}}">
                 <input type="submit" class="btn btn-primary btn-sm" value="送信">
@@ -47,25 +51,25 @@ Credit Link
                 <th>Date</th>
                 <th>Name</th>
                 <th>Fee</th>
-                <th>Targets</th>
+                <th>Link</th>
 <!--                <th>SubTargets</th>-->
-                <th>New</th>
+                <th>Create</th>
               </tr>
               {% for object in object_list %}
-              {% with ido=object.pk c=object.targets_count d=object.subtargets_count%}
+              {% with ido=object.credit.pk c=object.targets_count d=object.subtargets_count%}
               <tr class="{% if c == 1 %}{% elif d == 1%}table-warning{% else %}table-danger{% endif %}">
                 <td>
-                  {% if object.card == "SFC（家族）" %}
+                  {% if object.credit.card == "SFC（家族）" %}
                   <span class="badge bg-info rounded-pill">家族</span>
-                  {% elif object.card == "SFC" %}
+                  {% elif object.credit.card == "SFC" %}
                   <span class="badge bg-primary rounded-pill">SFC</span>
                   {% else %}
                   <span class="badge bg-secondary rounded-pill">その他</span>
                   {% endif %}
                 </td>
-                <td>{{object.date}}</td>
-                <td>{{object.name}}</td>
-                <td>{{object.fee |yen}}</td>
+                <td>{{object.credit.date}}</td>
+                <td>{{object.credit.name}}</td>
+                <td>{{object.credit.fee |yen}}</td>
 <!--                <td>{{object.memo}}</td>-->
                 <td>
                   <span class="badge bg-{% if c == 1 %}success{% elif c == 0%}warning{% else %}danger{% endif %}">
@@ -99,6 +103,7 @@ Credit Link
                   <p>
                     <input name="id_{{ido}}" type="radio" value="new">&nbsp;新規作成
                     <input name="id_{{ido}}" type="radio" value="delete">&nbsp;削除
+                    <input name="id_{{ido}}" type="radio" value="skip">&nbsp;残置
                   </p>
                   <p>
                     <select name="usage_{{ido}}" class="form-control" >
