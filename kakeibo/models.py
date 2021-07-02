@@ -65,6 +65,8 @@ class Resource(BaseModel):
             .aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
+        elif sum_from and sum_from > 0 and not sum_to:
+            val = - sum_from
         else:
             val = sum_to if sum_to else 0
         return val

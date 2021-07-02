@@ -1,24 +1,12 @@
-from django.shortcuts import render
 from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib import messages
-from django.shortcuts import redirect, reverse
+from django.shortcuts import reverse
 from django.db.models import Q
 from django.db import transaction
+from kakeibo.views.views_common import MyUserPasssesTestMixin
 from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event
 from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm
 # Create your views here.
-
-
-class MyUserPasssesTestMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-    def handle_no_permission(self):
-        messages.warning(self.request, "アクセス権限がありません")
-        return redirect("top")
 
 
 class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
@@ -105,10 +93,13 @@ class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
     template_name = "kakeibo_create.html"
     model = Kakeibo
     form_class = KakeiboForm
-    # fields = ("date", "fee", "way", 'usage', "memo")
 
     def get_success_url(self):
-        return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
+        messages.success(self.request, "家計簿作成に成功しました")
+        if self.request.POST.get('source_path', None):
+            return self.request.POST['source_path']
+        else:
+            return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
         with transaction.atomic():
@@ -124,6 +115,10 @@ class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
                 kakeibo.save()
         return res
 
+    def form_invalid(self, form):
+        messages.erro(self.request, "家計簿作成に失敗しました {}".format(form.errors))
+        return super(KakeiboCreate, self).form_invalid(form)
+
 
 class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     template_name = "kakeibo_update.html"
@@ -131,6 +126,7 @@ class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     form_class = KakeiboForm
 
     def get_success_url(self):
+        messages.success(self.request, "家計簿更新に成功しました")
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
 
 
@@ -154,6 +150,7 @@ class EventCreate(MyUserPasssesTestMixin, CreateView):
     form_class = EventForm
 
     def get_success_url(self):
+        messages.success(self.request, "イベント作成に成功しました")
         return reverse("kakeibo:event_detail", kwargs={"pk": self.object.pk})
 
 
@@ -163,4 +160,5 @@ class EventUpdate(MyUserPasssesTestMixin, UpdateView):
     form_class = EventForm
 
     def get_success_url(self):
+        messages.success(self.request, "イベント更新に成功しました")
         return reverse("kakeibo:event_detail", kwargs={"pk": self.object.pk})

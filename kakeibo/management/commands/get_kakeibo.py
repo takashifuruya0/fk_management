@@ -22,6 +22,7 @@ class Command(BaseCommand):
         kakeibo_list = list()
         error_list = list()
         transfer = Usage.objects.get(name="振替")
+        other = Usage.objects.get(name="その他")
         while True:
             r = requests.get(url)
             json_data = r.json()
@@ -30,28 +31,35 @@ class Command(BaseCommand):
                 try:
                     self.stdout.write("============")
                     pprint.pprint(r)
-                    usage = None
-                    resource_from = None
-                    resource_to = None
+                    # usage
                     if r['usage']:
                         usage = Usage.objects.get(name=r['usage']['name'])
+                    elif r['move_from'] or r['move_to']:
+                        # usageが設定されていないが、resourcesなし --> その他
+                        usage = other
                     else:
+                        # usageが設定されていないが、resourcesあり --> 振替
                         usage = transfer
+                    # resources
+                    resource_from = None
                     if r['move_from']:
                         if self.mapping_resource.get(r['move_from']['name'], None):
                             resource_from = Resource.objects.get(name=self.mapping_resource.get(r['move_from']['name']))
                         else:
                             resource_from = Resource.objects.get(name=r['move_from']['name'])
+                    resource_to = None
                     if r['move_to']:
                         if self.mapping_resource.get(r['move_to']['name'], None):
                             resource_to = Resource.objects.get(name=self.mapping_resource.get(r['move_to']['name']))
                         else:
                             resource_to = Resource.objects.get(name=r['move_to']['name'])
+                    # way
                     if Way.objects.filter(resource_to=resource_to, resource_from=resource_from).exists():
                         way = Way.objects.get(resource_to=resource_to, resource_from=resource_from)
                     else:
                         way = Way(resource_to=resource_to, resource_from=resource_from, name=r['way'])
                         way.save()
+                    # init Kakeibo
                     d = {
                         "fee": r['fee'],
                         "date": r['date'],
@@ -66,9 +74,10 @@ class Command(BaseCommand):
                 except Exception as e:
                     error_list.append({"msg": e, "data": r})
                     self.stderr.write(str(e))
-
             if not json_data['next']:
-                print("=================={}/{}====================".format(len(kakeibo_list), json_data['count']))
+                self.stdout.write(
+                    ("=================={}/{}====================".format(len(kakeibo_list), json_data['count']))
+                )
                 break
             url = json_data['next']
         if error_list:

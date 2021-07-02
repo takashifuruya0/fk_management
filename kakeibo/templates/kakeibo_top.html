@@ -49,7 +49,7 @@ kakeibo
             <tr>
               <th>{{resource.name}}</th>
               <td>{{resource.total |yen}}</td>
-              <td>{{resource.diff_this_month |yen}}</td>
+              <td>{{resource.diff_this_month |yen |safe}}</td>
             </tr>
             {% endfor %}
           </table>
