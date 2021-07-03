@@ -9,8 +9,14 @@ from django_currentuser.db.models import CurrentUserField
 
 
 # Create your models here.
+
+class BaseManager(models.Manager):
+    def all_active(self):
+        return self.get_queryset().filter(is_active=True)
+
+
 class BaseModel(models.Model):
-    objects = None
+    objects = BaseManager()
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="作成日時")
     last_updated_at = models.DateTimeField(auto_now=True, verbose_name="最終更新日時")
     created_by = CurrentUserField(
