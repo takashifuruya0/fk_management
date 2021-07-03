@@ -8,7 +8,7 @@ logger = logging.getLogger('django')
 # BaseCommandを継承して作成
 class Command(BaseCommand):
     # python manage.py help count_entryで表示されるメッセージ
-    help = 'Get Kakeibo data'
+    help = 'Get Resource data'
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
     # コマンドが実行された際に呼ばれるメソッド
