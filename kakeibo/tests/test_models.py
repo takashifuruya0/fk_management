@@ -1,5 +1,5 @@
 from django.test import TestCase
-from kakeibo.models import Resource, Way, Usage, Kakeibo, Event, SharedKakeibo
+from kakeibo.models import Resource, Usage, Kakeibo, Event, SharedKakeibo
 from datetime import date
 from dateutil.relativedelta import relativedelta
 # Create your tests here.
@@ -10,10 +10,8 @@ class KakeiboModelTest(TestCase):
     def setUp(self) -> None:
         self.r_wallet = Resource.objects.create(name="wallet", is_investment=False)
         self.r_saving = Resource.objects.create(name="saving", is_investment=False)
-        self.w_transfer = Way.objects.create(
-            name="r1-->r2", resource_from=self.r_wallet, resource_to=self.r_saving, is_expense=False, is_transfer=True)
-        self.w_pay = Way.objects.create(
-            name="pay by cash", resource_from=self.r_wallet, is_expense=True, is_transfer=False)
+        self.w_transfer = "振替"
+        self.w_pay = "支出（現金）"
         self.u_shopping = Usage.objects.create(name="shopping", is_expense=True)
         self.u_transer = Usage.objects.create(name="transfer", is_expense=False)
 
@@ -25,6 +23,7 @@ class KakeiboModelTest(TestCase):
             "memo": "test",
             "way": self.w_pay,
             "usage": self.u_shopping,
+            "resource_from": self.r_wallet,
         }
         k = Kakeibo.objects.create(**d)
         self.assertEqual(1, Kakeibo.objects.all().count())
@@ -55,13 +54,14 @@ class KakeiboModelTest(TestCase):
             "memo": "test",
             "way": self.w_pay,
             "usage": self.u_shopping,
-            "event": event
+            "event": event,
+            "resource_from": self.r_wallet,
         }
         k1 = Kakeibo.objects.create(**d_k)
         k2 = Kakeibo.objects.create(**d_k)
         self.assertEqual(d_k['fee']*2, event.sum_actual)
 
-    def test_resouce(self):
+    def test_resource(self):
         # 準備
         d_k1 = {
             "date": date.today(),
@@ -69,6 +69,8 @@ class KakeiboModelTest(TestCase):
             "memo": "test",
             "way": self.w_transfer,
             "usage": self.u_transer,
+            "resource_from": self.r_wallet,
+            "resource_to": self.r_saving,
         }
         d_k2 = {
             "date": date.today()-relativedelta(months=1),
@@ -76,10 +78,12 @@ class KakeiboModelTest(TestCase):
             "memo": "test",
             "way": self.w_transfer,
             "usage": self.u_transer,
+            "resource_from": self.r_wallet,
+            "resource_to": self.r_saving,
         }
         k1 = Kakeibo.objects.create(**d_k1)
         k2 = Kakeibo.objects.create(**d_k2)
         # total
-        self.assertEqual(d_k1['fee']+d_k2['fee'], self.w_transfer.resource_to.total)
+        self.assertEqual(d_k1['fee']+d_k2['fee'], self.r_saving.total)
         # diff_this_month
-        self.assertEqual(d_k1['fee'], self.w_transfer.resource_to.diff_this_month)
+        self.assertEqual(d_k1['fee'], self.r_saving.diff_this_month)

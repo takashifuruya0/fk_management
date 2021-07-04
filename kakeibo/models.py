@@ -153,10 +153,10 @@ class Kakeibo(BaseModel):
         self.fee_converted = math.floor(self.fee * self.rate)
         self.save()
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if self.currency == "JPY":
             self.fee_converted = self.fee
-        return super(Kakeibo, self).save()
+        return super(Kakeibo, self).save(*args, **kwargs)
 
 
 class CronKakeibo(BaseModel):
