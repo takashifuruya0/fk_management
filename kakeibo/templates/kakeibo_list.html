@@ -51,7 +51,13 @@ Kakeibo List
               <td>{{object.way}}</td>
               <td>{{object.resource_from |default:"-"}}</td>
               <td>{{object.resource_to |default:"-"}}</td>
-              <td>{{object.fee |yen}}</td>
+              <td>
+                {%if object.currency == 'JPY'%}
+                  {{object.fee |yen}}
+                {%elif object.currency == 'USD'%}
+                  {{object.fee |usd}}
+                {%endif%}
+              </td>
               <td>{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}

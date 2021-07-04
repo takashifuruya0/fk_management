@@ -24,7 +24,7 @@ class Command(BaseCommand):
             msg = "{}_{}".format(r['name'], r['is_expense'])
             self.stdout.write(self.style.SUCCESS(msg))
             if not Usage.objects.filter(name=r['name']).exists():
-                u = Usage(name=r['name'], is_expense=r['is_expense'])
+                u = Usage(name=r['name'], is_expense=r['is_expense'], legacy_id=r['pk'])
                 usage_list.append(u)
         self.stdout.write("追加数：{}".format(len(usage_list)))
         Usage.objects.bulk_create(usage_list)

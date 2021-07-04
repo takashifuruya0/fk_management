@@ -12,8 +12,8 @@ class KakeiboInline(admin.TabularInline):
     model = Kakeibo
     verbose_name = "関連家計簿"
     verbose_name_plural = "関連家計簿"
-    fields = ("date", "usage", "fee")
-    readonly_fields = ("date", "usage", "fee")
+    fields = ("date", "usage", "fee", "way", "memo")
+    readonly_fields = ("date", "usage", "fee", "way", "memo")
     can_delete = False
 
 
@@ -99,10 +99,21 @@ class CreditAdmin(admin.ModelAdmin):
     _debit_month.short_description = "請求年月"
 
 
+class EventAdmin(admin.ModelAdmin):
+    list_display = ["pk", "date", "name", "is_closed", "sum_plan"]
+    readonly_fields = ("_sum_actual",)
+    list_filter = ("is_closed", )
+    inlines = [KakeiboInline, ]
+
+    def _sum_actual(self, obj):
+        return obj.sum_actual
+    _sum_actual.short_description = "sum_actual"
+
+
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Credit, CreditAdmin)
 admin.site.register(Usage, UsageAdmin)
-admin.site.register(Event)
+admin.site.register(Event, EventAdmin)
 admin.site.register(SharedKakeibo)
 admin.site.register(CronKakeibo, CronKakeiboAdmin)
 admin.site.register(Kakeibo, KakeiboAdmin)

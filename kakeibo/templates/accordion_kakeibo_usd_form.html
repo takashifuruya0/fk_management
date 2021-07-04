@@ -1,0 +1,20 @@
+<!-- Create -->
+<div class="accordion-item">
+  <h4 class="accordion-header" id="headingUSD">
+    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUSD" aria-expanded="true" aria-controls="collapseUSD">
+      <i class="fas fa-flag-usa"></i>&nbsp;Created in USD
+    </button>
+  </h4>
+  <div id="collapseUSD" class="accordion-collapse collapse" aria-labelledby="headingUSD" data-bs-parent="#accordionExample">
+    <div class="accordion-body">
+      <form class="form" method="POST" action="{% url 'kakeibo:kakeibo_create_usd' %}">
+        {{usd_form.as_p}}
+        {% csrf_token %}
+        <input type="hidden" name="source_path" value="{{request.get_full_path}}">
+        <button type="submit" class="btn btn-primary" value="登録">
+          <i class="fas fa-plus"></i> Add
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

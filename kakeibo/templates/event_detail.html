@@ -36,6 +36,10 @@ Event Detail
               <td>{{object.memo}}</td>
             </tr>
             <tr>
+              <th>Detail</th>
+              <td>{{object.detail}}</td>
+            </tr>
+            <tr>
               <th>SumPlan</th>
               <td>{{object.sum_plan |yen}}</td>
             </tr>
@@ -53,6 +57,40 @@ Event Detail
                 {% endif %}
               </td>
             </tr>
+          </table>
+
+          <h5>Kakeibos</h5>
+          <table class="table">
+            <tr class="table-primary">
+              <th>ID</th>
+              <th>Date</th>
+              <th>Usage</th>
+              <th>Way</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Fee</th>
+              <th>Memo</th>
+            </tr>
+            {% for k in object.kakeibo_set.all %}
+            <tr>
+              <td>
+                <a href="{%url 'kakeibo:kakeibo_detail' pk=k.pk%}">{{k.pk}}</a>
+              </td>
+              <td>{{k.date}}</td>
+              <td>{{k.usage}}</td>
+              <td>{{k.way}}</td>
+              <td>{{k.resource_from |default:"-"}}</td>
+              <td>{{k.resource_to |default:"-"}}</td>
+              <td>
+                {%if k.currency == 'JPY'%}
+                  {{k.fee |yen}}
+                {%elif k.currency == 'USD'%}
+                  {{k.fee |usd}}
+                {%endif%}
+              </td>
+              <td>{{k.memo |default:"" |truncatechars:10 }}</td>
+            </tr>
+            {% endfor %}
           </table>
         </div>
         <div class="card-footer">

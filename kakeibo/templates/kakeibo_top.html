@@ -25,6 +25,7 @@ kakeibo
         {% include 'accordion_credit_import_form.html' %}
       </div>
       <div class="col-lg-4">
+        {% include 'accordion_kakeibo_usd_form.html' %}
       </div>
     </div>
   </div>
@@ -148,5 +149,6 @@ let chart_pie = new Chart(ctx_pie, {
 
 {% block js %}
 {{ form.media }}
+{{ usd_form.media }}
 {{credit_import_form.media}}
 {% endblock %}

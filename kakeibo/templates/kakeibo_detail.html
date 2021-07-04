@@ -28,8 +28,18 @@ Kakeibo Detail
               <td>{{object.date}}</td>
             </tr>
             <tr>
+              <th>Currency</th>
+              <td>{{object.currency}}</td>
+            </tr>
+            <tr>
               <th>Fee</th>
-              <td>{{object.fee |yen}}</td>
+              <td>
+                {%if object.currency == 'JPY'%}
+                  {{object.fee |yen}}
+                {%elif object.currency == 'USD'%}
+                  {{object.fee |usd}}
+                {%endif%}
+              </td>
             </tr>
             <tr>
               <th>Usage</th>

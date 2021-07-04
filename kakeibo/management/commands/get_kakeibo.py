@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from kakeibo.models import Resource, Kakeibo, Usage
-import requests, pprint
+import requests
+import pprint
 import logging
 logger = logging.getLogger('django')
 
@@ -9,21 +11,8 @@ logger = logging.getLogger('django')
 class Command(BaseCommand):
     # python manage.py help count_entryで表示されるメッセージ
     help = 'Get Kakeibo data'
-    mapping_resource = {
-        "SBI敬士": "SBI",
-        "投資口座": "投資元本",
-        "一般財形": "財形",
-    }
-    mapping_way = {
-        "支出（現金）": "支出（現金）",
-        "支出（クレジット）": "支出（カード）",
-        "支出（Suica）": "その他",
-        "引き落とし": "支出（現金）",
-        "収入": "収入",
-        "振替": "振替",
-        "共通支出": "その他",
-        "その他": "その他",
-    }
+    mapping_resource = settings.MAPPING_RESOURCE
+    mapping_way = settings.MAPPING_WAY
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
     # コマンドが実行された際に呼ばれるメソッド
@@ -74,6 +63,8 @@ class Command(BaseCommand):
                         "usage": usage,
                         "resource_from": resource_from,
                         "resource_to": resource_to,
+                        "fee_converted": r['fee'],  # save以外は自動算出されない
+                        "legacy_id": r['pk'],
                     }
                     k = Kakeibo(**d)
                     kakeibo_list.append(k)

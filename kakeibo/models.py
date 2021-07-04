@@ -29,6 +29,7 @@ class BaseModel(models.Model):
         verbose_name="最終更新者", editable=False, null=True, blank=True, on_update=True
     )
     is_active = models.BooleanField(default=True, verbose_name="有効")
+    legacy_id = models.IntegerField("旧ID", blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -92,6 +93,7 @@ class Usage(BaseModel):
 class Event(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
+    detail = models.TextField("詳細", blank=True, null=True)
     is_closed = models.BooleanField("終了フラグ", default=False)
     date = models.DateField("日付")
     sum_plan = models.IntegerField("計画総額")
@@ -143,13 +145,18 @@ class Kakeibo(BaseModel):
     resource_to = models.ForeignKey(
         Resource, related_name="resource_to", null=True, blank=True, verbose_name="To", on_delete=models.CASCADE
     )
-    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="YEN")
+    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="JPY")
     fee_converted = models.IntegerField("金額（換算後）", null=True, blank=True)
     rate = models.FloatField("レート", null=True, blank=True)
 
     def update_fee_converted(self):
         self.fee_converted = math.floor(self.fee * self.rate)
         self.save()
+
+    def save(self):
+        if self.currency == "JPY":
+            self.fee_converted = self.fee
+        return super(Kakeibo, self).save()
 
 
 class CronKakeibo(BaseModel):
