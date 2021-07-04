@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from kakeibo.models import Way, Resource, Kakeibo, Usage
+from kakeibo.models import Resource
 import requests
 import logging
 logger = logging.getLogger('django')

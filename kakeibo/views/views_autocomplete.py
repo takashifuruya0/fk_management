@@ -1,5 +1,5 @@
 from dal import autocomplete
-from kakeibo.models import Kakeibo, Usage, Resource, Way, Event
+from kakeibo.models import Usage, Resource
 # Create your views here.
 
 
@@ -17,6 +17,17 @@ class UsageAutocomplete(autocomplete.Select2QuerySetView):
         return qs.order_by("is_expense")
 
 
+class ResourceAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Resource.objects.none()
+        qs = Resource.objects.filter(is_active=True)
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+        return qs.order_by("name")
+
+
 class SharedUsageAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
@@ -26,14 +37,3 @@ class SharedUsageAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(name__icontains=self.q)
         return qs.order_by("is_expense")
-
-
-class WayAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated:
-            return Way.objects.none()
-        qs = Way.objects.filter(is_active=True)
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs.order_by("is_expense", "is_transfer")

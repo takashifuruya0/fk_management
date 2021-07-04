@@ -1,11 +1,11 @@
 from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
 from django.contrib import messages
 from django.shortcuts import reverse
-from django.db.models import Q
 from django.db import transaction
 from kakeibo.views.views_common import MyUserPasssesTestMixin
 from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event
 from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm
+from datetime import date
 # Create your views here.
 
 
@@ -49,23 +49,18 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
         if self.request.GET.getlist('ways', None):
             print("ways: {}".format(self.request.GET.getlist('ways', None)))
             q = q.filter(way__in=self.request.GET.getlist('ways'))
-        # types
-        if self.request.GET.getlist('types', None):
-            types = self.request.GET.getlist('types', None)
-            c1 = Q()
-            c2 = Q()
-            c3 = Q()
-            if "振替" in types:
-                c1 = Q(way__is_transfer=True)
-            if "支出" in types:
-                c2 = Q(way__is_expense=True, way__is_transfer=False)
-            if "収入" in types:
-                c3 = Q(way__is_expense=False, way__is_transfer=False)
-            q = q.filter(c1 | c2 | c3)
+        # resource_from
+        if self.request.GET.getlist('resources_from', None):
+            print("resources_from: {}".format(self.request.GET.getlist('resources_from', None)))
+            q = q.filter(resource_from__in=self.request.GET.getlist('resources_from'))
+        # resource_to
+        if self.request.GET.getlist('resources_to', None):
+            print("resources_to: {}".format(self.request.GET.getlist('resources_to', None)))
+            q = q.filter(resource_to__in=self.request.GET.getlist('resources_to'))
         # memo
         if self.request.GET.get("memo", None):
             q = q.filter(memo__icontains=self.request.GET["memo"])
-        return q.select_related('way', 'usage').order_by('-date')
+        return q.select_related('usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,7 +72,7 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
         if params:
             messages.info(self.request, "検索結果を表示します。{}".format(params))
         context.update({
-            'form': KakeiboForm(),
+            'form': KakeiboForm(initial={"date": date.today(),}),
             "search_form": KakeiboSearchForm(self.request.GET),
             "params": params
         })
@@ -116,7 +111,7 @@ class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
         return res
 
     def form_invalid(self, form):
-        messages.erro(self.request, "家計簿作成に失敗しました {}".format(form.errors))
+        messages.error(self.request, "家計簿作成に失敗しました {}".format(form.errors))
         return super(KakeiboCreate, self).form_invalid(form)
 
 

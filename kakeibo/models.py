@@ -6,6 +6,7 @@ from django_currentuser.middleware import get_current_authenticated_user
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django_currentuser.db.models import CurrentUserField
+import math
 
 
 # Create your models here.
@@ -50,10 +51,10 @@ class Resource(BaseModel):
 
     @property
     def total(self):
-        sum_from = Kakeibo.objects.select_related('way').filter(
-            way__resource_from=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
-        sum_to = Kakeibo.objects.select_related('way').filter(
-            way__resource_to=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
+        sum_from = Kakeibo.objects.select_related('resource_from').filter(
+            resource_from=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
+        sum_to = Kakeibo.objects.select_related('resource_to').filter(
+            resource_to=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
         else:
@@ -63,11 +64,11 @@ class Resource(BaseModel):
     @property
     def diff_this_month(self):
         today = date.today()
-        sum_from = Kakeibo.objects.select_related('way') \
-            .filter(way__resource_from=self, date__month=today.month, date__year=today.year, is_active=True) \
+        sum_from = Kakeibo.objects.select_related('resource_from') \
+            .filter(resource_from=self, date__month=today.month, date__year=today.year, is_active=True) \
             .aggregate(sum=Sum('fee'))['sum']
-        sum_to = Kakeibo.objects.select_related('way') \
-            .filter(way__resource_to=self, date__month=today.month, date__year=today.year, is_active=True) \
+        sum_to = Kakeibo.objects.select_related('resource_to') \
+            .filter(resource_to=self, date__month=today.month, date__year=today.year, is_active=True) \
             .aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
@@ -86,25 +87,6 @@ class Usage(BaseModel):
 
     def __str__(self) -> str:
         return self.name
-
-
-class Way(BaseModel):
-    name = models.CharField("名前", max_length=255)
-    memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    resource_from = models.ForeignKey(
-        Resource, related_name="resource_from", null=True, blank=True, verbose_name="From", on_delete=models.CASCADE
-    )
-    resource_to = models.ForeignKey(
-        Resource, related_name="resource_to", null=True, blank=True, verbose_name="To", on_delete=models.CASCADE
-    )
-    is_expense = models.BooleanField("支出フラグ", default=True)
-    is_transfer = models.BooleanField("振替フラグ", default=True)
-
-    def __str__(self) -> str:
-        # return self.name
-        rf = "" if self.resource_from is None else self.resource_from
-        rt = "" if self.resource_to is None else self.resource_to
-        return "{} ({}→{})".format(self.name, rf, rt)
 
 
 class Event(BaseModel):
@@ -129,6 +111,9 @@ class Credit(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
     card = models.CharField("カード", max_length=255, choices=settings.CHOICES_CARD)
+    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="YEN")
+    fee_converted = models.IntegerField("金額（換算後）", null=True, blank=True)
+    rate = models.FloatField("レート", null=True, blank=True)
 
     def __str__(self):
         return "({}) {}".format(self.date, self.name)
@@ -146,17 +131,37 @@ class Kakeibo(BaseModel):
     fee = models.IntegerField("金額")
     date = models.DateField("日付")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    way = models.ForeignKey(Way, verbose_name="種別", on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
     shared = models.ForeignKey(SharedKakeibo, verbose_name="共通家計簿", on_delete=models.CASCADE, null=True, blank=True)
     credit = models.ForeignKey(Credit, verbose_name="クレジット", on_delete=models.CASCADE, null=True, blank=True)
     event = models.ForeignKey(Event, verbose_name="イベント", on_delete=models.CASCADE, null=True, blank=True)
+    #
+    way = models.CharField("種別", choices=settings.CHOICES_WAY, max_length=255)
+    resource_from = models.ForeignKey(
+        Resource, related_name="resource_from", null=True, blank=True, verbose_name="From", on_delete=models.CASCADE
+    )
+    resource_to = models.ForeignKey(
+        Resource, related_name="resource_to", null=True, blank=True, verbose_name="To", on_delete=models.CASCADE
+    )
+    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="YEN")
+    fee_converted = models.IntegerField("金額（換算後）", null=True, blank=True)
+    rate = models.FloatField("レート", null=True, blank=True)
+
+    def update_fee_converted(self):
+        self.fee_converted = math.floor(self.fee * self.rate)
+        self.save()
 
 
 class CronKakeibo(BaseModel):
     fee = models.IntegerField("金額")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    way = models.ForeignKey(Way, verbose_name="種別", on_delete=models.CASCADE)
+    way = models.CharField("種別", choices=settings.CHOICES_WAY, max_length=255)
+    resource_from = models.ForeignKey(
+        Resource, related_name="cronkakeibo_resource_from", null=True, blank=True, verbose_name="From",
+        on_delete=models.CASCADE)
+    resource_to = models.ForeignKey(
+        Resource, related_name="cronkakeibo_resource_to", null=True, blank=True, verbose_name="To",
+        on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
     is_coping_to_shared = models.BooleanField("共通コピーフラグ")
     kind = models.CharField("種類", max_length=255, choices=settings.CHOICES_KIND_CRON_KAKEIBO)

@@ -279,3 +279,10 @@ CHOICES_KIND_CRON_KAKEIBO = (
 CHOICES_KIND_TARGET = (
     ("総資産", "総資産"),
 )
+CHOICES_WAY = (
+    ("振替", "振替"), ("支出（現金）", "支出（現金）"), ("支出（カード）", "支出（カード）"), ("収入", "収入"),
+    ("その他", "その他"),
+)
+CHOICES_CURRENCY = (
+    ("YEN", "YEN"), ("USD", "USD"),
+)

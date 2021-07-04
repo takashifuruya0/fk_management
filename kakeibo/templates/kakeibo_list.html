@@ -36,6 +36,8 @@ Kakeibo List
               <th>Date</th>
               <th>Usage</th>
               <th>Way</th>
+              <th>From</th>
+              <th>To</th>
               <th>Fee</th>
               <th>Memo</th>
             </tr>
@@ -47,6 +49,8 @@ Kakeibo List
               <td>{{object.date}}</td>
               <td>{{object.usage}}</td>
               <td>{{object.way}}</td>
+              <td>{{object.resource_from |default:"-"}}</td>
+              <td>{{object.resource_to |default:"-"}}</td>
               <td>{{object.fee |yen}}</td>
               <td>{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>

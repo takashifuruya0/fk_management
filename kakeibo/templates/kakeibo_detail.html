@@ -41,15 +41,15 @@ Kakeibo Detail
             </tr>
             <tr>
               <th>Resource From</th>
-              <td>{{object.way.resource_from |default:"-"}}</td>
+              <td>{{object.resource_from |default:"-"}}</td>
             </tr>
             <tr>
               <th>Resource To</th>
-              <td>{{object.way.resource_to |default:"-"}}</td>
+              <td>{{object.resource_to |default:"-"}}</td>
             </tr>
             <tr>
               <th>Memo</th>
-              <td>{{object.memo}}</td>
+              <td>{{object.memo |default:"-"}}</td>
             </tr>
             {% if object.shared %}
             <tr>

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from kakeibo.models import Way, Resource, Kakeibo, Usage
+from kakeibo.models import Resource, Kakeibo, Usage
 import requests, pprint
 import logging
 logger = logging.getLogger('django')
@@ -13,6 +13,16 @@ class Command(BaseCommand):
         "SBI敬士": "SBI",
         "投資口座": "投資元本",
         "一般財形": "財形",
+    }
+    mapping_way = {
+        "支出（現金）": "支出（現金）",
+        "支出（クレジット）": "支出（カード）",
+        "支出（Suica）": "その他",
+        "引き落とし": "支出（現金）",
+        "収入": "収入",
+        "振替": "振替",
+        "共通支出": "その他",
+        "その他": "その他",
     }
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
@@ -34,7 +44,7 @@ class Command(BaseCommand):
                     # usage
                     if r['usage']:
                         usage = Usage.objects.get(name=r['usage']['name'])
-                    elif r['move_from'] or r['move_to']:
+                    elif not r['move_from'] or not r['move_to']:
                         # usageが設定されていないが、resourcesなし --> その他
                         usage = other
                     else:
@@ -54,11 +64,7 @@ class Command(BaseCommand):
                         else:
                             resource_to = Resource.objects.get(name=r['move_to']['name'])
                     # way
-                    if Way.objects.filter(resource_to=resource_to, resource_from=resource_from).exists():
-                        way = Way.objects.get(resource_to=resource_to, resource_from=resource_from)
-                    else:
-                        way = Way(resource_to=resource_to, resource_from=resource_from, name=r['way'])
-                        way.save()
+                    way = self.mapping_way[r['way']]
                     # init Kakeibo
                     d = {
                         "fee": r['fee'],
@@ -66,6 +72,8 @@ class Command(BaseCommand):
                         "memo": r['memo'],
                         "way": way,
                         "usage": usage,
+                        "resource_from": resource_from,
+                        "resource_to": resource_to,
                     }
                     k = Kakeibo(**d)
                     kakeibo_list.append(k)
