@@ -46,16 +46,17 @@ class Resource(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
     is_investment = models.BooleanField("投資フラグ")
+    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="JPY")
 
     def __str__(self) -> str:
-        return self.name
+        return "{} ({})".format(self.name, self.currency)
 
     @property
     def total(self):
         sum_from = Kakeibo.objects.select_related('resource_from').filter(
-            resource_from=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
+            currency=self.currency, resource_from=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
         sum_to = Kakeibo.objects.select_related('resource_to').filter(
-            resource_to=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
+            currency=self.currency, resource_to=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
         else:
@@ -65,12 +66,12 @@ class Resource(BaseModel):
     @property
     def diff_this_month(self):
         today = date.today()
-        sum_from = Kakeibo.objects.select_related('resource_from') \
-            .filter(resource_from=self, date__month=today.month, date__year=today.year, is_active=True) \
-            .aggregate(sum=Sum('fee'))['sum']
-        sum_to = Kakeibo.objects.select_related('resource_to') \
-            .filter(resource_to=self, date__month=today.month, date__year=today.year, is_active=True) \
-            .aggregate(sum=Sum('fee'))['sum']
+        sum_from = Kakeibo.objects.select_related('resource_from').filter(
+            currency=self.currency, resource_from=self, date__month=today.month, date__year=today.year, is_active=True
+        ) .aggregate(sum=Sum('fee'))['sum']
+        sum_to = Kakeibo.objects.select_related('resource_to').filter(
+            currency=self.currency, resource_to=self, date__month=today.month, date__year=today.year, is_active=True
+        ).aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
         elif sum_from and sum_from > 0 and not sum_to:

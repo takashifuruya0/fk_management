@@ -15,15 +15,20 @@ class KakeiboForm(forms.ModelForm):
 
     class Meta:
         model = Kakeibo
-        fields = ("date", "fee", "way", 'usage', "resource_from", "resource_to", "memo", "event", "is_shared")
+        fields = (
+            "date", "fee", "currency",
+            "way", 'usage', "resource_from", "resource_to", "memo",
+            "event", "is_shared"
+        )
         widgets = {
+            "currency": forms.Select(attrs={"class": "form-control"}),
             'usage': autocomplete.ModelSelect2(url='kakeibo:autocomplete_usage'),
             "way": forms.Select(attrs={"class": "form-control"}),
             'resource_from': autocomplete.ModelSelect2(url='kakeibo:autocomplete_resource'),
             'resource_to': autocomplete.ModelSelect2(url='kakeibo:autocomplete_resource'),
             'date': forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
-            "fee": forms.NumberInput(attrs={"class": "form-control"})
+            "fee": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
 
@@ -137,8 +142,10 @@ class KakeiboUSDForm(forms.ModelForm):
     class Meta:
         model = Kakeibo
         fields = (
-            "date", "fee", "way", 'usage', "resource_from", "resource_to", "memo", "event", "currency",
-            "rate", "fee_converted"
+            "date", "fee", "currency",
+            "rate", "fee_converted",
+            "way", 'usage', "resource_from", "resource_to", "memo",
+            "event",
         )
         widgets = {
             'usage': autocomplete.ModelSelect2(url='kakeibo:autocomplete_usage'),

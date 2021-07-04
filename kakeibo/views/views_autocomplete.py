@@ -1,4 +1,5 @@
 from dal import autocomplete
+from django.db.models import Q
 from kakeibo.models import Usage, Resource
 # Create your views here.
 
@@ -24,7 +25,7 @@ class ResourceAutocomplete(autocomplete.Select2QuerySetView):
             return Resource.objects.none()
         qs = Resource.objects.filter(is_active=True)
         if self.q:
-            qs = qs.filter(name__icontains=self.q)
+            qs = qs.filter(Q(name__icontains=self.q) | Q(currency__icontains=self.q))
         return qs.order_by("name")
 
 

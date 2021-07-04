@@ -42,7 +42,7 @@ class KakeiboResource(resources.ModelResource):
 class ResourceAdmin(ImportExportModelAdmin):
     resource_class = ResourceResource
     list_display = [
-        "pk", "name", "is_investment",
+        "pk", "name", "is_investment", "currency",
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
     search_fields = ("name", )

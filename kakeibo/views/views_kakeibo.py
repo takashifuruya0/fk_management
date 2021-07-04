@@ -2,6 +2,7 @@ from django.views.generic import TemplateView, CreateView, UpdateView, ListView,
 from django.contrib import messages
 from django.shortcuts import reverse
 from django.db import transaction
+from django import forms
 from kakeibo.views.views_common import MyUserPasssesTestMixin
 from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event
 from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm, KakeiboUSDForm
@@ -16,15 +17,17 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        resources = Resource.objects.prefetch_related('resource_from', "resource_to").filter(is_active=True)\
+            .exclude(resource_from=None, resource_to=None).order_by('currency')
         context.update({
-            "resources": Resource.objects.filter(is_active=True).iterator(),
+            "resources": resources.iterator(),
             "chart_header": list(),
             "chart_data": list(),
             "form": KakeiboForm(initial={"date": date.today()}),
             "credit_import_form": CreditImportForm(),
             "usd_form": KakeiboUSDForm(initial={"date": date.today()}),
         })
-        for r in Resource.objects.filter(is_active=True):
+        for r in resources:
             context["chart_header"].append(r.name)
             context["chart_data"].append(r.total)
         return context
@@ -124,7 +127,18 @@ class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
 class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     template_name = "kakeibo_update.html"
     model = Kakeibo
-    form_class = KakeiboForm
+
+    def get_form_class(self):
+        if self.object.currency == "USD":
+            return KakeiboUSDForm
+        else:
+            return KakeiboForm
+
+    def get_form(self, form_class=None):
+        form = super().get_form()
+        if form.fields.get("is_shared", None):
+            form.fields['is_shared'].widget = forms.HiddenInput()
+        return form
 
     def get_success_url(self):
         messages.success(self.request, "家計簿更新に成功しました")
@@ -182,9 +196,7 @@ class KakeiboCreateUSD(MyUserPasssesTestMixin, CreateView):
             return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
 
     def form_valid(self, form):
-        res = super(KakeiboCreateUSD, self).form_valid(form)
-        kakeibo = self.object
-        return res
+        return super(KakeiboCreateUSD, self).form_valid(form)
 
     def form_invalid(self, form):
         messages.error(self.request, "Failed to create Kakeibo: {}".format(form.errors))
