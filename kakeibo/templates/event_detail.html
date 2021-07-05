@@ -68,7 +68,7 @@ Event Detail
               <th>Way</th>
               <th>From</th>
               <th>To</th>
-              <th>Fee</th>
+              <th class="right">Fee</th>
               <th>Memo</th>
             </tr>
             {% for k in object.kakeibo_set.all %}
@@ -81,7 +81,7 @@ Event Detail
               <td>{{k.way}}</td>
               <td>{{k.resource_from |default:"-"}}</td>
               <td>{{k.resource_to |default:"-"}}</td>
-              <td>
+              <td class="right">
                 {%if k.currency == 'JPY'%}
                   {{k.fee |yen}}
                 {%elif k.currency == 'USD'%}

@@ -37,7 +37,7 @@
               <th>Date</th>
               <th>Usage</th>
               <th>PaidBy</th>
-              <th>Fee</th>
+              <th class="right">Fee</th>
               <th>Memo</th>
             </tr>
             {% for object in object_list %}
@@ -48,7 +48,7 @@
               <td>{{object.date}}</td>
               <td>{{object.usage}}</td>
               <td>{{object.paid_by}}</td>
-              <td>{{object.fee |yen}}</td>
+              <td class="right">{{object.fee |yen}}</td>
               <td>{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}
