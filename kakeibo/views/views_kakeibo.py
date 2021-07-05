@@ -1,11 +1,14 @@
 from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
 from django.contrib import messages
 from django.shortcuts import reverse
-from django.db.models import Q
 from django.db import transaction
+from django import forms
 from kakeibo.views.views_common import MyUserPasssesTestMixin
 from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event
-from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm
+from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm, KakeiboUSDForm
+from datetime import date
+import logging
+logger = logging.getLogger('django')
 # Create your views here.
 
 
@@ -14,14 +17,17 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        resources = Resource.objects.prefetch_related('resource_from', "resource_to").filter(is_active=True)\
+            .exclude(resource_from=None, resource_to=None).order_by('currency')
         context.update({
-            "resources": Resource.objects.filter(is_active=True).iterator(),
+            "resources": resources.iterator(),
             "chart_header": list(),
             "chart_data": list(),
-            "form": KakeiboForm(),
+            "form": KakeiboForm(initial={"date": date.today()}),
             "credit_import_form": CreditImportForm(),
+            "usd_form": KakeiboUSDForm(initial={"date": date.today()}),
         })
-        for r in Resource.objects.filter(is_active=True):
+        for r in resources:
             context["chart_header"].append(r.name)
             context["chart_data"].append(r.total)
         return context
@@ -43,29 +49,27 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
             q = q.filter(date__lte=self.request.GET['date_to'])
         # usage
         if self.request.GET.getlist('usages', None):
-            print("usages: {}".format(self.request.GET.getlist('usages', None)))
+            logger.info("usages: {}".format(self.request.GET.getlist('usages', None)))
             q = q.filter(usage__in=self.request.GET.getlist('usages'))
         # way
         if self.request.GET.getlist('ways', None):
-            print("ways: {}".format(self.request.GET.getlist('ways', None)))
+            logger.info("ways: {}".format(self.request.GET.getlist('ways', None)))
             q = q.filter(way__in=self.request.GET.getlist('ways'))
-        # types
-        if self.request.GET.getlist('types', None):
-            types = self.request.GET.getlist('types', None)
-            c1 = Q()
-            c2 = Q()
-            c3 = Q()
-            if "振替" in types:
-                c1 = Q(way__is_transfer=True)
-            if "支出" in types:
-                c2 = Q(way__is_expense=True, way__is_transfer=False)
-            if "収入" in types:
-                c3 = Q(way__is_expense=False, way__is_transfer=False)
-            q = q.filter(c1 | c2 | c3)
+        # resource_from
+        if self.request.GET.getlist('resources_from', None):
+            logger.info("resources_from: {}".format(self.request.GET.getlist('resources_from', None)))
+            q = q.filter(resource_from__in=self.request.GET.getlist('resources_from'))
+        # resource_to
+        if self.request.GET.getlist('resources_to', None):
+            logger.info("resources_to: {}".format(self.request.GET.getlist('resources_to', None)))
+            q = q.filter(resource_to__in=self.request.GET.getlist('resources_to'))
         # memo
         if self.request.GET.get("memo", None):
             q = q.filter(memo__icontains=self.request.GET["memo"])
-        return q.select_related('way', 'usage').order_by('-date')
+        # memo
+        if self.request.GET.get("currency", None):
+            q = q.filter(currency=self.request.GET["currency"])
+        return q.select_related('usage', "resource_from", "resource_to").order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -77,7 +81,7 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
         if params:
             messages.info(self.request, "検索結果を表示します。{}".format(params))
         context.update({
-            'form': KakeiboForm(),
+            'form': KakeiboForm(initial={"date": date.today(),}),
             "search_form": KakeiboSearchForm(self.request.GET),
             "params": params
         })
@@ -116,14 +120,25 @@ class KakeiboCreate(MyUserPasssesTestMixin, CreateView):
         return res
 
     def form_invalid(self, form):
-        messages.erro(self.request, "家計簿作成に失敗しました {}".format(form.errors))
+        messages.error(self.request, "家計簿作成に失敗しました {}".format(form.errors))
         return super(KakeiboCreate, self).form_invalid(form)
 
 
 class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     template_name = "kakeibo_update.html"
     model = Kakeibo
-    form_class = KakeiboForm
+
+    def get_form_class(self):
+        if self.object.currency == "USD":
+            return KakeiboUSDForm
+        else:
+            return KakeiboForm
+
+    def get_form(self, form_class=None):
+        form = super().get_form()
+        if form.fields.get("is_shared", None):
+            form.fields['is_shared'].widget = forms.HiddenInput()
+        return form
 
     def get_success_url(self):
         messages.success(self.request, "家計簿更新に成功しました")
@@ -137,6 +152,7 @@ class EventList(MyUserPasssesTestMixin, ListView):
     template_name = "event_list.html"
     model = Event
     paginate_by = 20
+    queryset = Event.objects.filter(is_active=True).order_by('-date', "is_closed")
 
 
 class EventDetail(MyUserPasssesTestMixin, DetailView):
@@ -162,3 +178,26 @@ class EventUpdate(MyUserPasssesTestMixin, UpdateView):
     def get_success_url(self):
         messages.success(self.request, "イベント更新に成功しました")
         return reverse("kakeibo:event_detail", kwargs={"pk": self.object.pk})
+
+
+# =================================
+# USD
+# =================================
+class KakeiboCreateUSD(MyUserPasssesTestMixin, CreateView):
+    template_name = "kakeibo_create.html"
+    model = Kakeibo
+    form_class = KakeiboUSDForm
+
+    def get_success_url(self):
+        messages.success(self.request, "Successfully Created Kakeibo")
+        if self.request.POST.get('source_path', None):
+            return self.request.POST['source_path']
+        else:
+            return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
+
+    def form_valid(self, form):
+        return super(KakeiboCreateUSD, self).form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Failed to create Kakeibo: {}".format(form.errors))
+        return super(KakeiboCreateUSD, self).form_invalid(form)

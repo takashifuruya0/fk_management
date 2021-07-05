@@ -1,9 +1,9 @@
 # coding:utf-8
-# from django.conf.urls import url
-from django.urls import include, path
+from django.urls import path
 from kakeibo.views.views_kakeibo import KakeiboTop, KakeiboList, KakeiboDetail, KakeiboCreate, KakeiboUpdate
 from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, EventDetail
-from kakeibo.views.views_autocomplete import UsageAutocomplete, WayAutocomplete, SharedUsageAutocomplete
+from kakeibo.views.views_kakeibo import KakeiboCreateUSD
+from kakeibo.views.views_autocomplete import UsageAutocomplete, SharedUsageAutocomplete, ResourceAutocomplete
 from kakeibo.views.views_shared import SharedTop, SharedList, SharedDetail, SharedCreate, SharedUpdate
 from kakeibo.views.views_credit import CreditImport, CreditLink, CreditLinkFromKakeibo
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path('mine/<int:pk>', KakeiboDetail.as_view(), name="kakeibo_detail"),
     path('mine/<int:pk>/edit', KakeiboUpdate.as_view(), name="kakeibo_update"),
     path('mine/create', KakeiboCreate.as_view(), name="kakeibo_create"),
+    path('mine/create_usd', KakeiboCreateUSD.as_view(), name="kakeibo_create_usd"),
     # event
     path('event/list', EventList.as_view(), name="event_list"),
     path('event/<int:pk>', EventDetail.as_view(), name="event_detail"),
@@ -28,7 +29,7 @@ urlpatterns = [
     path('event/create', EventCreate.as_view(), name="event_create"),
     # autcomplete
     path('autocomplete/usage', UsageAutocomplete.as_view(), name="autocomplete_usage"),
-    path('autocomplete/way', WayAutocomplete.as_view(), name="autocomplete_way"),
+    path('autocomplete/resource', ResourceAutocomplete.as_view(), name="autocomplete_resource"),
     path('autocomplete/shared/usage', SharedUsageAutocomplete.as_view(), name="autocomplete_shared_usage"),
     # credit
     path('credit/import', CreditImport.as_view(), name="credit_import"),

@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
-from kakeibo.models import Way, Resource, Kakeibo, Usage
-import requests, pprint
+from django.conf import settings
+from kakeibo.models import Resource, Kakeibo, Usage
+import requests
+import pprint
 import logging
 logger = logging.getLogger('django')
 
@@ -9,11 +11,8 @@ logger = logging.getLogger('django')
 class Command(BaseCommand):
     # python manage.py help count_entryで表示されるメッセージ
     help = 'Get Kakeibo data'
-    mapping_resource = {
-        "SBI敬士": "SBI",
-        "投資口座": "投資元本",
-        "一般財形": "財形",
-    }
+    mapping_resource = settings.MAPPING_RESOURCE
+    mapping_way = settings.MAPPING_WAY
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
     # コマンドが実行された際に呼ばれるメソッド
@@ -34,7 +33,7 @@ class Command(BaseCommand):
                     # usage
                     if r['usage']:
                         usage = Usage.objects.get(name=r['usage']['name'])
-                    elif r['move_from'] or r['move_to']:
+                    elif not r['move_from'] or not r['move_to']:
                         # usageが設定されていないが、resourcesなし --> その他
                         usage = other
                     else:
@@ -54,11 +53,7 @@ class Command(BaseCommand):
                         else:
                             resource_to = Resource.objects.get(name=r['move_to']['name'])
                     # way
-                    if Way.objects.filter(resource_to=resource_to, resource_from=resource_from).exists():
-                        way = Way.objects.get(resource_to=resource_to, resource_from=resource_from)
-                    else:
-                        way = Way(resource_to=resource_to, resource_from=resource_from, name=r['way'])
-                        way.save()
+                    way = self.mapping_way[r['way']]
                     # init Kakeibo
                     d = {
                         "fee": r['fee'],
@@ -66,6 +61,10 @@ class Command(BaseCommand):
                         "memo": r['memo'],
                         "way": way,
                         "usage": usage,
+                        "resource_from": resource_from,
+                        "resource_to": resource_to,
+                        "fee_converted": r['fee'],  # save以外は自動算出されない
+                        "legacy_id": r['pk'],
                     }
                     k = Kakeibo(**d)
                     kakeibo_list.append(k)

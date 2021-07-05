@@ -40,7 +40,8 @@ class Command(BaseCommand):
                         "date": r['date'],
                         "memo": r['memo'],
                         "usage": usage,
-                        "paid_by": self.mapping_paid_by[r['paid_by']]
+                        "paid_by": self.mapping_paid_by[r['paid_by']],
+                        "legacy_id": r['pk'],
                     }
                     sk = SharedKakeibo(**d)
                     skakeibo_list.append(sk)

@@ -28,8 +28,18 @@ Kakeibo Detail
               <td>{{object.date}}</td>
             </tr>
             <tr>
+              <th>Currency</th>
+              <td>{{object.currency}}</td>
+            </tr>
+            <tr>
               <th>Fee</th>
-              <td>{{object.fee |yen}}</td>
+              <td>
+                {%if object.currency == 'JPY'%}
+                  {{object.fee |yen}}
+                {%elif object.currency == 'USD'%}
+                  {{object.fee |usd}}
+                {%endif%}
+              </td>
             </tr>
             <tr>
               <th>Usage</th>
@@ -41,15 +51,15 @@ Kakeibo Detail
             </tr>
             <tr>
               <th>Resource From</th>
-              <td>{{object.way.resource_from |default:"-"}}</td>
+              <td>{{object.resource_from |default:"-"}}</td>
             </tr>
             <tr>
               <th>Resource To</th>
-              <td>{{object.way.resource_to |default:"-"}}</td>
+              <td>{{object.resource_to |default:"-"}}</td>
             </tr>
             <tr>
               <th>Memo</th>
-              <td>{{object.memo}}</td>
+              <td>{{object.memo |default:"-"}}</td>
             </tr>
             {% if object.shared %}
             <tr>

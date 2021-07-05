@@ -4,7 +4,7 @@ from django.shortcuts import redirect
 from django.db.models import Sum
 from django.contrib import messages
 from kakeibo.views.views_common import MyUserPasssesTestMixin
-from kakeibo.models import Kakeibo, Usage, Credit, Way
+from kakeibo.models import Kakeibo, Usage, Credit
 from kakeibo.forms import CreditImportForm
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -86,7 +86,7 @@ class CreditLink(MyUserPasssesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         target_data = []
-        way_card = Way.objects.get(name__icontains="カード")
+        way_card = "支出（カード）"
         # credit_unlinked
         if self.request.GET.get('debit_date', None):
             debit_date = datetime.strptime(self.request.GET.get('debit_date', None), "%Y-%m-%d")
@@ -104,12 +104,12 @@ class CreditLink(MyUserPasssesTestMixin, TemplateView):
             # Targets
             targets = Kakeibo.objects.filter(
                 is_active=True, way=way_card, fee=c.fee, date=c.date, credit=None,
-            ).select_related('way', 'usage')
+            ).select_related('usage')
             # Sub Targets
             date_range = (c.date-relativedelta(days=2), c.date+relativedelta(days=2))
             targets2 = Kakeibo.objects.filter(
                 is_active=True, way=way_card, fee=c.fee, date__range=date_range, credit=None,
-            ).exclude(pk__in=[t.pk for t in targets]).select_related('way', 'usage')
+            ).exclude(pk__in=[t.pk for t in targets]).select_related('usage')
             # Data
             target_data.append({
                 "credit": c,
@@ -130,7 +130,7 @@ class CreditLink(MyUserPasssesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         logger.info(request.POST)
-        way_card = Way.objects.get(name="カード払い")
+        way_card = "支出（カード）"
         num_add = 0
         num_link = 0
         num_delete = 0
@@ -178,7 +178,7 @@ class CreditLinkFromKakeibo(MyUserPasssesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         target_data = []
-        way_card = Way.objects.get(name__icontains="カード")
+        way_card = "支出（カード）"
         # kakeibo_unlinked
         if self.request.GET.get('target_date', None):
             target_date = datetime.strptime(self.request.GET.get('target_date', None), "%Y-%m-%d")
@@ -205,7 +205,6 @@ class CreditLinkFromKakeibo(MyUserPasssesTestMixin, TemplateView):
         credits_unlinked = Credit.objects.prefetch_related('kakeibo_set').filter(is_active=True, kakeibo=None)
         # return
         context.update({
-            # "object_list": kakeibos_unlinked,
             "object_list": target_data,
             "total": total,
             "target_date": target_date,
@@ -238,4 +237,3 @@ class CreditLinkFromKakeibo(MyUserPasssesTestMixin, TemplateView):
         if num_delete > 0:
             messages.warning(request, "{}件のレコード削除しました".format(num_delete))
         return redirect("kakeibo:credit_link_from_kakeibo")
-#
