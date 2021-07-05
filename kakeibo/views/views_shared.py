@@ -178,6 +178,7 @@ class MobileSharedCreate(LoginRequiredMixin, CreateView):
         return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
 
 
+
 class MobileSharedUpdate(LoginRequiredMixin, UpdateView):
     template_name = "shared_update.html"
     model = SharedKakeibo

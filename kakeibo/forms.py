@@ -229,17 +229,25 @@ class MobileSharedForm(forms.ModelForm):
         queryset=Usage.objects.filter(is_active=True, is_shared=True), label="用途",
         widget=forms.Select(attrs={"class": "form-control"}),
     )
+    date2 = forms.DateField(
+        label="日付2", required=True,
+        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}))
 
     class Meta:
         model = SharedKakeibo
-        fields = ("date", "fee", "paid_by", 'usage', "memo")
+        fields = ("date2", "fee", "paid_by", 'usage', "memo")
         widgets = {
             'usage': forms.Select(attrs={"class": "form-control"}),
-            'date': forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}),
             "paid_by": forms.RadioSelect(),
             "fee": forms.NumberInput(attrs={"class": "form-control"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
         }
+
+    def save(self, commit=True):
+        sk = super(MobileSharedForm, self).save(commit=False)
+        sk.date = self.cleaned_data['date2']
+        sk.save()
+        return sk
 
 
 class MobileSharedSearchForm(SharedSearchForm):
