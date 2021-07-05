@@ -8,8 +8,8 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
 from django.contrib import messages
 import math
-from kakeibo.models import SharedKakeibo, Budget, Usage
-from kakeibo.forms import SharedForm, SharedSearchForm
+from kakeibo.models import SharedKakeibo, Budget
+from kakeibo.forms import SharedForm, SharedSearchForm, MobileSharedForm, MobileSharedSearchForm
 # Create your views here.
 
 
@@ -100,6 +100,7 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             },
             "form": SharedForm(),
             "initial_val": initial_val,
+            "mobile_form": MobileSharedForm(),
         })
         return context
 
@@ -138,7 +139,9 @@ class SharedList(LoginRequiredMixin, ListView):
         context.update({
             'form': SharedForm(),
             "search_form": SharedSearchForm(self.request.GET),
-            "params": params
+            'mobile_form': MobileSharedForm(),
+            "mobile_search_form": MobileSharedSearchForm(self.request.GET),
+            "params": params,
         })
         return context
 
@@ -165,3 +168,20 @@ class SharedUpdate(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
 
+
+class MobileSharedCreate(LoginRequiredMixin, CreateView):
+    template_name = "shared_create.html"
+    model = SharedKakeibo
+    form_class = MobileSharedForm
+
+    def get_success_url(self):
+        return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
+
+
+class MobileSharedUpdate(LoginRequiredMixin, UpdateView):
+    template_name = "shared_update.html"
+    model = SharedKakeibo
+    form_class = MobileSharedForm
+
+    def get_success_url(self):
+        return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
