@@ -50,7 +50,7 @@ Credit Link
                 <th>Card</th>
                 <th>Date</th>
                 <th>Name</th>
-                <th>Fee</th>
+                <th class="right">Fee</th>
                 <th>Link</th>
 <!--                <th>SubTargets</th>-->
                 <th>Create</th>
@@ -69,7 +69,7 @@ Credit Link
                 </td>
                 <td>{{object.credit.date}}</td>
                 <td>{{object.credit.name}}</td>
-                <td>{{object.credit.fee |yen}}</td>
+                <td class="right">{{object.credit.fee |yen}}</td>
 <!--                <td>{{object.memo}}</td>-->
                 <td>
                   <span class="badge bg-{% if c == 1 %}success{% elif c == 0%}warning{% else %}danger{% endif %}">

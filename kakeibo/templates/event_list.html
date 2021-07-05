@@ -29,9 +29,9 @@ Event List
               <th>Date</th>
               <th>Status</th>
               <th>Name</th>
-              <th>Plan</th>
-              <th>Actual</th>
               <th>Memo</th>
+              <th class="right">Plan</th>
+              <th class="right">Actual</th>
             </tr>
             {% for object in object_list %}
             <tr>
@@ -47,9 +47,9 @@ Event List
                 {% endif %}
               </td>
               <td>{{object.name}}</td>
-              <td>{{object.sum_plan |yen}}</td>
-              <td>{{object.sum_actual |yen}}</td>
               <td>{{object.memo |default:"" |truncatechars:10 }}</td>
+              <td class="right">{{object.sum_plan |yen}}</td>
+              <td class="right">{{object.sum_actual |yen}}</td>
             </tr>
             {% endfor %}
           </table>

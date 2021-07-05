@@ -38,7 +38,7 @@ Kakeibo List
               <th>Way</th>
               <th>From</th>
               <th>To</th>
-              <th>Fee</th>
+              <th class="right">Fee</th>
               <th>Memo</th>
             </tr>
             {% for object in object_list %}
@@ -51,7 +51,7 @@ Kakeibo List
               <td>{{object.way}}</td>
               <td>{{object.resource_from |default:"-"}}</td>
               <td>{{object.resource_to |default:"-"}}</td>
-              <td>
+              <td class="right">
                 {%if object.currency == 'JPY'%}
                   {{object.fee |yen}}
                 {%elif object.currency == 'USD'%}

@@ -39,7 +39,12 @@
   <div class="row">
     <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
-        {% include 'accordion_shared_form.html' %}
+        <div class="d-none d-sm-block">
+          {% include 'accordion_shared_form.html' %}
+        </div>
+        <div class="d-block d-sm-none">
+          {% include 'accordion_mobile_shared_form.html' %}
+        </div>
       </div>
       <h4>精算</h4>
       <p>{{seisan.hoko |yen}}</p>

@@ -19,8 +19,14 @@
   <div class="row">
     <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
-        {% include 'accordion_shared_search_form.html' %}
-        {% include 'accordion_shared_form.html' %}
+        <div class="d-none d-sm-block">
+          {% include 'accordion_shared_search_form.html' %}
+          {% include 'accordion_shared_form.html' %}
+        </div>
+        <div class="d-block d-sm-none">
+          {% include 'accordion_mobile_shared_search_form.html' %}
+          {% include 'accordion_mobile_shared_form.html' %}
+        </div>
       </div>
     </div>
 
@@ -37,7 +43,7 @@
               <th>Date</th>
               <th>Usage</th>
               <th>PaidBy</th>
-              <th>Fee</th>
+              <th class="right">Fee</th>
               <th>Memo</th>
             </tr>
             {% for object in object_list %}
@@ -48,7 +54,7 @@
               <td>{{object.date}}</td>
               <td>{{object.usage}}</td>
               <td>{{object.paid_by}}</td>
-              <td>{{object.fee |yen}}</td>
+              <td class="right">{{object.fee |yen}}</td>
               <td>{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}

@@ -44,19 +44,19 @@ kakeibo
             <tr class="table-primary">
               <th>リソース</th>
               <th>通貨</th>
-              <th>合計</th>
-              <th>今月収支</th>
+              <th class="right">合計</th>
+              <th class="right">今月収支</th>
             </tr>
             {% for resource in resources %}
             <tr>
               <th>{{resource.name}}</th>
               <th>{{resource.currency}}</th>
               {% if resource.currency == "JPY" %}
-                <td>{{resource.total |yen}}</td>
-                <td>{{resource.diff_this_month |yen |safe}}</td>
+                <td class="right">{{resource.total |yen}}</td>
+                <td class="right">{{resource.diff_this_month |yen |safe}}</td>
               {% elif resource.currency == "USD" %}
-                <td>{{resource.total |usd}}</td>
-                <td>{{resource.diff_this_month |usd |safe}}</td>
+                <td class="right">{{resource.total |usd}}</td>
+                <td class="right">{{resource.diff_this_month |usd |safe}}</td>
               {% endif %}
             </tr>
             {% endfor %}
