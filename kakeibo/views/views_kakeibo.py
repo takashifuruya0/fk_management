@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
 from django.contrib import messages
-from django.shortcuts import reverse
+from django.shortcuts import reverse, redirect
 from django.db import transaction
 from django import forms
 from kakeibo.views.views_common import MyUserPasssesTestMixin
@@ -207,6 +207,10 @@ class KakeiboCreateUSD(MyUserPasssesTestMixin, CreateView):
 class ExchangeCreate(CreateView):
     form_class = ExchangeForm
     model = Exchange
+
+    def get(self, request, *args, **kwargs):
+        messages.info(request, "Cannot access this page.")
+        return redirect("kakeibo:kakeibo_top")
 
     def get_success_url(self):
         messages.success(self.request, "Successfully Created Exchange")
