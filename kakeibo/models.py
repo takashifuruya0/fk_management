@@ -197,3 +197,16 @@ class Budget(BaseModel):
 
     def __str__(self):
         return "予算_{}".format(self.date)
+
+
+class Exchange(BaseModel):
+    date = models.DateField("Date")
+    method = models.CharField("Method", max_length=255)
+    kakeibo_from = models.OneToOneField(
+        Kakeibo, related_name="exchange_from", on_delete=models.CASCADE, verbose_name="Kakeibo_From")
+    kakeibo_to = models.OneToOneField(
+        Kakeibo, related_name="exchange_to", on_delete=models.CASCADE, verbose_name="Kakeibo_To")
+    rate = models.FloatField("Rate (JPY)")
+    commission = models.FloatField("Commission")
+    currency = models.CharField("Currency of commission", max_length=3, choices=settings.CHOICES_CURRENCY)
+
