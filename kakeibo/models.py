@@ -201,7 +201,7 @@ class Budget(BaseModel):
 
 class Exchange(BaseModel):
     date = models.DateField("Date")
-    method = models.CharField("Method", max_length=255)
+    method = models.CharField("Method", max_length=255, choices=settings.CHOICES_EXCHANGE_METHOD)
     kakeibo_from = models.OneToOneField(
         Kakeibo, related_name="exchange_from", on_delete=models.CASCADE, verbose_name="Kakeibo_From")
     kakeibo_to = models.OneToOneField(

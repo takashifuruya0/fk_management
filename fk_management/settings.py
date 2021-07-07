@@ -286,6 +286,9 @@ CHOICES_WAY = (
 CHOICES_CURRENCY = (
     ("JPY", "JPY"), ("USD", "USD"),
 )
+CHOICES_EXCHANGE_METHOD = (
+    ("Wire", "Wire"), ("prestia", "prestia")
+)
 
 # MAPPING
 MAPPING_RESOURCE = {

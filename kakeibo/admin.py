@@ -38,7 +38,9 @@ class KakeiboResource(resources.ModelResource):
         exclude = ["created_by", "created_at", "last_updated_by", "last_updated_at"]
 
 
+# ===========================
 # ModelAdmin
+# ===========================
 class ResourceAdmin(ImportExportModelAdmin):
     resource_class = ResourceResource
     list_display = [
@@ -116,6 +118,10 @@ class ExchangeAdmin(admin.ModelAdmin):
         "_kakeibo_from__resource", "_kakeibo_from__fee",
         "_kakeibo_to__resource", "_kakeibo_to__fee",
     ]
+    readonly_fields = (
+        "_kakeibo_from__resource", "_kakeibo_from__fee",
+        "_kakeibo_to__resource", "_kakeibo_to__fee",
+    )
 
     def _kakeibo_from__resource(self, obj):
         return obj.kakeibo_from.resource_from
@@ -124,10 +130,10 @@ class ExchangeAdmin(admin.ModelAdmin):
         return obj.kakeibo_to.resource_to
 
     def _kakeibo_from__fee(self, obj):
-        return obj.kakeibo_from.fee
+        return "{} ({})".format(obj.kakeibo_from.fee, obj.kakeibo_from.resource_from.currency)
 
     def _kakeibo_to__fee(self, obj):
-        return obj.kakeibo_to.fee
+        return "{} ({})".format(obj.kakeibo_to.fee, obj.kakeibo_to.resource_to.currency)
 
 
 admin.site.register(Resource, ResourceAdmin)

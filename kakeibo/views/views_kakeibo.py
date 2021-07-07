@@ -4,8 +4,8 @@ from django.shortcuts import reverse
 from django.db import transaction
 from django import forms
 from kakeibo.views.views_common import MyUserPasssesTestMixin
-from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event
-from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm, KakeiboUSDForm
+from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event, Exchange
+from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm, KakeiboUSDForm, ExchangeForm
 from datetime import date
 import logging
 logger = logging.getLogger('django')
@@ -26,6 +26,7 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
             "form": KakeiboForm(initial={"date": date.today()}),
             "credit_import_form": CreditImportForm(),
             "usd_form": KakeiboUSDForm(initial={"date": date.today()}),
+            "exchange_form": ExchangeForm(initial={"date": date.today()}),
         })
         for r in resources:
             context["chart_header"].append(r.name)
@@ -201,3 +202,15 @@ class KakeiboCreateUSD(MyUserPasssesTestMixin, CreateView):
     def form_invalid(self, form):
         messages.error(self.request, "Failed to create Kakeibo: {}".format(form.errors))
         return super(KakeiboCreateUSD, self).form_invalid(form)
+
+
+class ExchangeCreate(CreateView):
+    form_class = ExchangeForm
+    model = Exchange
+
+    def get_success_url(self):
+        messages.success(self.request, "Successfully Created Exchange")
+        if self.request.POST.get('source_path', None):
+            return self.request.POST['source_path']
+        else:
+            return reverse("kakeibo:kakeibo_top")
