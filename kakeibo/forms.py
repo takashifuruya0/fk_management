@@ -1,7 +1,7 @@
 # coding: UTF-8
 from django import forms
 from django.contrib.auth import get_user_model
-from kakeibo.models import Kakeibo, Usage, SharedKakeibo, Event, Resource
+from kakeibo.models import Kakeibo, Usage, SharedKakeibo, Event, Resource, Exchange
 from dal import autocomplete
 from django.conf import settings
 
@@ -26,7 +26,7 @@ class KakeiboForm(forms.ModelForm):
             "way": forms.Select(attrs={"class": "form-control"}),
             'resource_from': autocomplete.ModelSelect2(url='kakeibo:autocomplete_resource'),
             'resource_to': autocomplete.ModelSelect2(url='kakeibo:autocomplete_resource'),
-            'date': forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}),
+            'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
             "fee": forms.NumberInput(attrs={"class": "form-control"}),
         }
@@ -160,6 +160,52 @@ class KakeiboUSDForm(forms.ModelForm):
         }
 
 
+class ExchangeForm(forms.ModelForm):
+    fee_from = forms.IntegerField(label="Fee (From)", widget=forms.NumberInput(attrs={"class": "form-control"}))
+    fee_to = forms.IntegerField(label="Fee (To)", widget=forms.NumberInput(attrs={"class": "form-control"}))
+    resource_from = forms.ModelChoiceField(
+        label="From", queryset=Resource.objects.filter(is_active=True, currency="JPY"),
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    resource_to = forms.ModelChoiceField(
+        label="To", queryset=Resource.objects.filter(is_active=True, currency="USD"),
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+
+    class Meta:
+        model = Exchange
+        fields = (
+            "date", "method",
+            "resource_from", "fee_from", "resource_to", "fee_to",
+            "rate",  "commission", "currency"
+        )
+        widgets = {
+            'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "method": forms.Select(attrs={"class": "form-control"}),
+            "currency": forms.Select(attrs={"class": "form-control"}),
+            "rate": forms.NumberInput(attrs={"class": "form-control"}),
+            "commission": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+
+    def save(self, commit=True):
+        exchange = super(ExchangeForm, self).save(commit=False)
+        kf = Kakeibo.objects.create(
+            date=self.cleaned_data['date'], fee=self.cleaned_data['fee_from'], way="振替",
+            usage=Usage.objects.get(name="Exchange (From)"),
+            resource_from=self.cleaned_data["resource_from"],
+            currency=self.cleaned_data["resource_from"].currency
+        )
+        kt = Kakeibo.objects.create(
+            date=self.cleaned_data['date'], fee=self.cleaned_data['fee_to'], way="振替",
+            usage=Usage.objects.get(name="Exchange (To)"),
+            resource_to=self.cleaned_data["resource_to"],
+            currency=self.cleaned_data["resource_to"].currency
+        )
+        exchange.kakeibo_from = kf
+        exchange.kakeibo_to = kt
+        exchange.save()
+        return exchange
+
 # ==================================
 # Mobile
 # ==================================
@@ -251,22 +297,8 @@ class MobileSharedForm(forms.ModelForm):
 
 
 class MobileSharedSearchForm(SharedSearchForm):
-    # date_from = forms.DateField(
-    #     label="開始日", required=False,
-    #     widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
-    # )
-    # date_to = forms.DateField(
-    #     label="終了日", required=False,
-    #     widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
-    # )
-    # paid_by = forms.ModelMultipleChoiceField(
-    #     queryset=get_user_model().objects.filter(is_active=True), required=False,
-    #     label="支払者",
-    #     widget=forms.RadioSelect()
-    # )
     usages = forms.ModelMultipleChoiceField(
         queryset=Usage.objects.filter(is_active=True, is_shared=True),
         label="用途a", required=False,
         widget=forms.SelectMultiple(attrs={"class": "form-control"}),
     )
-    # memo = forms.CharField(label="メモ", required=False, widget=forms.TextInput(attrs={"class": "form-control"}))

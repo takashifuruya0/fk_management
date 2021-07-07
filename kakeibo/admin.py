@@ -38,7 +38,9 @@ class KakeiboResource(resources.ModelResource):
         exclude = ["created_by", "created_at", "last_updated_by", "last_updated_at"]
 
 
+# ===========================
 # ModelAdmin
+# ===========================
 class ResourceAdmin(ImportExportModelAdmin):
     resource_class = ResourceResource
     list_display = [
@@ -110,6 +112,30 @@ class EventAdmin(admin.ModelAdmin):
     _sum_actual.short_description = "sum_actual"
 
 
+class ExchangeAdmin(admin.ModelAdmin):
+    list_display = [
+        "pk", "date", "method",
+        "_kakeibo_from__resource", "_kakeibo_from__fee",
+        "_kakeibo_to__resource", "_kakeibo_to__fee",
+    ]
+    readonly_fields = (
+        "_kakeibo_from__resource", "_kakeibo_from__fee",
+        "_kakeibo_to__resource", "_kakeibo_to__fee",
+    )
+
+    def _kakeibo_from__resource(self, obj):
+        return obj.kakeibo_from.resource_from
+
+    def _kakeibo_to__resource(self, obj):
+        return obj.kakeibo_to.resource_to
+
+    def _kakeibo_from__fee(self, obj):
+        return "{} ({})".format(obj.kakeibo_from.fee, obj.kakeibo_from.resource_from.currency)
+
+    def _kakeibo_to__fee(self, obj):
+        return "{} ({})".format(obj.kakeibo_to.fee, obj.kakeibo_to.resource_to.currency)
+
+
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Credit, CreditAdmin)
 admin.site.register(Usage, UsageAdmin)
@@ -119,3 +145,4 @@ admin.site.register(CronKakeibo, CronKakeiboAdmin)
 admin.site.register(Kakeibo, KakeiboAdmin)
 admin.site.register(Target)
 admin.site.register(Budget, BudgetAdmin)
+admin.site.register(Exchange, ExchangeAdmin)
