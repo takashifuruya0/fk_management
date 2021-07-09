@@ -10,15 +10,23 @@ spec:
     spec:
       restartPolicy: Never
       shareProcessNamespace: true
+      volumes:
+      - name: test
+        configMap:
+          name: test
       containers:
       - name: fk-management-migrate
-        image: tfuruya/fk_management:0.5
+        image: tfuruya/fk_management:0.56
         imagePullPolicy: Always
         command: [ "/bin/sh", "-c" ]
         args:
           - |
             python3 manage.py migrate --settings=fk_management.environment.develop ;
             sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+        volumeMounts:
+          - name: test
+            mountPath: "/home/fk_management/env"
+            readOnly: true
         resources:
           limits:
             memory: 256Mi
