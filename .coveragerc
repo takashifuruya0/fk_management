@@ -6,6 +6,7 @@ omit =
     */apps.py
     .venv/*
     vent/*
+    manage.py
 
 
 [report]
@@ -16,6 +17,7 @@ omit =
     */apps.py
     .venv/*
     vent/*
+    manage.py
 
 
 [html]
