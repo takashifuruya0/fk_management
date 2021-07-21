@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
 from django.contrib import messages
 import math
-from kakeibo.models import SharedKakeibo, Budget
+from kakeibo.models import SharedKakeibo, Budget, Usage
 from kakeibo.forms import SharedForm, SharedSearchForm, MobileSharedForm, MobileSharedSearchForm
 # Create your views here.
 
@@ -68,8 +68,18 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             p_hoko = 100 - p_takashi - p_over
         seisan_hoko = 0 if seisan_hoko < 0 else math.floor(seisan_hoko/1000)*1000
         # usage
-        group_by_usage_tm = records_this_month.values('usage__name').annotate(sum=Sum('fee')).order_by('-sum')
-        group_by_usage_lm = records_last_month.values('usage__name').annotate(sum=Sum('fee')).order_by('-sum')
+        usages_shared = Usage.objects.filter(is_active=True, is_shared=True).prefetch_related('sharedkakeibo_set')
+        usages = dict()
+        for us in usages_shared.order_by('pk'):
+            tm_sum = us.sharedkakeibo_set.filter(
+                is_active=True, date__year=target_ym.year, date__month=target_ym.month).aggregate(sum=Sum('fee'))['sum']
+            lm_sum = us.sharedkakeibo_set.filter(
+                is_active=True, date__year=last_ym.year, date__month=last_ym.month).aggregate(sum=Sum('fee'))['sum']
+            usages[us.name] = {
+                "tm": tm_sum if tm_sum else 0,
+                "lm": lm_sum if lm_sum else 0,
+            }
+
         # return
         context.update({
             "budget": budget,
@@ -81,6 +91,7 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             "diff": diff,
             "is_black": is_black,
             "target_ym": target_ym,
+            "last_ym": last_ym,
             "payment": {
                 "takashi": payment_takashi,
                 "hoko": payment_hoko,
@@ -94,13 +105,10 @@ class SharedTop(LoginRequiredMixin, TemplateView):
                 "takashi": seisan_takashi,
                 "hoko": seisan_hoko,
             },
-            "group_by_usage": {
-                "tm": group_by_usage_tm,
-                "lm": group_by_usage_lm,
-            },
             "form": SharedForm(),
             "initial_val": initial_val,
             "mobile_form": MobileSharedForm(),
+            "usages": usages,
         })
         return context
 

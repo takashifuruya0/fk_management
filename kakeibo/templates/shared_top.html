@@ -91,10 +91,16 @@
         <div class="card-body">
           <h4>内訳</h4>
           <table class="table">
-            {% for gbu in group_by_usage.tm %}
             <tr>
-              <th>{{gbu.usage__name}}</th>
-              <td>{{gbu.sum |yen}}</td>
+              <th>用途</th>
+              <th class="right">{{target_ym.year}}年{{target_ym.month}}月</th>
+              <th class="right">{{last_ym.year}}年{{last_ym.month}}月</th>
+            </tr>
+            {% for k, u in usages.items %}
+            <tr>
+              <td>{{k}}</td>
+              <td class="right">{{u.tm |yen}}</td>
+              <td class="right">{{u.lm |yen}}</td>
             </tr>
             {% endfor %}
           </table>
@@ -188,13 +194,11 @@ let ctx_pie = document.getElementById("chart_pie").getContext("2d");
 let chart_pie = new Chart(ctx_pie, {
   type: "pie",
   data: {
-     //labels: ["食費", "家賃", "電気", "水道", "ガス", "日用消耗品"],
-     labels: [{% for gbu in group_by_usage.tm %}"{{gbu.usage__name}}",{% endfor %}],
+     labels: [{% for u in usages.keys %}"{{u}}",{% endfor %}],
      datasets: [
         {
           label: "Yen (¥)",
-          //data: [30000, 104000, 5000, 7500, 3500, 10000],
-          data: [{% for gbu in group_by_usage.tm %}{{gbu.sum}},{% endfor %}],
+          data: [{% for v in usages.values %}{{v.tm}},{% endfor %}],
           backgroundColor: [
           "#2ecc71",
           "#3498db",
