@@ -184,24 +184,24 @@ class EventUpdate(MyUserPasssesTestMixin, UpdateView):
 # =================================
 # USD
 # =================================
-class KakeiboCreateUSD(MyUserPasssesTestMixin, CreateView):
-    template_name = "kakeibo_create.html"
-    model = Kakeibo
-    form_class = KakeiboUSDForm
-
-    def get_success_url(self):
-        messages.success(self.request, "Successfully Created Kakeibo")
-        if self.request.POST.get('source_path', None):
-            return self.request.POST['source_path']
-        else:
-            return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
-
-    def form_valid(self, form):
-        return super(KakeiboCreateUSD, self).form_valid(form)
-
-    def form_invalid(self, form):
-        messages.error(self.request, "Failed to create Kakeibo: {}".format(form.errors))
-        return super(KakeiboCreateUSD, self).form_invalid(form)
+# class KakeiboCreateUSD(MyUserPasssesTestMixin, CreateView):
+#     template_name = "kakeibo_create.html"
+#     model = Kakeibo
+#     form_class = KakeiboUSDForm
+#
+#     def get_success_url(self):
+#         messages.success(self.request, "Successfully Created Kakeibo")
+#         if self.request.POST.get('source_path', None):
+#             return self.request.POST['source_path']
+#         else:
+#             return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
+#
+#     def form_valid(self, form):
+#         return super(KakeiboCreateUSD, self).form_valid(form)
+#
+#     def form_invalid(self, form):
+#         messages.error(self.request, "Failed to create Kakeibo: {}".format(form.errors))
+#         return super(KakeiboCreateUSD, self).form_invalid(form)
 
 
 class ExchangeCreate(CreateView):

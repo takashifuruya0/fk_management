@@ -302,3 +302,11 @@ class MobileSharedSearchForm(SharedSearchForm):
         label="用途a", required=False,
         widget=forms.SelectMultiple(attrs={"class": "form-control"}),
     )
+    date_from = forms.DateField(
+        label="開始日", required=False,
+        widget=forms.DateInput(attrs={'type': 'date', "class": "form-control"})
+    )
+    date_to = forms.DateField(
+        label="終了日", required=False,
+        widget=forms.DateInput(attrs={'type': 'date', "class": "form-control"})
+    )
