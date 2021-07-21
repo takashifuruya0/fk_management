@@ -30,6 +30,9 @@ class Command(BaseCommand):
                 try:
                     self.stdout.write("============")
                     pprint.pprint(r)
+                    if Kakeibo.objects.filter(is_active=True, legacy_id=r['pk']).exists():
+                        self.stdout.write("{} already existed".format(r['pk']))
+                        continue
                     # usage
                     if r['usage']:
                         usage = Usage.objects.get(name=r['usage']['name'])
