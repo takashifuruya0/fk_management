@@ -33,6 +33,3 @@ services:
       - 8090:80
     depends_on:
       - backend
-#
-#volumes:
-#    postgres_data:
