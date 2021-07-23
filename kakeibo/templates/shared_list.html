@@ -19,14 +19,11 @@
   <div class="row">
     <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
-        <div class="d-none d-sm-block">
+<!--        <div class="d-none d-sm-block">-->
           {% include 'accordion_shared_search_form.html' %}
           {% include 'accordion_shared_form.html' %}
-        </div>
-        <div class="d-block d-sm-none">
-          {% include 'accordion_mobile_shared_search_form.html' %}
-          {% include 'accordion_mobile_shared_form.html' %}
-        </div>
+<!--        </div>-->
+
       </div>
     </div>
 
@@ -39,11 +36,11 @@
           <table class="table">
             <tr class="table-light">
               <th>ID</th>
-              <th>Date</th>
-              <th>Usage</th>
-              <th>PaidBy</th>
-              <th class="right">Fee</th>
-              <th>Memo</th>
+              <th>日付</th>
+              <th>用途</th>
+              <th class="d-none d-sm-block">支払者</th>
+              <th class="right">金額</th>
+              <th class="d-none d-sm-block">メモ</th>
             </tr>
             {% for object in object_list %}
             <tr>
@@ -52,9 +49,9 @@
               </td>
               <td>{{object.date}}</td>
               <td>{{object.usage}}</td>
-              <td>{{object.paid_by}}</td>
+              <td class="d-none d-sm-block">{{object.paid_by}}</td>
               <td class="right">{{object.fee |yen}}</td>
-              <td>{{object.memo |default:"" |truncatechars:10 }}</td>
+              <td class="d-none d-sm-block">{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}
           </table>

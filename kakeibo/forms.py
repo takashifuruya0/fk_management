@@ -68,14 +68,17 @@ class KakeiboSearchForm(forms.Form):
 
 
 class SharedForm(forms.ModelForm):
+    usage = forms.ModelChoiceField(
+        queryset=Usage.objects.filter(is_active=True, is_shared=True).order_by('-name'),
+        label="用途", required=True,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+
     class Meta:
         model = SharedKakeibo
         fields = ("date", "fee", "paid_by", 'usage', "memo")
         widgets = {
-            'usage': autocomplete.ModelSelect2(
-                url='kakeibo:autocomplete_shared_usage', attrs={"class": "form-control"}
-            ),
-            'date': forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}),
+            'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "paid_by": forms.RadioSelect(),
             "fee": forms.NumberInput(attrs={"class": "form-control"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
@@ -85,21 +88,19 @@ class SharedForm(forms.ModelForm):
 class SharedSearchForm(forms.Form):
     date_from = forms.DateField(
         label="開始日", required=False,
-        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
     )
     date_to = forms.DateField(
         label="終了日", required=False,
-        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
     )
     paid_by = forms.ModelMultipleChoiceField(
-        queryset=get_user_model().objects.filter(is_active=True), required=False,
-        label="支払者",
-        widget=forms.RadioSelect()
+        queryset=get_user_model().objects.filter(is_active=True),
+        required=False, label="支払者", widget=forms.RadioSelect()
     )
     usages = forms.ModelMultipleChoiceField(
-        queryset=Usage.objects.filter(is_active=True, is_shared=True),
-        label="用途", required=False,
-        widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_shared_usage')
+        queryset=Usage.objects.filter(is_active=True, is_shared=True).order_by('-name'),
+        label="用途", required=False, widget=forms.SelectMultiple(attrs={"class": "form-control"}),
     )
     memo = forms.CharField(label="メモ", required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
 
@@ -122,8 +123,7 @@ class CreditImportForm(forms.Form):
         label="ファイル", required=True, widget=forms.FileInput(attrs={"class": "form-control"})
     )
     date_debit = forms.DateField(
-        label="請求年月", required=True,
-        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
+        label="請求年月", required=True, widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
     )
     card = forms.ChoiceField(label="カード", required=True, widget=forms.Select(attrs={"class": "form-control"}))
 
@@ -276,8 +276,8 @@ class MobileSharedForm(forms.ModelForm):
         widget=forms.Select(attrs={"class": "form-control"}),
     )
     date2 = forms.DateField(
-        label="日付2", required=True,
-        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}))
+        label="日付", required=True,
+        widget=forms.DateInput(attrs={'type': 'date', "class": "form-control"}))
 
     class Meta:
         model = SharedKakeibo
@@ -299,7 +299,7 @@ class MobileSharedForm(forms.ModelForm):
 class MobileSharedSearchForm(SharedSearchForm):
     usages = forms.ModelMultipleChoiceField(
         queryset=Usage.objects.filter(is_active=True, is_shared=True),
-        label="用途a", required=False,
+        label="用途", required=False,
         widget=forms.SelectMultiple(attrs={"class": "form-control"}),
     )
     date_from = forms.DateField(

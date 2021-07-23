@@ -24,33 +24,33 @@
         <div class="card-body table-responsive">
           <table class="table">
             <tr>
-              <th>Date</th>
+              <th>日付</th>
               <td>{{object.date}}</td>
             </tr>
             <tr>
-              <th>Fee</th>
+              <th>金額</th>
               <td>{{object.fee |yen}}</td>
             </tr>
             <tr>
-              <th>Usage</th>
+              <th>用途</th>
               <td>{{object.usage}}</td>
             </tr>
             <tr>
-              <th>Paid By</th>
+              <th>支払者</th>
               <td>{{object.paid_by}}</td>
             </tr>
             <tr>
-              <th>Memo</th>
+              <th>メモ</th>
               <td>{{object.memo}}</td>
             </tr>
           </table>
         </div>
         <div class="card-footer">
           <a class="btn btn-info" href="{%url 'kakeibo:shared_update' pk=object.pk%}">
-            <i class="fas fa-edit"></i> 共通家計簿更新
+            <i class="fas fa-edit"></i> 更新
           </a>
-          <a class="btn btn-info" href="{%url 'kakeibo:shared_list'%}">
-            <i class="fas fa-list"></i> 共通家計簿一覧
+          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_list'%}">
+            <i class="fas fa-list"></i> 一覧
           </a>
         </div>
       </div>
