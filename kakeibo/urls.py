@@ -1,6 +1,7 @@
 # coding:utf-8
 from django.urls import path
-from kakeibo.views.views_kakeibo import KakeiboTop, KakeiboList, KakeiboDetail, KakeiboCreate, KakeiboUpdate
+from kakeibo.views.views_kakeibo import KakeiboTop
+from kakeibo.views.views_kakeibo import KakeiboList, KakeiboDetail, KakeiboCreate, KakeiboUpdate, KakeiboDelete
 from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, EventDetail
 from kakeibo.views.views_kakeibo import ExchangeCreate
 from kakeibo.views.views_autocomplete import UsageAutocomplete, SharedUsageAutocomplete, ResourceAutocomplete
@@ -21,6 +22,7 @@ urlpatterns = [
     path('mine/list', KakeiboList.as_view(), name="kakeibo_list"),
     path('mine/<int:pk>', KakeiboDetail.as_view(), name="kakeibo_detail"),
     path('mine/<int:pk>/edit', KakeiboUpdate.as_view(), name="kakeibo_update"),
+    path('mine/<int:pk>/delete', KakeiboDelete.as_view(), name="kakeibo_delete"),
     path('mine/create', KakeiboCreate.as_view(), name="kakeibo_create"),
     # path('mine/create_usd', KakeiboCreateUSD.as_view(), name="kakeibo_create_usd"),
     # Exchange

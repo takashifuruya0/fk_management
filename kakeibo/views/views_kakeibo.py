@@ -1,6 +1,7 @@
-from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
+from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView, DeleteView
 from django.contrib import messages
 from django.shortcuts import reverse, redirect
+from django.urls import reverse_lazy
 from django.db import transaction
 from django import forms
 from kakeibo.views.views_common import MyUserPasssesTestMixin
@@ -144,6 +145,27 @@ class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
     def get_success_url(self):
         messages.success(self.request, "家計簿更新に成功しました")
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
+
+
+class KakeiboDelete(MyUserPasssesTestMixin, DeleteView):
+    model = Kakeibo
+    template_name = "kakeibo_delete.html"
+
+    def get_success_url(self):
+        return reverse('kakeibo:kakeibo_list')
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.is_active:
+            messages.warning(request, "{}は削除済みです".format(obj))
+            return redirect('kakeibo:kakeibo_list')
+        return super(KakeiboDelete, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        ob = self.get_object()
+        result = super().delete(request, *args, **kwargs)
+        messages.success(self.request, '「{}」を削除しました'.format(ob))
+        return result
 
 
 # =================================
