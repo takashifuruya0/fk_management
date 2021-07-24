@@ -19,8 +19,14 @@ Kakeibo List
   <div class="row">
     <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
-        {% include 'accordion_kakeibo_search_form.html' %}
-        {% include 'accordion_kakeibo_form.html' %}
+        <div class="d-block d-sm-none">
+          {% include 'accordion_mobile_kakeibo_search_form.html' %}
+          {% include 'accordion_mobile_kakeibo_form.html' %}
+        </div>
+        <div class="d-none d-sm-block">
+          {% include 'accordion_kakeibo_search_form.html' %}
+          {% include 'accordion_kakeibo_form.html' %}
+        </div>
       </div>
     </div>
 

@@ -7,6 +7,7 @@ from django import forms
 from kakeibo.views.views_common import MyUserPasssesTestMixin
 from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event, Exchange
 from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm, KakeiboUSDForm, ExchangeForm
+from kakeibo.forms import MobileKakeiboForm, MobileKakeiboSearchForm
 from datetime import date
 import logging
 logger = logging.getLogger('django')
@@ -84,7 +85,9 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
             messages.info(self.request, "検索結果を表示します。{}".format(params))
         context.update({
             'form': KakeiboForm(initial={"date": date.today(),}),
+            "mobile_form": MobileKakeiboForm(initial={"date": date.today(),}),
             "search_form": KakeiboSearchForm(self.request.GET),
+            "mobile_search_form": MobileKakeiboSearchForm(self.request.GET),
             "params": params
         })
         return context
