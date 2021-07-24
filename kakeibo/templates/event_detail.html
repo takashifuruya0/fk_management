@@ -33,11 +33,11 @@ Event Detail
             </tr>
             <tr>
               <th>Memo</th>
-              <td>{{object.memo}}</td>
+              <td>{{object.memo |default:""}}</td>
             </tr>
             <tr>
               <th>Detail</th>
-              <td>{{object.detail}}</td>
+              <td>{{object.detail |default:""}}</td>
             </tr>
             <tr>
               <th>SumPlan</th>
@@ -95,11 +95,17 @@ Event Detail
         </div>
         <div class="card-footer">
           <a class="btn btn-info" href="{%url 'kakeibo:event_update' pk=object.pk%}">
-            <i class="fas fa-edit"></i> 更新
+            <i class="fas fa-edit"></i> Update
           </a>
           <a class="btn btn-secondary" href="{%url 'kakeibo:event_list'%}">
-            <i class="fas fa-list"></i> イベント一覧
+            <i class="fas fa-list"></i> List
           </a>
+          {% if object.is_active %}
+          <a class="btn btn-danger" href="{%url 'kakeibo:event_delete' pk=object.pk%}">
+            <i class="fas fa-trash-alt"></i> Delete
+          </a>
+          {% endif %}
+        </div>
         </div>
       </div>
     </div>

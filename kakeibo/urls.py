@@ -2,7 +2,7 @@
 from django.urls import path
 from kakeibo.views.views_kakeibo import KakeiboTop
 from kakeibo.views.views_kakeibo import KakeiboList, KakeiboDetail, KakeiboCreate, KakeiboUpdate, KakeiboDelete
-from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, EventDetail
+from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, EventDetail, EventDelete
 from kakeibo.views.views_kakeibo import ExchangeCreate
 from kakeibo.views.views_autocomplete import UsageAutocomplete, SharedUsageAutocomplete, ResourceAutocomplete
 from kakeibo.views.views_shared import SharedTop, SharedList, SharedDetail, SharedCreate, SharedUpdate, SharedDelete
@@ -31,6 +31,7 @@ urlpatterns = [
     path('event/list', EventList.as_view(), name="event_list"),
     path('event/<int:pk>', EventDetail.as_view(), name="event_detail"),
     path('event/<int:pk>/edit', EventUpdate.as_view(), name="event_update"),
+    path('event/<int:pk>/delete', EventDelete.as_view(), name="event_delete"),
     path('event/create', EventCreate.as_view(), name="event_create"),
     # autcomplete
     path('autocomplete/usage', UsageAutocomplete.as_view(), name="autocomplete_usage"),

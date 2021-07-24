@@ -203,6 +203,27 @@ class EventUpdate(MyUserPasssesTestMixin, UpdateView):
         return reverse("kakeibo:event_detail", kwargs={"pk": self.object.pk})
 
 
+class EventDelete(MyUserPasssesTestMixin, DeleteView):
+    model = Event
+    template_name = "event_delete.html"
+
+    def get_success_url(self):
+        return reverse('kakeibo:event_list')
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.is_active:
+            messages.warning(request, "{}は削除済みです".format(obj))
+            return redirect('kakeibo:event_list')
+        return super(EventDelete, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        ob = self.get_object()
+        result = super().delete(request, *args, **kwargs)
+        messages.success(self.request, '「{}」を削除しました'.format(ob))
+        return result
+
+
 # =================================
 # USD
 # =================================
