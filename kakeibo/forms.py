@@ -35,28 +35,25 @@ class KakeiboForm(forms.ModelForm):
 class KakeiboSearchForm(forms.Form):
     date_from = forms.DateField(
         label="開始日", required=False,
-        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
     )
     date_to = forms.DateField(
         label="終了日", required=False,
-        widget=forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"})
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
     )
     ways = forms.MultipleChoiceField(
         label="種別", required=False, widget=forms.SelectMultiple(attrs={"class": "form-control"}))
     usages = forms.ModelMultipleChoiceField(
-        queryset=Usage.objects.filter(is_active=True),
-        label="用途", required=False,
-        widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_usage')
+        queryset=Usage.objects.none(),
+        label="用途", required=False, widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_usage')
     )
     resources_from = forms.ModelMultipleChoiceField(
-        queryset=Resource.objects.filter(is_active=True),
-        label="From", required=False,
-        widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_resource')
+        queryset=Resource.objects.none(),
+        label="From", required=False, widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_resource')
     )
     resources_to = forms.ModelMultipleChoiceField(
-        queryset=Resource.objects.filter(is_active=True),
-        label="To", required=False,
-        widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_resource')
+        queryset=Resource.objects.none(),
+        label="To", required=False, widget=autocomplete.ModelSelect2Multiple(url='kakeibo:autocomplete_resource')
     )
     memo = forms.CharField(label="メモ", required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
     currency = forms.ChoiceField(label="通貨", required=False, widget=forms.Select(attrs={"class": "form-control"}))
@@ -110,7 +107,7 @@ class EventForm(forms.ModelForm):
         model = Event
         fields = ("date", "name", "memo", "detail", 'sum_plan', "is_closed")
         widgets = {
-            'date': forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}),
+            'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
             "detail": forms.Textarea(attrs={"class": "form-control"}),
@@ -152,7 +149,7 @@ class KakeiboUSDForm(forms.ModelForm):
             "way": forms.Select(attrs={"class": "form-control"}),
             'resource_from': autocomplete.ModelSelect2(url='kakeibo:autocomplete_resource'),
             'resource_to': autocomplete.ModelSelect2(url='kakeibo:autocomplete_resource'),
-            'date': forms.DateInput(attrs={'readonly': 'readonly', "class": "datepicker form-control"}),
+            'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
             "fee": forms.NumberInput(attrs={"class": "form-control"}),
             "rate": forms.NumberInput(attrs={"class": "form-control"}),
@@ -164,11 +161,11 @@ class ExchangeForm(forms.ModelForm):
     fee_from = forms.IntegerField(label="Fee (From)", widget=forms.NumberInput(attrs={"class": "form-control"}))
     fee_to = forms.IntegerField(label="Fee (To)", widget=forms.NumberInput(attrs={"class": "form-control"}))
     resource_from = forms.ModelChoiceField(
-        label="From", queryset=Resource.objects.filter(is_active=True, currency="JPY"),
+        label="From", queryset=Resource.objects.filter(is_active=True, currency="JPY").order_by('-name'),
         widget=forms.Select(attrs={"class": "form-control"}),
     )
     resource_to = forms.ModelChoiceField(
-        label="To", queryset=Resource.objects.filter(is_active=True, currency="USD"),
+        label="To", queryset=Resource.objects.filter(is_active=True, currency="USD").order_by('-name'),
         widget=forms.Select(attrs={"class": "form-control"}),
     )
 
