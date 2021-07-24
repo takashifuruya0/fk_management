@@ -22,6 +22,11 @@
           <h2 class="card-title">共通家計簿 削除確認</h2>
         </div>
         <div class="card-body table-responsive">
+          <h5>
+            <label class="badge bg-warning text-reset">
+              <i class="fas fa-exclamation-circle"></i> 削除しますか ?
+            </label>
+          </h5>
           <table class="table">
             <tr>
               <th>日付</th>
@@ -51,7 +56,7 @@
             <button class="btn btn-danger" type="submit">
               <i class="fas fa-trash-alt"></i> 削除
             </button>
-            <a class="btn btn-secondary" href="{%url 'kakeibo:shared_list'%}">
+            <a class="btn btn-secondary" href="{%url 'kakeibo:shared_detail' pk=object.pk%}">
               <i class="fas fa-backward"></i> 詳細に戻る
             </a>
           </form>

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load humanize %}
+{% load my_templatetags %}
+
+{% block title %}
+Event Delete
+{% endblock %}
+
+{% block page-title %}
+Event Delete
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Event Delete</h2>
+        </div>
+        <div class="card-body">
+          <h5>
+            <label class="badge bg-warning text-reset">
+              <i class="fas fa-exclamation-circle"></i> Do you want to delete this ?
+            </label>
+          </h5>
+
+          <div class="table-responsive">
+            <table class="table">
+              <tr>
+                <th>Date</th>
+                <td>{{object.date}}</td>
+              </tr>
+              <tr>
+                <th>Name</th>
+                <td>{{object.name}}</td>
+              </tr>
+              <tr>
+                <th>Memo</th>
+                <td>{{object.memo |default:""}}</td>
+              </tr>
+              <tr>
+                <th>Detail</th>
+                <td>{{object.detail |default:""}}</td>
+              </tr>
+              <tr>
+                <th>SumPlan</th>
+                <td>{{object.sum_plan |yen}}</td>
+              </tr>
+              <tr>
+                <th>SumActual</th>
+                <td>{{object.sum_actual |yen}}</td>
+              </tr>
+              <tr>
+                <th>Is Closed</th>
+                <td>
+                  {% if object.is_closed %}
+                  <span class="badge bg-danger"><i class="fas fa-door-closed"></i> Closed</span>
+                  {% else %}
+                  <span class="badge bg-success"><i class="fas fa-door-open"></i> Open</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <h5>Kakeibos</h5>
+          <div class="table-responsive">
+            <table class="table">
+              <tr class="table-primary">
+                <th>ID</th>
+                <th>Date</th>
+                <th>Usage</th>
+                <th>Way</th>
+                <th>From</th>
+                <th>To</th>
+                <th class="right">Fee</th>
+                <th>Memo</th>
+              </tr>
+              {% for k in object.kakeibo_set.all %}
+              <tr>
+                <td>
+                  <a href="{%url 'kakeibo:kakeibo_detail' pk=k.pk%}">{{k.pk}}</a>
+                </td>
+                <td>{{k.date}}</td>
+                <td>{{k.usage}}</td>
+                <td>{{k.way}}</td>
+                <td>{{k.resource_from |default:"-"}}</td>
+                <td>{{k.resource_to |default:"-"}}</td>
+                <td class="right">
+                  {%if k.currency == 'JPY'%}
+                    {{k.fee |yen}}
+                  {%elif k.currency == 'USD'%}
+                    {{k.fee |usd}}
+                  {%endif%}
+                </td>
+                <td>{{k.memo |default:"" |truncatechars:10 }}</td>
+              </tr>
+              {% endfor %}
+            </table>
+          </div>
+        </div>
+        <div class="card-footer">
+          <form class="form" method="POST">
+            <button class="btn btn-danger" type="submit">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+            <a class="btn btn-secondary" href="{%url 'kakeibo:event_detail' pk=object.pk%}">
+              <i class="fas fa-list"></i> Back to detail
+            </a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

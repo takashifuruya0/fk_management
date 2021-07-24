@@ -1,11 +1,13 @@
-from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
+from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView, DeleteView
 from django.contrib import messages
 from django.shortcuts import reverse, redirect
+from django.urls import reverse_lazy
 from django.db import transaction
 from django import forms
 from kakeibo.views.views_common import MyUserPasssesTestMixin
 from kakeibo.models import Kakeibo, Resource, SharedKakeibo, Event, Exchange
 from kakeibo.forms import KakeiboForm, KakeiboSearchForm, EventForm, CreditImportForm, KakeiboUSDForm, ExchangeForm
+from kakeibo.forms import MobileKakeiboForm, MobileKakeiboSearchForm
 from datetime import date
 import logging
 logger = logging.getLogger('django')
@@ -83,7 +85,9 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
             messages.info(self.request, "検索結果を表示します。{}".format(params))
         context.update({
             'form': KakeiboForm(initial={"date": date.today(),}),
+            "mobile_form": MobileKakeiboForm(initial={"date": date.today(),}),
             "search_form": KakeiboSearchForm(self.request.GET),
+            "mobile_search_form": MobileKakeiboSearchForm(self.request.GET),
             "params": params
         })
         return context
@@ -146,6 +150,27 @@ class KakeiboUpdate(MyUserPasssesTestMixin, UpdateView):
         return reverse("kakeibo:kakeibo_detail", kwargs={"pk": self.object.pk})
 
 
+class KakeiboDelete(MyUserPasssesTestMixin, DeleteView):
+    model = Kakeibo
+    template_name = "kakeibo_delete.html"
+
+    def get_success_url(self):
+        return reverse('kakeibo:kakeibo_list')
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.is_active:
+            messages.warning(request, "{}は削除済みです".format(obj))
+            return redirect('kakeibo:kakeibo_list')
+        return super(KakeiboDelete, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        ob = self.get_object()
+        result = super().delete(request, *args, **kwargs)
+        messages.success(self.request, '「{}」を削除しました'.format(ob))
+        return result
+
+
 # =================================
 # Event
 # =================================
@@ -179,6 +204,27 @@ class EventUpdate(MyUserPasssesTestMixin, UpdateView):
     def get_success_url(self):
         messages.success(self.request, "イベント更新に成功しました")
         return reverse("kakeibo:event_detail", kwargs={"pk": self.object.pk})
+
+
+class EventDelete(MyUserPasssesTestMixin, DeleteView):
+    model = Event
+    template_name = "event_delete.html"
+
+    def get_success_url(self):
+        return reverse('kakeibo:event_list')
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.is_active:
+            messages.warning(request, "{}は削除済みです".format(obj))
+            return redirect('kakeibo:event_list')
+        return super(EventDelete, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        ob = self.get_object()
+        result = super().delete(request, *args, **kwargs)
+        messages.success(self.request, '「{}」を削除しました'.format(ob))
+        return result
 
 
 # =================================

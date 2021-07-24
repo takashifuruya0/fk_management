@@ -19,8 +19,14 @@ Kakeibo List
   <div class="row">
     <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
-        {% include 'accordion_kakeibo_search_form.html' %}
-        {% include 'accordion_kakeibo_form.html' %}
+        <div class="d-block d-sm-none">
+          {% include 'accordion_mobile_kakeibo_search_form.html' %}
+          {% include 'accordion_mobile_kakeibo_form.html' %}
+        </div>
+        <div class="d-none d-sm-block">
+          {% include 'accordion_kakeibo_search_form.html' %}
+          {% include 'accordion_kakeibo_form.html' %}
+        </div>
       </div>
     </div>
 
@@ -29,7 +35,7 @@ Kakeibo List
         <div class="card-header bg-primary text-white">
           <h2 class="card-title"><i class="fas fa-list"></i> Kakeibo List</h2>
         </div>
-        <div class="card-body">
+        <div class="card-body table-responsive">
           <table class="table">
             <tr class="table-primary">
               <th>ID</th>
