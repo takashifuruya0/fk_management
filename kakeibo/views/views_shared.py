@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView
+from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
@@ -172,3 +172,24 @@ class SharedUpdate(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
+
+
+class SharedDelete(LoginRequiredMixin, DeleteView):
+    model = SharedKakeibo
+    template_name = "shared_delete.html"
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.is_active:
+            messages.warning(request, "{}は削除済みです".format(obj))
+            return redirect('kakeibo:shared_list')
+        return super(SharedDelete, self).get(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('kakeibo:shared_list')
+
+    def post(self, request, *args, **kwargs):
+        ob = self.get_object()
+        result = super().delete(request, *args, **kwargs)
+        messages.success(self.request, '「{}」を削除しました'.format(ob))
+        return result

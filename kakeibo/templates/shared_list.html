@@ -38,9 +38,9 @@
               <th>ID</th>
               <th>日付</th>
               <th>用途</th>
-              <th class="d-none d-sm-block">支払者</th>
+              <th class="d-none d-sm-table-cell">支払者</th>
               <th class="right">金額</th>
-              <th class="d-none d-sm-block">メモ</th>
+              <th class="d-none d-sm-table-cell">メモ</th>
             </tr>
             {% for object in object_list %}
             <tr>
@@ -49,9 +49,9 @@
               </td>
               <td>{{object.date}}</td>
               <td>{{object.usage}}</td>
-              <td class="d-none d-sm-block">{{object.paid_by}}</td>
+              <td class="d-none d-sm-table-cell">{{object.paid_by}}</td>
               <td class="right">{{object.fee |yen}}</td>
-              <td class="d-none d-sm-block">{{object.memo |default:"" |truncatechars:10 }}</td>
+              <td class="d-none d-sm-table-cell">{{object.memo |default:"" |truncatechars:10 }}</td>
             </tr>
             {% endfor %}
           </table>
