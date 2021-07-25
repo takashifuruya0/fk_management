@@ -2,14 +2,15 @@
 <div class="accordion-item">
   <h4 class="accordion-header" id="headingTwo">
     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-      <i class="fas fa-plus"></i>&nbsp;共通家計簿作成 (Mobile)
+      <i class="fas fa-plus"></i>&nbsp;Create
     </button>
   </h4>
   <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
     <div class="accordion-body">
-      <form class="form" method="POST" action="{% url 'kakeibo:shared_create_mobile' %}">
+      <form class="form" method="POST" action="{% url 'kakeibo:kakeibo_create' %}">
         {{mobile_form.as_p}}
         {% csrf_token %}
+        <input type="hidden" name="source_path" value="{{request.get_full_path}}">
         <button type="submit" class="btn btn-primary" value="登録">
           <i class="fas fa-plus"></i> 登録
         </button>
@@ -17,4 +18,3 @@
     </div>
   </div>
 </div>
-<hr>

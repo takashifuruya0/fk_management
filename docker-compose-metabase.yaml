@@ -1,0 +1,35 @@
+version: '3'
+services:
+  db2:
+    image: gcr.io/cloudsql-docker/gce-proxy:1.16
+    volumes:
+      - ~/Documents/Local/gcloud/testiam.json:/config
+    ports:
+      - 5432
+    command: [
+      "/cloud_sql_proxy",
+      "-instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432",
+    ]
+  backend:
+    build: .
+    command: >
+      bash -c '
+        python3 manage.py migrate --settings=fk_management.environment.develop &&
+        python3 manage.py collectstatic --no-input  --settings=fk_management.environment.develop &&
+        python3 manage.py runserver 0.0.0.0:8000 --settings=fk_management.environment.develop '
+    ports:
+      - 8000
+    volumes:
+      - .:/home/fk_management
+    depends_on:
+      - db2
+
+  web:
+    image: nginx:1.21
+    volumes:
+      - .:/etc/nginx/conf.d
+      - ./static:/var/www/html/static
+    ports:
+      - 8090:80
+    depends_on:
+      - backend

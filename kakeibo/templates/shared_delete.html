@@ -6,11 +6,11 @@
 {% load my_templatetags %}
 
 {% block title %}
-共通家計簿 詳細
+共通家計簿 削除確認
 {% endblock %}
 
 {% block page-title %}
-共通家計簿 詳細
+共通家計簿 削除確認
 {% endblock %}
 
 {% block body %}
@@ -19,12 +19,14 @@
     <div class="col-12">
       <div class="card bg-light">
         <div class="card-header">
-          <h2 class="card-title">共通家計簿 詳細</h2>
-          {% if not object.is_active %}
-            <label class="badge bg-danger">削除済み</label>
-            {% endif %}
+          <h2 class="card-title">共通家計簿 削除確認</h2>
         </div>
         <div class="card-body table-responsive">
+          <h5>
+            <label class="badge bg-warning text-reset">
+              <i class="fas fa-exclamation-circle"></i> 削除しますか ?
+            </label>
+          </h5>
           <table class="table">
             <tr>
               <th>日付</th>
@@ -49,17 +51,15 @@
           </table>
         </div>
         <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:shared_update' pk=object.pk%}">
-            <i class="fas fa-edit"></i> 更新
-          </a>
-          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_list'%}">
-            <i class="fas fa-list"></i> 一覧
-          </a>
-          {% if object.is_active %}
-          <a class="btn btn-danger" href="{%url 'kakeibo:shared_delete' pk=object.pk%}">
-            <i class="fas fa-trash-alt"></i> 削除
-          </a>
-          {% endif %}
+          <form method="POST">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">
+              <i class="fas fa-trash-alt"></i> 削除
+            </button>
+            <a class="btn btn-secondary" href="{%url 'kakeibo:shared_detail' pk=object.pk%}">
+              <i class="fas fa-backward"></i> 詳細に戻る
+            </a>
+          </form>
         </div>
       </div>
     </div>

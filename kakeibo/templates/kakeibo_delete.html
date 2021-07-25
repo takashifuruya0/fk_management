@@ -6,11 +6,11 @@
 {% load my_templatetags %}
 
 {% block title %}
-Kakeibo Detail
+Kakeibo Delete
 {% endblock %}
 
 {% block page-title %}
-Kakeibo Detail
+Kakeibo Delete
 {% endblock %}
 
 {% block body %}
@@ -19,14 +19,14 @@ Kakeibo Detail
     <div class="col-12">
       <div class="card">
         <div class="card-header bg-primary text-white">
-          <h2 class="card-title">Kakeibo Detail</h2>
-          {% if object.is_active %}
-          <label class="badge bg-success">Active</label>
-          {% else %}
-          <label class="badge bg-danger">Inactive</label>
-          {% endif %}
+          <h2 class="card-title">Kakeibo Delete Confirmation</h2>
         </div>
         <div class="card-body">
+          <h5>
+            <label class="badge bg-warning text-reset">
+              <i class="fas fa-exclamation-circle"></i> Do you want to delete this ?
+            </label>
+          </h5>
           <table class="table">
             <tr>
               <th>Date</th>
@@ -78,26 +78,22 @@ Kakeibo Detail
             <tr>
               <th>Event</th>
               <td>
-                <a href="{%url 'kakeibo:event_detail' pk=object.event.pk%}" class="btn btn-sm btn-info">
-                  {{object.event}}
-                </a>
+                <a href="{%url 'kakeibo:shared_detail' pk=object.event.pk%}">{{object.event}}</a>
               </td>
             </tr>
             {% endif %}
           </table>
         </div>
         <div class="card-footer">
-          <a class="btn btn-info" href="{%url 'kakeibo:kakeibo_update' pk=object.pk%}">
-            <i class="fas fa-edit"></i> Update
-          </a>
-          <a class="btn btn-secondary" href="{%url 'kakeibo:kakeibo_list'%}">
-            <i class="fas fa-list"></i> List
-          </a>
-          {% if object.is_active %}
-          <a class="btn btn-danger" href="{%url 'kakeibo:kakeibo_delete' pk=object.pk%}">
-            <i class="fas fa-trash-alt"></i> Delete
-          </a>
-          {% endif %}
+          <form class="form" method="POST">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+            <a class="btn btn-secondary" href="{%url 'kakeibo:kakeibo_detail' pk=object.pk%}">
+              <i class="fas fa-backward"></i> Back to detail
+            </a>
+          </form>
         </div>
       </div>
     </div>
