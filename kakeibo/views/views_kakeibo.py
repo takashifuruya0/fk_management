@@ -69,7 +69,7 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
         # memo
         if self.request.GET.get("memo", None):
             q = q.filter(memo__icontains=self.request.GET["memo"])
-        # memo
+        # currency
         if self.request.GET.get("currency", None):
             q = q.filter(currency=self.request.GET["currency"])
         return q.select_related('usage', "resource_from", "resource_to").order_by('-date')

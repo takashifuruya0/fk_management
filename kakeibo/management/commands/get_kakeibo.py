@@ -33,6 +33,12 @@ class Command(BaseCommand):
                     if Kakeibo.objects.filter(is_active=True, legacy_id=r['pk']).exists():
                         self.stdout.write("{} already existed".format(r['pk']))
                         continue
+                    # currency
+                    if r['memo'] and "USD" in r['memo']:
+                        currency = "USD"
+                    else:
+                        currency = "JPY"
+                    pprint.pprint(f"currency: {currency}")
                     # usage
                     if r['usage']:
                         usage = Usage.objects.get(name=r['usage']['name'])
@@ -46,17 +52,23 @@ class Command(BaseCommand):
                     resource_from = None
                     if r['move_from']:
                         if self.mapping_resource.get(r['move_from']['name'], None):
-                            resource_from = Resource.objects.get(name=self.mapping_resource.get(r['move_from']['name']))
+                            resource_from = Resource.objects.get(
+                                name=self.mapping_resource.get(r['move_from']['name']), currency=currency)
                         else:
-                            resource_from = Resource.objects.get(name=r['move_from']['name'])
+                            resource_from = Resource.objects.get(
+                                name=r['move_from']['name'], currency=currency)
+                        pprint.pprint(f"resource_from: {resource_from}")
                     resource_to = None
                     if r['move_to']:
                         if self.mapping_resource.get(r['move_to']['name'], None):
-                            resource_to = Resource.objects.get(name=self.mapping_resource.get(r['move_to']['name']))
+                            resource_to = Resource.objects.get(
+                                name=self.mapping_resource.get(r['move_to']['name']), currency=currency)
                         else:
-                            resource_to = Resource.objects.get(name=r['move_to']['name'])
+                            resource_to = Resource.objects.get(name=r['move_to']['name'], currency=currency)
+                        pprint.pprint(f"resource_to: {resource_to}")
                     # way
                     way = self.mapping_way[r['way']]
+                    pprint.pprint(f"way: {way}")
                     # init Kakeibo
                     d = {
                         "fee": r['fee'],
@@ -68,6 +80,7 @@ class Command(BaseCommand):
                         "resource_to": resource_to,
                         "fee_converted": r['fee'],  # save以外は自動算出されない
                         "legacy_id": r['pk'],
+                        "currency": currency,
                     }
                     k = Kakeibo(**d)
                     kakeibo_list.append(k)
