@@ -27,14 +27,3 @@ class ResourceAutocomplete(autocomplete.Select2QuerySetView):
         if self.q:
             qs = qs.filter(Q(name__icontains=self.q) | Q(currency__icontains=self.q))
         return qs.order_by("name")
-
-
-class SharedUsageAutocomplete(autocomplete.Select2QuerySetView):
-    def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authenticated:
-            return Usage.objects.none()
-        qs = Usage.objects.filter(is_active=True, is_shared=True)
-        if self.q:
-            qs = qs.filter(name__icontains=self.q)
-        return qs.order_by("is_expense")

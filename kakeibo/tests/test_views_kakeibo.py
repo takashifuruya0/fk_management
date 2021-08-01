@@ -12,9 +12,19 @@ class KakeiboViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        Usage.objects.all().delete()
+        Resource.objects.all().delete()
+        get_user_model().objects.all().delete()
         # user
         get_user_model().objects.create(username="user", password="test", is_superuser=False, is_staff=False)
         get_user_model().objects.create(username="admin", password="test", is_superuser=True, is_staff=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        Usage.objects.all().delete()
+        Resource.objects.all().delete()
+        get_user_model().objects.all().delete()
 
     def setUp(self) -> None:
         # lgoin
@@ -25,8 +35,14 @@ class KakeiboViewTest(TestCase):
         self.r_other = Resource.objects.create(name="other", is_investment=False)
         self.w_transfer = "振替"
         self.w_pay = "支出（現金）"
-        self.u_shopping = Usage.objects.create(name="shopping", is_expense=True)
+        self.u_shopping = Usage.objects.create(name="shopping", is_expense=True, is_shared=True)
+        self.u_lunch = Usage.objects.create(name="lunch", is_expense=True, is_shared=True)
         self.u_transer = Usage.objects.create(name="transfer", is_expense=False)
+
+    def tearDown(self) -> None:
+        Usage.objects.all().delete()
+        Resource.objects.all().delete()
+        self.client.logout()
 
     # ========================================
     # Kakeibo
@@ -243,7 +259,7 @@ class KakeiboViewTest(TestCase):
         self.assertEqual(1, Event.objects.all().count())
 
     # ========================================
-    # Event
+    # Exchange
     # ========================================
     def test_exchange_form(self):
         # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~

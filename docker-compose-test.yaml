@@ -4,7 +4,7 @@ services:
     build: .
     command: >
       bash -c '
-        coverage run manage.py test;
+        coverage run manage.py test -v3;
         coverage html;
         coverage xml'
     volumes:

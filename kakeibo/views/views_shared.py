@@ -38,7 +38,11 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             # Payment
             payment_total = records_this_month.aggregate(sum=Sum('fee'))['sum']
             payment_hoko = records_this_month.filter(paid_by__last_name="朋子").aggregate(sum=Sum('fee'))['sum']
-            payment_takashi = payment_total - payment_hoko
+            if payment_hoko:
+                payment_takashi = payment_total - payment_hoko
+            else:
+                payment_takashi = payment_total
+                payment_hoko = 0
             # Payment (%)
             pp_takashi = math.floor(100 * payment_takashi / payment_total)
             pp_hoko = 100 - pp_takashi
@@ -131,7 +135,7 @@ class SharedList(LoginRequiredMixin, ListView):
             q = q.filter(usage__in=self.request.GET.getlist('usages'))
         # memo
         if self.request.GET.get("memo", None):
-            q = q.filter(memo__icontains=self.request.GET("memo"))
+            q = q.filter(memo__icontains=self.request.GET.get("memo"))
         return q.select_related('paid_by', 'usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
