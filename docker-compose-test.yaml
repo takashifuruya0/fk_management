@@ -5,6 +5,7 @@ services:
     command: >
       bash -c '
         coverage run manage.py test;
+        coverage html;
         coverage xml'
     volumes:
       - .:/home/fk_management
