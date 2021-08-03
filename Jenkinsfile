@@ -10,14 +10,19 @@ pipeline {
         echo env.BRANCH_NAME
       }
     }
-    stage('git clone') {
+    stage ('create envfile') {
       steps {
-        git url:'https://github.com/takashifuruya0/fk_management', branch: env.BRANCH_NAME
-       }
+        script {
+          withCredentials([file(credentialsId: 'fk-management-env-develop', variable: 'ENVFILE')]) {
+            sh 'mkdir -p env'
+            sh 'cp $ENVFILE env/'
+          }
+        }
+      }
     }
     stage("unit test"){
       steps {
-        sh 'docker-compose -f docker-compose-test.yaml up'
+        sh 'docker-compose -f docker-compose-test.yaml up --build'
       }
     }
   }
