@@ -7,6 +7,8 @@ pipeline {
       steps {
         sh 'pwd'
         sh 'ls'
+        sh 'who'
+        sh 'hostname'
         echo env.BRANCH_NAME
       }
     }
