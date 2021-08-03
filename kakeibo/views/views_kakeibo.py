@@ -26,8 +26,8 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
             "chart_header": list(),
             "chart_data": list(),
             "form": KakeiboForm(initial={"date": date.today()}),
+            "mobile_form": MobileKakeiboForm(initial={"date": date.today()}),
             "credit_import_form": CreditImportForm(),
-            "usd_form": KakeiboUSDForm(initial={"date": date.today()}),
             "exchange_form": ExchangeForm(initial={"date": date.today()}),
         })
         for r in resources:
