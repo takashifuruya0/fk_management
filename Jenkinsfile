@@ -9,5 +9,10 @@ pipeline {
         echo env.BRANCH_NAME
       }
     }
+    stage("unit test"){
+      steps {
+        sh 'docker-compose -f docker-compose-test.yaml up'
+      }
+    }
   }
 }
