@@ -26,4 +26,10 @@ pipeline {
       }
     }
   }
+  //　事後処理
+  post {
+    always {
+      cleanWs()
+    }
+  }
 }
