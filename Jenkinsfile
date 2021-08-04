@@ -25,11 +25,10 @@ pipeline {
     stage("build"){
       steps {
         script {
-            dockerImage = docker.build "fk_management_backend_test"
-//             dockerImage.inside("-v `pwd`:/home/fk_management fk_management_backend_test"){
-//                 sh 'coverage run manage.py test -v3'
-//             }
-            sh 'sed -e "s/build: ./image: fk_management_backend_test/g" docker-compose-test.yaml > d.yaml'
+            version = "fk_management_backend_test" + ":" + env.BRANCH_NAME
+            echo version
+            dockerImage = docker.build version
+            sh 'sed -e "s/build: ./image: ${version}/g" docker-compose-test.yaml > d.yaml'
             sh 'cat d.yaml'
             sh 'docker-compose -f d.yaml up '
         }
