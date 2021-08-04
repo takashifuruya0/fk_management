@@ -25,10 +25,14 @@ pipeline {
     stage("build"){
       steps {
         script {
-            version = "fk_management_backend_test" + ":" + env.BRANCH_NAME
-            echo version
-            dockerImage = docker.build version
-            sh 'sed -e "s/build: ./image: ${version}/g" docker-compose-test.yaml > d.yaml'
+            // 変数定義
+            image_name = "fk_management_backend_test" + ":" + env.BRANCH_NAME
+            echo image_name
+            command = 'sed -e "s/build: ./image:'+image_name+'/g" docker-compose-test.yaml > d.yaml'
+            echo command
+            // 実行
+            dockerImage = docker.build image_name
+            sh command
             sh 'cat d.yaml'
             sh 'docker-compose -f d.yaml up '
         }
