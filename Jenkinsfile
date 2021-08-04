@@ -24,7 +24,10 @@ pipeline {
     }
     stage("unit test"){
       steps {
-        sh 'sudo docker-compose -f docker-compose-test.yaml up --build'
+        dockerImage = docker.build "fk_management_backend_test"
+        dockerImage.inside("-v `pwd`:/home/fk_management fk_management_backend_test"){
+            sh 'coverage run manage.py test -v3'
+        }
       }
     }
   }
