@@ -28,7 +28,7 @@ pipeline {
             // 変数定義
             image_name = "fk_management_backend_test" + ":" + env.BRANCH_NAME
             echo image_name
-            command = 'sed -e "s/build: ./image:'+image_name+'/g" docker-compose-test.yaml > d.yaml'
+            command = 'sed -e "s/build: ./image: '+image_name+'/g" docker-compose-test.yaml > d.yaml'
             echo command
             // 実行
             dockerImage = docker.build image_name
