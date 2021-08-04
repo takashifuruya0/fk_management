@@ -24,7 +24,7 @@ pipeline {
     }
     stage("unit test"){
       steps {
-        sh '/usr/local/bin/docker-compose -f docker-compose-test.yaml up --build'
+        sh 'sudo docker-compose -f docker-compose-test.yaml up --build'
       }
     }
   }
