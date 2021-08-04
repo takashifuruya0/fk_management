@@ -24,9 +24,11 @@ pipeline {
     }
     stage("unit test"){
       steps {
-        dockerImage = docker.build "fk_management_backend_test"
-        dockerImage.inside("-v `pwd`:/home/fk_management fk_management_backend_test"){
-            sh 'coverage run manage.py test -v3'
+        script {
+            dockerImage = docker.build "fk_management_backend_test"
+            dockerImage.inside("-v `pwd`:/home/fk_management fk_management_backend_test"){
+                sh 'coverage run manage.py test -v3'
+            }
         }
       }
     }
