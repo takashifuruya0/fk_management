@@ -21,7 +21,7 @@ Event Detail
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Event Detail</h2>
         </div>
-        <div class="card-body">
+        <div class="card-body table-responsive">
           <table class="table">
             <tr>
               <th>Date</th>
@@ -37,7 +37,7 @@ Event Detail
             </tr>
             <tr>
               <th>Detail</th>
-              <td>{{object.detail |default:""}}</td>
+              <td>{{object.detail |default:"" |linebreaksbr}}</td>
             </tr>
             <tr>
               <th>SumPlan</th>
@@ -65,9 +65,9 @@ Event Detail
               <th>ID</th>
               <th>Date</th>
               <th>Usage</th>
-              <th>Way</th>
-              <th>From</th>
-              <th>To</th>
+              <th class="d-none d-table-cell-sm">Way</th>
+              <th class="d-none d-table-cell-sm">From</th>
+              <th class="d-none d-table-cell-sm">To</th>
               <th class="right">Fee</th>
               <th>Memo</th>
             </tr>
@@ -78,9 +78,9 @@ Event Detail
               </td>
               <td>{{k.date}}</td>
               <td>{{k.usage}}</td>
-              <td>{{k.way}}</td>
-              <td>{{k.resource_from |default:"-"}}</td>
-              <td>{{k.resource_to |default:"-"}}</td>
+              <td class="d-none d-table-cell-sm">{{k.way}}</td>
+              <td class="d-none d-table-cell-sm">{{k.resource_from |default:"-"}}</td>
+              <td class="d-none d-table-cell-sm">{{k.resource_to |default:"-"}}</td>
               <td class="right">
                 {%if k.currency == 'JPY'%}
                   {{k.fee |yen}}
