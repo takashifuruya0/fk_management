@@ -35,6 +35,7 @@ pipeline {
             sh command
             sh 'cat d.yaml'
             sh 'docker-compose -f d.yaml up '
+            sh 'docker-compose -f d.yaml down'
         }
       }
     }
