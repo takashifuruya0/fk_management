@@ -1,5 +1,6 @@
 # coding:utf-8
-from django.urls import path
+from django.urls import path, reverse_lazy
+from django.views.generic import RedirectView
 from kakeibo.views.views_kakeibo import KakeiboTop
 from kakeibo.views.views_kakeibo import KakeiboList, KakeiboDetail, KakeiboCreate, KakeiboUpdate, KakeiboDelete
 from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, EventDetail, EventDelete
@@ -39,6 +40,7 @@ urlpatterns = [
     # credit
     path('credit/import', CreditImport.as_view(), name="credit_import"),
     path('credit/link', CreditLink.as_view(), name="credit_link"),
-    path('credit/link_from_kakeibo', CreditLinkFromKakeibo.as_view(), name="credit_link_from_kakeibo")
-
+    path('credit/link_from_kakeibo', CreditLinkFromKakeibo.as_view(), name="credit_link_from_kakeibo"),
+    # other
+    path('', RedirectView.as_view(url=reverse_lazy('kakeibo:kakeibo_top')))
 ]

@@ -26,8 +26,8 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
             "chart_header": list(),
             "chart_data": list(),
             "form": KakeiboForm(initial={"date": date.today()}),
+            "mobile_form": MobileKakeiboForm(initial={"date": date.today()}),
             "credit_import_form": CreditImportForm(),
-            "usd_form": KakeiboUSDForm(initial={"date": date.today()}),
             "exchange_form": ExchangeForm(initial={"date": date.today()}),
         })
         for r in resources:
@@ -177,7 +177,7 @@ class KakeiboDelete(MyUserPasssesTestMixin, DeleteView):
 class EventList(MyUserPasssesTestMixin, ListView):
     template_name = "event_list.html"
     model = Event
-    paginate_by = 20
+    paginate_by = 10
     queryset = Event.objects.filter(is_active=True).order_by('-date', "is_closed")
 
 

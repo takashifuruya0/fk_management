@@ -42,10 +42,24 @@ class AutocompleteViewTest(TestCase):
         url = reverse("kakeibo:autocomplete_usage")
         res = self.client.get(url)
         self.assertEqual(res.status_code, 200)
+        # q
+        res = self.client.get(url, data={"q": "test"})
+        self.assertEqual(res.status_code, 200)
+        # logout
+        self.client.logout()
+        res = self.client.get(url)
+        jsondata = json.loads(res.content)
+        self.assertEqual(
+            jsondata, {"results": [], "pagination": {"more": False}}
+        )
+        self.assertEqual(res.status_code, 200)
 
     def test_autocomplete_resource(self):
         url = reverse("kakeibo:autocomplete_resource")
         res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        # q
+        res = self.client.get(url, data={"q": "test"})
         self.assertEqual(res.status_code, 200)
         # logout
         self.client.logout()

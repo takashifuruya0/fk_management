@@ -20,7 +20,7 @@ Kakeibo Update
           <div class="card-header bg-primary text-white">
             <h2 class="card-title">Kakeibo Update</h2>
           </div>
-          <div class="card-body">
+          <div class="card-body table-responsive">
             <table class="table">
               {% csrf_token %}
               {{form.as_table}}
@@ -32,6 +32,9 @@ Kakeibo Update
             </button>
             <a class="btn btn-secondary" href="{%url 'kakeibo:kakeibo_list'%}">
               <i class="fas fa-list"></i> List
+            </a>
+            <a class="btn btn-warning" href="/admin/kakeibo/kakeibo/{{object.pk}}/change/">
+              <i class="fas fa-pen-nib"></i> Edit@Admin
             </a>
           </div>
         </form>
