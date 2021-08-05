@@ -22,7 +22,7 @@ Event List
         <div class="card-header bg-primary text-white">
           <h2 class="card-title"><i class="fas fa-list"></i> Event List</h2>
         </div>
-        <div class="card-body">
+        <div class="card-body table-responsive">
           <table class="table">
             <tr class="table-primary">
               <th>ID</th>
@@ -96,7 +96,7 @@ Event List
               {% endif %}
               {% endfor %}
               <!--last-->
-              {% if not page_obj.number == page_obj.paginator.num_pages %}
+              {% if not page_obj.number == page_obj.paginator.num_pages and page_obj.paginator.num_pages > 5%}
               <li class="page-item">
                 <a class="page-link"
                    href="{%url 'kakeibo:event_list'%}?page={{page_obj.paginator.num_pages}}{{params}}"

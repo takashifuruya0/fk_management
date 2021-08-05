@@ -177,7 +177,7 @@ class KakeiboDelete(MyUserPasssesTestMixin, DeleteView):
 class EventList(MyUserPasssesTestMixin, ListView):
     template_name = "event_list.html"
     model = Event
-    paginate_by = 20
+    paginate_by = 10
     queryset = Event.objects.filter(is_active=True).order_by('-date', "is_closed")
 
 
