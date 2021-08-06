@@ -46,14 +46,14 @@ class KakeiboModelTest(TestCase):
             "usage": self.u_shopping,
             "resource_from": self.r_usd,
             "currency": "USD",
-            "rate": 110.15
         }
         # 最初は換算なし
         k2 = Kakeibo.objects.create(**d2)
         self.assertEqual(k2.fee_converted, None)
         # 換算実行後の確認
-        k2.update_fee_converted()
-        self.assertEqual(k2.fee_converted, math.floor(d2['fee']*d2['rate']))
+        k2.rate = 110.15
+        k2.save()
+        self.assertEqual(k2.fee_converted, math.floor(k2.fee*k2.rate))
 
     def test_event(self):
         self.assertEqual(0, Event.objects.all().count())
