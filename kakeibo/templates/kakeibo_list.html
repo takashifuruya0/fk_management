@@ -45,7 +45,7 @@ Kakeibo List
               <th>From</th>
               <th>To</th>
               <th class="right">Fee</th>
-              <th>Memo</th>
+              {% comment %} <th>Memo</th> {% endcomment %}
             </tr>
             {% for object in object_list %}
             <tr>
@@ -64,7 +64,7 @@ Kakeibo List
                   {{object.fee |usd}}
                 {%endif%}
               </td>
-              <td>{{object.memo |default:"" |truncatechars:10 }}</td>
+              {% comment %} <td>{{object.memo |default:"" |truncatechars:10 }}</td> {% endcomment %}
             </tr>
             {% endfor %}
           </table>

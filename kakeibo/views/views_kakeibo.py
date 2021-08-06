@@ -31,8 +31,9 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
             "exchange_form": ExchangeForm(initial={"date": date.today()}),
         })
         for r in resources:
-            context["chart_header"].append(r.name)
-            context["chart_data"].append(r.total)
+            if r.total_converted > 0:
+                context["chart_header"].append(r.name)
+                context["chart_data"].append(r.total_converted)
         return context
 
 
