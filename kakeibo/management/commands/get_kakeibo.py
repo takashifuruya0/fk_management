@@ -15,9 +15,32 @@ class Command(BaseCommand):
     mapping_way = settings.MAPPING_WAY
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
+    def add_arguments(self, parser):
+        # Named (optional) arguments
+        parser.add_argument(
+            '--date_from',
+            default='',
+            nargs=1,
+            help='add filter by date_from',
+        )
+        parser.add_argument(
+            '--date_to',
+            default='',
+            nargs=1,
+            help='add filter by date_to',
+        )
+
+        
     # コマンドが実行された際に呼ばれるメソッド
     def handle(self, *args, **options):
         url = "https://www.fk-management.com/drm/kakeibo/kakeibo/?limit=100"
+        if options['date_from'] and options['date_to']:
+            url = f"{url}&date_range_after={options['date_from'][0]}&date_range_before={options['date_to'][0]}"
+        elif options['date_from']:
+            url = f"{url}&date_range_after={options['date_from'][0]}"
+        elif options['date_to']:
+            url = f"{url}&date_range_before={options['date_to'][0]}"
+        # raise Exception(url)
         kakeibo_list = list()
         error_list = list()
         transfer = Usage.objects.get(name="振替")
@@ -33,6 +56,12 @@ class Command(BaseCommand):
                     if Kakeibo.objects.filter(is_active=True, legacy_id=r['pk']).exists():
                         self.stdout.write("{} already existed".format(r['pk']))
                         continue
+                    # currency
+                    if r['memo'] and "USD" in r['memo']:
+                        currency = "USD"
+                    else:
+                        currency = "JPY"
+                    pprint.pprint(f"currency: {currency}")
                     # usage
                     if r['usage']:
                         usage = Usage.objects.get(name=r['usage']['name'])
@@ -46,17 +75,23 @@ class Command(BaseCommand):
                     resource_from = None
                     if r['move_from']:
                         if self.mapping_resource.get(r['move_from']['name'], None):
-                            resource_from = Resource.objects.get(name=self.mapping_resource.get(r['move_from']['name']))
+                            resource_from = Resource.objects.get(
+                                name=self.mapping_resource.get(r['move_from']['name']), currency=currency)
                         else:
-                            resource_from = Resource.objects.get(name=r['move_from']['name'])
+                            resource_from = Resource.objects.get(
+                                name=r['move_from']['name'], currency=currency)
+                        pprint.pprint(f"resource_from: {resource_from}")
                     resource_to = None
                     if r['move_to']:
                         if self.mapping_resource.get(r['move_to']['name'], None):
-                            resource_to = Resource.objects.get(name=self.mapping_resource.get(r['move_to']['name']))
+                            resource_to = Resource.objects.get(
+                                name=self.mapping_resource.get(r['move_to']['name']), currency=currency)
                         else:
-                            resource_to = Resource.objects.get(name=r['move_to']['name'])
+                            resource_to = Resource.objects.get(name=r['move_to']['name'], currency=currency)
+                        pprint.pprint(f"resource_to: {resource_to}")
                     # way
                     way = self.mapping_way[r['way']]
+                    pprint.pprint(f"way: {way}")
                     # init Kakeibo
                     d = {
                         "fee": r['fee'],
@@ -68,6 +103,7 @@ class Command(BaseCommand):
                         "resource_to": resource_to,
                         "fee_converted": r['fee'],  # save以外は自動算出されない
                         "legacy_id": r['pk'],
+                        "currency": currency,
                     }
                     k = Kakeibo(**d)
                     kakeibo_list.append(k)

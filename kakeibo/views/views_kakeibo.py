@@ -26,13 +26,14 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
             "chart_header": list(),
             "chart_data": list(),
             "form": KakeiboForm(initial={"date": date.today()}),
+            "mobile_form": MobileKakeiboForm(initial={"date": date.today()}),
             "credit_import_form": CreditImportForm(),
-            "usd_form": KakeiboUSDForm(initial={"date": date.today()}),
             "exchange_form": ExchangeForm(initial={"date": date.today()}),
         })
         for r in resources:
-            context["chart_header"].append(r.name)
-            context["chart_data"].append(r.total)
+            if r.total_converted > 0:
+                context["chart_header"].append(r.name)
+                context["chart_data"].append(r.total_converted)
         return context
 
 
@@ -69,7 +70,7 @@ class KakeiboList(MyUserPasssesTestMixin, ListView):
         # memo
         if self.request.GET.get("memo", None):
             q = q.filter(memo__icontains=self.request.GET["memo"])
-        # memo
+        # currency
         if self.request.GET.get("currency", None):
             q = q.filter(currency=self.request.GET["currency"])
         return q.select_related('usage', "resource_from", "resource_to").order_by('-date')
@@ -177,7 +178,7 @@ class KakeiboDelete(MyUserPasssesTestMixin, DeleteView):
 class EventList(MyUserPasssesTestMixin, ListView):
     template_name = "event_list.html"
     model = Event
-    paginate_by = 20
+    paginate_by = 10
     queryset = Event.objects.filter(is_active=True).order_by('-date', "is_closed")
 
 

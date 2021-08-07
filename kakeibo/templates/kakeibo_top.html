@@ -19,7 +19,12 @@ kakeibo
   <div class="accordion" id="accordionExample">
     <div class="row">
       <div class="col-lg-4">
+        <div class="d-none d-sm-block">
         {% include 'accordion_kakeibo_form.html' %}
+        </div>
+        <div class="d-block d-sm-none">
+        {% include 'accordion_mobile_kakeibo_form.html' %}
+        </div>
       </div>
       <div class="col-lg-4">
         {% include 'accordion_exchange_form.html' %}
@@ -38,27 +43,38 @@ kakeibo
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Kakeibo</h2>
         </div>
-        <div class="card-body">
-
+        <div class="card-body table-responsive">
           <table class="table">
             <tr class="table-primary">
               <th>リソース</th>
               <th>通貨</th>
               <th class="right">合計</th>
-              <th class="right">今月収支</th>
+              <th class="right d-none d-sm-table-cell">今月収支</th>
             </tr>
             {% for resource in resources %}
+            {% if resource.total > 0 %}
             <tr>
               <th>{{resource.name}}</th>
-              <th>{{resource.currency}}</th>
+              <th>
+                {% if resource.currency == "JPY" %}
+                <label class="badge bg-info">
+                  <i class="fas fa-yen-sign"></i>
+                </label>
+                {% elif resource.currency == "USD" %}
+                <label class="badge bg-warning">
+                  <i class="fas fa-dollar-sign"></i>
+                </label>
+                {% endif %}
+              </th>
               {% if resource.currency == "JPY" %}
                 <td class="right">{{resource.total |yen}}</td>
-                <td class="right">{{resource.diff_this_month |yen |safe}}</td>
+                <td class="right d-none d-sm-table-cell">{{resource.diff_this_month |yen |safe}}</td>
               {% elif resource.currency == "USD" %}
                 <td class="right">{{resource.total |usd}}</td>
-                <td class="right">{{resource.diff_this_month |usd |safe}}</td>
+                <td class="right d-none d-sm-table-cell">{{resource.diff_this_month |usd |safe}}</td>
               {% endif %}
             </tr>
+            {% endif %}
             {% endfor %}
           </table>
         </div>
@@ -99,15 +115,15 @@ let ctx = document.getElementById("chart_bar").getContext("2d");
 let chart = new Chart(ctx, {
   type: "bar",
   data: {
-     labels: [{% for ch in chart_header %}"{{ch}}",{% endfor %}],
-     datasets: [
-        {
-          label: "Gross volume ($)",
-          backgroundColor: "#79AEC8",
-          borderColor: "#417690",
-          data: [{% for cd in chart_data %}{{cd}},{% endfor %}]
-        }
-     ]
+    labels: [{% for ch in chart_header %}"{{ch}}",{% endfor %}],
+    datasets: [
+      {
+        label: "Yen (¥)",
+        backgroundColor: "#79AEC8",
+        borderColor: "#417690",
+        data: [{% for cd in chart_data %}{{cd}},{% endfor %}]
+      }
+    ]
   },
   options: {
     title: {
@@ -127,12 +143,12 @@ let ctx_pie = document.getElementById("chart_pie").getContext("2d");
 let chart_pie = new Chart(ctx_pie, {
   type: "pie",
   data: {
-     labels: [{% for ch in chart_header %}"{{ch}}",{% endfor %}],
-     datasets: [
-        {
-          label: "Yen (¥)",
-          data: [{% for cd in chart_data %}{{cd}},{% endfor %}],
-          backgroundColor: [
+    labels: [{% for ch in chart_header %}"{{ch}}",{% endfor %}],
+    datasets: [
+      {
+        label: "Yen (¥)",
+        data: [{% for cd in chart_data %}{{cd}},{% endfor %}],
+        backgroundColor: [
           "#2ecc71",
           "#3498db",
           "#95a5a6",
@@ -140,9 +156,9 @@ let chart_pie = new Chart(ctx_pie, {
           "#f1c40f",
           "#e74c3c",
           "#34495e",
-         ]
-        }
-     ]
+        ]
+      }
+    ]
   },
   options: {
     title: {

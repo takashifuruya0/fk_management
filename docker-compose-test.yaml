@@ -1,0 +1,11 @@
+version: '3'
+services:
+  backend_test:
+    build: .
+    command: >
+      bash -c '
+        coverage run manage.py test -v3;
+        coverage html;
+        coverage xml'
+    volumes:
+      - .:/home/fk_management

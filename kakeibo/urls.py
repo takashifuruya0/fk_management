@@ -1,10 +1,11 @@
 # coding:utf-8
-from django.urls import path
+from django.urls import path, reverse_lazy
+from django.views.generic import RedirectView
 from kakeibo.views.views_kakeibo import KakeiboTop
 from kakeibo.views.views_kakeibo import KakeiboList, KakeiboDetail, KakeiboCreate, KakeiboUpdate, KakeiboDelete
 from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, EventDetail, EventDelete
 from kakeibo.views.views_kakeibo import ExchangeCreate
-from kakeibo.views.views_autocomplete import UsageAutocomplete, SharedUsageAutocomplete, ResourceAutocomplete
+from kakeibo.views.views_autocomplete import UsageAutocomplete, ResourceAutocomplete
 from kakeibo.views.views_shared import SharedTop, SharedList, SharedDetail, SharedCreate, SharedUpdate, SharedDelete
 from kakeibo.views.views_credit import CreditImport, CreditLink, CreditLinkFromKakeibo
 
@@ -36,10 +37,10 @@ urlpatterns = [
     # autcomplete
     path('autocomplete/usage', UsageAutocomplete.as_view(), name="autocomplete_usage"),
     path('autocomplete/resource', ResourceAutocomplete.as_view(), name="autocomplete_resource"),
-    path('autocomplete/shared/usage', SharedUsageAutocomplete.as_view(), name="autocomplete_shared_usage"),
     # credit
     path('credit/import', CreditImport.as_view(), name="credit_import"),
     path('credit/link', CreditLink.as_view(), name="credit_link"),
-    path('credit/link_from_kakeibo', CreditLinkFromKakeibo.as_view(), name="credit_link_from_kakeibo")
-
+    path('credit/link_from_kakeibo', CreditLinkFromKakeibo.as_view(), name="credit_link_from_kakeibo"),
+    # other
+    path('', RedirectView.as_view(url=reverse_lazy('kakeibo:kakeibo_top')))
 ]

@@ -34,7 +34,17 @@ Kakeibo Detail
             </tr>
             <tr>
               <th>Currency</th>
-              <td>{{object.currency}}</td>
+              <td>
+                {%if object.currency == 'JPY'%}
+                  <label class="badge bg-info">
+                    <i class="fas fa-yen-sign"></i>
+                  </label>
+                {%elif object.currency == 'USD'%}
+                  <label class="badge bg-warning">
+                    <i class="fas fa-dollar-sign"></i>
+                  </label>
+                {%endif%}
+              </td>
             </tr>
             <tr>
               <th>Fee</th>
@@ -42,7 +52,7 @@ Kakeibo Detail
                 {%if object.currency == 'JPY'%}
                   {{object.fee |yen}}
                 {%elif object.currency == 'USD'%}
-                  {{object.fee |usd}}
+                  {{object.fee |usd}} {%if object.fee_converted%}({{object.fee_converted |yen}}){%endif%}
                 {%endif%}
               </td>
             </tr>

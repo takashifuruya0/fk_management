@@ -12,9 +12,19 @@ class KakeiboViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        Usage.objects.all().delete()
+        Resource.objects.all().delete()
+        get_user_model().objects.all().delete()
         # user
         get_user_model().objects.create(username="user", password="test", is_superuser=False, is_staff=False)
         get_user_model().objects.create(username="admin", password="test", is_superuser=True, is_staff=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        Usage.objects.all().delete()
+        Resource.objects.all().delete()
+        get_user_model().objects.all().delete()
 
     def setUp(self) -> None:
         # lgoin
@@ -25,8 +35,14 @@ class KakeiboViewTest(TestCase):
         self.r_other = Resource.objects.create(name="other", is_investment=False)
         self.w_transfer = "振替"
         self.w_pay = "支出（現金）"
-        self.u_shopping = Usage.objects.create(name="shopping", is_expense=True)
+        self.u_shopping = Usage.objects.create(name="shopping", is_expense=True, is_shared=True)
+        self.u_lunch = Usage.objects.create(name="lunch", is_expense=True, is_shared=True)
         self.u_transer = Usage.objects.create(name="transfer", is_expense=False)
+
+    def tearDown(self) -> None:
+        Usage.objects.all().delete()
+        Resource.objects.all().delete()
+        self.client.logout()
 
     # ========================================
     # Kakeibo
@@ -74,6 +90,14 @@ class KakeiboViewTest(TestCase):
         self.assertEqual(2, Kakeibo.objects.all().count())
         # sharedkakeiboも作成される
         self.assertEqual(1, SharedKakeibo.objects.all().count())
+        # ~~~~~~~~~~~~~~~~ post failed ~~~~~~~~~~~~~~~~
+        data = {
+            "date": "2021-04-011",
+            "fee": 100,
+        }
+        response = self.client.post(url, data)
+        # 増えない
+        self.assertEqual(2, Kakeibo.objects.all().count())
 
     def test_kakeibo_top(self):
         # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
@@ -82,6 +106,14 @@ class KakeiboViewTest(TestCase):
         # ~~~~~~~~~~~~~~~~ access ~~~~~~~~~~~~~~~~
         self.client.get(url)
         self.assertTemplateUsed("kakeibo_top.html")
+        # ~~~~~~~~~~~~~~~~ logout ~~~~~~~~~~~~~~~~
+        self.client.logout()
+        res = self.client.get(url)
+        self.assertRedirects(res, "/")
+        # ~~~~~~~~~~~~~~~~ user without permission ~~~~~~~~~~~~~~~~
+        self.client.force_login(get_user_model().objects.get(username="user"))
+        res = self.client.get(url)
+        self.assertRedirects(res, "/")
 
     def test_kakeibo_list(self):
         # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
@@ -186,6 +218,29 @@ class KakeiboViewTest(TestCase):
         self.assertEqual(type(res.context['form']), KakeiboUSDForm)
         self.assertTemplateUsed("kakeibo_update.html")
 
+    def test_kakeibo_delete(self):
+        k1 = Kakeibo.objects.create(
+            date="2021-06-01", fee=100, currency="JPY", usage=self.u_shopping,
+            resource_from=self.r_wallet, resource_to=None, way=self.w_pay,
+            memo="test"
+        )
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:kakeibo_delete", kwargs={"pk": k1.pk})
+        self.assertEqual("/kakeibo/mine/{}/delete".format(k1.pk), url)
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertTemplateUsed("kakeibo_delete.html")
+        self.assertEqual(res.status_code, 200)
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~        
+        self.client.post(url)
+        k1_deleted = Kakeibo.objects.get(pk=k1.pk)
+        self.assertFalse(k1_deleted.is_active)
+        # ~~~~~~~~~~~~~~~~ get again ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertRedirects(res, reverse("kakeibo:kakeibo_list"))
+
+        
+
     # ========================================
     # Event
     # ========================================
@@ -242,8 +297,33 @@ class KakeiboViewTest(TestCase):
         self.assertRedirects(response, reverse("kakeibo:event_detail", kwargs={"pk": event_updated.pk}))
         self.assertEqual(1, Event.objects.all().count())
 
+    def test_event_delete(self):
+        data = {
+            "date": "2021-04-01",
+            "name": "t",
+            "memo": "t",
+            "detail": "t",
+            "sum_plan": 10000,
+            "is_closed": False
+        }
+        event = Event.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:event_delete", kwargs={"pk": event.pk})
+        self.assertEqual("/kakeibo/event/{}/delete".format(event.pk), url)
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertTemplateUsed("event_delete.html")
+        self.assertEqual(res.status_code, 200)
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~        
+        self.client.post(url)
+        event_deleted = Event.objects.get(pk=event.pk)
+        self.assertFalse(event_deleted.is_active)
+        # ~~~~~~~~~~~~~~~~ get again ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertRedirects(res, reverse("kakeibo:event_list"))
+
     # ========================================
-    # Event
+    # Exchange
     # ========================================
     def test_exchange_form(self):
         # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
@@ -276,3 +356,19 @@ class KakeiboViewTest(TestCase):
         # ~~~~~~~~~~~~~~~~ get:NG ~~~~~~~~~~~~~~~~
         res = self.client.get(url)
         self.assertRedirects(res, reverse("kakeibo:kakeibo_top"))
+        # ~~~~~~~~~~~~~~~~ post without source_path~~~~~~~~~~~~~~~~
+        data = {
+            "date": "2021-06-02",
+            "method": "Wire",
+            "resource_from": r_jpy.pk,
+            "fee_from": 10000,
+            "resource_to": r_usd.pk,
+            "fee_to": 90,
+            "rate": 110,
+            "commission": 100,
+            "currency": "JPY",
+        }
+        res = self.client.post(url, data)
+        self.assertRedirects(res, reverse("kakeibo:kakeibo_top"))
+        self.assertEqual(Exchange.objects.all().count(), 2)
+        self.assertEqual(Kakeibo.objects.all().count(), 4)

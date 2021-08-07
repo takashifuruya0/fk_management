@@ -62,6 +62,18 @@ class Resource(BaseModel):
         else:
             val = sum_to if sum_to else 0
         return val
+    
+    @property
+    def total_converted(self):
+        sum_from = Kakeibo.objects.select_related('resource_from').filter(
+            currency=self.currency, resource_from=self, is_active=True).aggregate(sum=Sum('fee_converted'))['sum']
+        sum_to = Kakeibo.objects.select_related('resource_to').filter(
+            currency=self.currency, resource_to=self, is_active=True).aggregate(sum=Sum('fee_converted'))['sum']
+        if sum_from and sum_to:
+            val = sum_to - sum_from
+        else:
+            val = sum_to if sum_to else 0
+        return val
 
     @property
     def diff_this_month(self):
@@ -157,6 +169,8 @@ class Kakeibo(BaseModel):
     def save(self, *args, **kwargs):
         if self.currency == "JPY":
             self.fee_converted = self.fee
+        elif self.rate:
+            self.fee_converted = math.floor(self.fee * self.rate)
         return super(Kakeibo, self).save(*args, **kwargs)
 
 

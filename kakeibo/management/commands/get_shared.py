@@ -16,10 +16,32 @@ class Command(BaseCommand):
         "朋子": get_user_model().objects.last(),
     }
 
+    def add_arguments(self, parser):
+        # Named (optional) arguments
+        parser.add_argument(
+            '--date_from',
+            default='',
+            nargs=1,
+            help='add filter by date_from',
+        )
+        parser.add_argument(
+            '--date_to',
+            default='',
+            nargs=1,
+            help='add filter by date_to',
+        )
+
+
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
     # コマンドが実行された際に呼ばれるメソッド
     def handle(self, *args, **options):
         url = "https://www.fk-management.com/drm/kakeibo/shared/?limit=100"
+        if options['date_from'] and options['date_to']:
+            url = f"{url}&date_range_after={options['date_from'][0]}&date_range_before={options['date_to'][0]}"
+        elif options['date_from']:
+            url = f"{url}&date_range_after={options['date_from'][0]}"
+        elif options['date_to']:
+            url = f"{url}&date_range_before={options['date_to'][0]}"
         skakeibo_list = list()
         error_list = list()
         transfer = Usage.objects.get(name="振替")
