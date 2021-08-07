@@ -372,3 +372,7 @@ class KakeiboViewTest(TestCase):
         self.assertRedirects(res, reverse("kakeibo:kakeibo_top"))
         self.assertEqual(Exchange.objects.all().count(), 2)
         self.assertEqual(Kakeibo.objects.all().count(), 4)
+    
+    # ========================================
+    # Credit
+    # ========================================
