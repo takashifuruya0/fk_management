@@ -1,5 +1,6 @@
 from django.test import TestCase
-from kakeibo.models import Resource, Usage, Kakeibo, Event, SharedKakeibo, Budget, Exchange
+from kakeibo.models import Resource, Usage, Kakeibo, Event, SharedKakeibo
+from kakeibo.models import Budget, Exchange, Credit
 from kakeibo.forms import KakeiboUSDForm, KakeiboForm
 from datetime import date
 from django.contrib.auth import get_user_model
@@ -16,8 +17,10 @@ class KakeiboViewTest(TestCase):
         Resource.objects.all().delete()
         get_user_model().objects.all().delete()
         # user
-        get_user_model().objects.create(username="user", password="test", is_superuser=False, is_staff=False)
-        get_user_model().objects.create(username="admin", password="test", is_superuser=True, is_staff=True)
+        get_user_model().objects.create(username="user", 
+            password="test", is_superuser=False, is_staff=False)
+        get_user_model().objects.create(username="admin", 
+            password="test", is_superuser=True, is_staff=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -35,6 +38,7 @@ class KakeiboViewTest(TestCase):
         self.r_other = Resource.objects.create(name="other", is_investment=False)
         self.w_transfer = "振替"
         self.w_pay = "支出（現金）"
+        self.w_credit = "支出（カード）"
         self.u_shopping = Usage.objects.create(name="shopping", is_expense=True, is_shared=True)
         self.u_lunch = Usage.objects.create(name="lunch", is_expense=True, is_shared=True)
         self.u_transer = Usage.objects.create(name="transfer", is_expense=False)
@@ -65,7 +69,10 @@ class KakeiboViewTest(TestCase):
         response = self.client.post(url, data)
         kakeibo_created = Kakeibo.objects.last()
         # assert
-        self.assertRedirects(response, reverse("kakeibo:kakeibo_detail", kwargs={"pk": kakeibo_created.pk}))
+        self.assertRedirects(
+            response, 
+            reverse("kakeibo:kakeibo_detail", kwargs={"pk": kakeibo_created.pk})
+        )
         self.assertEqual(data['way'], kakeibo_created.way)
         self.assertEqual(1, Kakeibo.objects.all().count())
         # sharedkakeiboは作成されない
@@ -130,8 +137,8 @@ class KakeiboViewTest(TestCase):
         )
         k2 = Kakeibo.objects.create(
             date="2023-06-01", fee=100, currency="USD", usage=self.u_transer,
-            resource_from=self.r_wallet, resource_to=self.r_saving, way=self.w_transfer,
-            memo="test2"
+            resource_from=self.r_wallet, resource_to=self.r_saving, 
+            way=self.w_transfer, memo="test2"
         )
         res = self.client.get("{}?date_from=2020-06-01".format(url))
         self.assertEqual(res.context['object_list'].count(), 2)
@@ -141,7 +148,9 @@ class KakeiboViewTest(TestCase):
         self.assertEqual(res.context['object_list'].count(), 0)
         res = self.client.get("{}?usages={}&ways={}".format(url, self.u_shopping.pk, self.w_pay))
         self.assertEqual(res.context['object_list'].count(), 1)
-        res = self.client.get("{}?resources_from={}&resources_to={}".format(url, self.r_wallet.pk, self.r_saving.pk))
+        res = self.client.get(
+            "{}?resources_from={}&resources_to={}".format(url, self.r_wallet.pk, self.r_saving.pk)
+        )
         self.assertEqual(res.context['object_list'].count(), 1)
         res = self.client.get("{}?currency={}".format(url, "USD"))
         self.assertEqual(res.context['object_list'].count(), 1)
@@ -198,7 +207,8 @@ class KakeiboViewTest(TestCase):
         res = self.client.post(url, data2)
         kakeibo_updated = Kakeibo.objects.get(pk=kakeibo.pk)
         self.assertEqual(data2['fee'], kakeibo_updated.fee)
-        self.assertRedirects(res, reverse("kakeibo:kakeibo_detail", kwargs={"pk": kakeibo_updated.pk}))
+        self.assertRedirects(
+            res, reverse("kakeibo:kakeibo_detail", kwargs={"pk": kakeibo_updated.pk}))
         # ~~~~~~~~~~USD~~~~~~~~~~~~~~
         data_usd = {
             "date": "2021-06-01",
@@ -261,7 +271,8 @@ class KakeiboViewTest(TestCase):
         event_created = Event.objects.last()
         # ~~~~~~~~~~~~~~~~ assert ~~~~~~~~~~~~~~~~
         self.assertEqual(data['sum_plan'], event_created.sum_plan)
-        self.assertRedirects(response, reverse("kakeibo:event_detail", kwargs={"pk": event_created.pk}))
+        self.assertRedirects(
+            response, reverse("kakeibo:event_detail", kwargs={"pk": event_created.pk}))
         self.assertEqual(1, Event.objects.all().count())
 
     def test_event_update(self):
@@ -294,7 +305,8 @@ class KakeiboViewTest(TestCase):
         event_updated = Event.objects.get(pk=event.pk)
         # ~~~~~~~~~~~~~~~~ assert ~~~~~~~~~~~~~~~~
         self.assertEqual(data2['sum_plan'], event_updated.sum_plan)
-        self.assertRedirects(response, reverse("kakeibo:event_detail", kwargs={"pk": event_updated.pk}))
+        self.assertRedirects(
+            response, reverse("kakeibo:event_detail", kwargs={"pk": event_updated.pk}))
         self.assertEqual(1, Event.objects.all().count())
 
     def test_event_delete(self):
@@ -376,3 +388,159 @@ class KakeiboViewTest(TestCase):
     # ========================================
     # Credit
     # ========================================
+    def test_credit_import(self):    
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:credit_import")
+        self.assertEqual("/kakeibo/credit/import", url)
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertRedirects(res, reverse("kakeibo:kakeibo_top"))
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        res = self.client.post(url)
+        self.assertRedirects(res, reverse("kakeibo:kakeibo_top"))
+
+
+    def test_credit_link(self):
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        # Credit
+        d1 = {
+            "fee": 1000,
+            "date": "2020-07-16",
+            "debit_date": "2020-09-01",
+            "name": "UBER EATS",
+            "memo": "test",
+            "card": "SFC",
+            "currency": "JPY",
+        }
+        d2 = {
+            "fee": 1000,
+            "date": "2020-07-13",
+            "debit_date": "2020-08-01",
+            "name": "UBER EATS",
+            "memo": "test",
+            "card": "SFC",
+            "currency": "JPY",
+        }
+        d3 = {
+            "fee": 1000,
+            "date": "2020-07-13",
+            "debit_date": "2020-08-01",
+            "name": "Amazon",
+            "memo": "test",
+            "card": "SFC",
+            "currency": "JPY",
+        }
+        c1 = Credit.objects.create(**d1)
+        c2 = Credit.objects.create(**d2)
+        c3 = Credit.objects.create(**d3)
+        # kakeibo
+        d4 = {
+            "date": "2020-07-15",
+            "fee": 1000,
+            "memo": "Amazon",
+            "way": self.w_credit,
+            "usage": self.u_shopping,
+        }
+        k4 = Kakeibo.objects.create(**d4)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:credit_link")
+        self.assertEqual("/kakeibo/credit/link", url)
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "credit_link.html")
+        self.assertEqual(res.context['total'], d3['fee']+d2['fee']+d1['fee'])
+        # debit_dateを指定
+        res = self.client.get(url+"?debit_date=2020-08-01")
+        self.assertEqual(res.context['total'], d3['fee']+d2['fee'])
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        num_before = Credit.objects.filter(is_active=True).count()
+        num_before_kakeibo = Kakeibo.objects.filter(is_active=True).count()
+        post_data = {
+            f"id_{c1.pk}": "new",
+            f"usage_{c1.pk}": self.u_lunch.pk,
+            f"id_{c2.pk}": "delete",
+            f"id_{c3.pk}": k4.pk,
+        }
+        res = self.client.post(url, data=post_data)
+        num_after = Credit.objects.filter(is_active=True).count()
+        num_after_kakeibo = Kakeibo.objects.filter(is_active=True).count()
+        # 同ページにリダイレクト
+        self.assertRedirects(res, reverse("kakeibo:credit_link"))
+        # c1：新規Kakiebo作成
+        k_new = Kakeibo.objects.last()
+        self.assertEqual(num_before_kakeibo, num_after_kakeibo-1)
+        self.assertEqual(Credit.objects.get(pk=c1.pk), k_new.credit)
+        self.assertEqual(post_data[f"usage_{c1.pk}"], k_new.usage.pk)
+        # c2：delete
+        self.assertFalse(Credit.objects.get(pk=c2.pk).is_active)
+        self.assertEqual(num_before, num_after+1)
+        # c3:link with k4
+        self.assertEqual(Credit.objects.get(pk=c3.pk), Kakeibo.objects.get(pk=k4.pk).credit)
+
+        
+    def test_credit_link_from_kakeibo(self):
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        # kakeibo
+        d1 = {
+            "date": "2020-07-15",
+            "fee": 1000,
+            "memo": "test",
+            "way": self.w_credit,
+            "usage": self.u_shopping,
+        }
+        d2 = {
+            "date": "2020-08-15",
+            "fee": 2000,
+            "memo": "test",
+            "way": self.w_credit,
+            "usage": self.u_shopping,
+        }
+        d3 = {
+            "date": "2020-08-15",
+            "fee": 2000,
+            "memo": "test",
+            "way": self.w_pay,
+            "usage": self.u_shopping,
+        }
+        k1 = Kakeibo.objects.create(**d1)
+        k2 = Kakeibo.objects.create(**d2)
+        k3 = Kakeibo.objects.create(**d3)
+        # Credit
+        d4 = {
+            "fee": 1000,
+            "date": "2020-07-15",
+            "debit_date": "2020-08-01",
+            "name": "UBER EATS",
+            "memo": "test",
+            "card": "SFC",
+            "currency": "JPY",
+        }
+        c4 = Credit.objects.create(**d4)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:credit_link_from_kakeibo")
+        self.assertEqual("/kakeibo/credit/link_from_kakeibo", url)
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        self.assertTemplateUsed(res, "credit_link_from_kakeibo.html")
+        self.assertEqual(res.context['total'], d2['fee']+d1['fee'])
+        # target_dateを指定
+        res = self.client.get(url+"?target_date=2020-08-01")
+        self.assertEqual(res.context['total'], d2['fee'])
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        num_before = Kakeibo.objects.filter(way=self.w_credit, is_active=True).count()
+        post_data = {
+            f"id_{k1.pk}": "link",
+            f"credit_{k1.pk}": c4.pk,
+            f"id_{k2.pk}": "delete",
+        }
+        res = self.client.post(url, data=post_data)
+        num_after = Kakeibo.objects.filter(way=self.w_credit, is_active=True).count()
+        # 同ページにリダイレクト
+        self.assertRedirects(res, reverse("kakeibo:credit_link_from_kakeibo"))
+        # k2がdeleteされる
+        self.assertFalse(Kakeibo.objects.get(pk=k2.pk).is_active)
+        self.assertEqual(num_before, num_after+1)
+        # k1がc4に紐づく
+        self.assertEqual(Kakeibo.objects.get(pk=k1.pk).credit, c4)
