@@ -34,16 +34,12 @@ pipeline {
             dockerImage = docker.build image_name
             sh command
             sh 'cat d.yaml'
-            TESTRES = sh(
-              script: 'docker-compose -f d.yaml run --rm backend_test',
-              returnStatus: true
-            )
-            print TESTRES
+            sh 'docker-compose -f d.yaml run --rm backend_test'
+            RES = sh(script: 'tail -n2 tmp | grep "FAILED"', returnStdout: true)
             sh 'docker-compose -f d.yaml down'
-            if (TESTRES) {
+            if (RES) {
               error 'Test failed'
             }
-            sh 'docker-compose -f d.yaml run --rm backend_test'
         }
       }
     }
