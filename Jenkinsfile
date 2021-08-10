@@ -34,8 +34,15 @@ pipeline {
             dockerImage = docker.build image_name
             sh command
             sh 'cat d.yaml'
-            sh 'docker-compose -f d.yaml up '
+            TESTRES = sh(
+              script: 'docker-compose -f d.yaml up ',
+              returnStatus: true
+            )
             sh 'docker-compose -f d.yaml down'
+            if (TESTRES) {
+              error 'Test failed'
+            }
+            
         }
       }
     }
