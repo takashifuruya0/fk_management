@@ -38,6 +38,8 @@ pipeline {
               script: 'docker-compose -f d.yaml up --exit-code-from backend_test',
               returnStatus: true
             )
+            print TESTRES
+            sh 'docker-compose -f d.yaml up --exit-code-from backend_test'
             sh 'docker-compose -f d.yaml down'
             if (TESTRES) {
               error 'Test failed'
