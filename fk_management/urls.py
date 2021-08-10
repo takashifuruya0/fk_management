@@ -14,19 +14,34 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import path, include
 from django.conf import settings
 from django.views.generic import TemplateView
+
+
+class TopView(TemplateView):
+    template_name="top.html"
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            # return super().get(request)
+            return redirect("/auth/login")
+        elif request.user.is_superuser:
+            return redirect("kakeibo:kakeibo_top")
+        else:
+            return redirect("kakeibo:shared_top")
+
 
 urlpatterns = [
     path('admin/', admin.site.urls, name="admin"),
     path('auth/', include('allauth.urls')),
     path("kakeibo/", include("kakeibo.urls")),
-    path("", TemplateView.as_view(template_name="top.html"), name="top"),
+    path("", TopView.as_view(), name="top"),
 ]
 
 if settings.DEBUG:
-     import debug_toolbar
-     urlpatterns += [
-         path('__debug__/', include(debug_toolbar.urls)),
-     ]
+    import debug_toolbar
+    urlpatterns += [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ]
