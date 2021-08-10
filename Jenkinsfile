@@ -35,16 +35,15 @@ pipeline {
             sh command
             sh 'cat d.yaml'
             TESTRES = sh(
-              script: 'docker-compose -f d.yaml up --exit-code-from backend_test',
+              script: 'docker-compose -f d.yaml run --rm backend_test',
               returnStatus: true
             )
             print TESTRES
-            sh 'docker-compose -f d.yaml up --exit-code-from backend_test'
             sh 'docker-compose -f d.yaml down'
             if (TESTRES) {
               error 'Test failed'
             }
-            
+            sh 'docker-compose -f d.yaml run --rm backend_test'
         }
       }
     }
