@@ -34,8 +34,15 @@ pipeline {
             dockerImage = docker.build image_name
             sh command
             sh 'cat d.yaml'
-            sh 'docker-compose -f d.yaml up '
-            sh 'docker-compose -f d.yaml down'
+            sh 'docker-compose -f d.yaml run --rm backend_test'
+            // 出力したファイルの下から二行目をチェック。OKならば、もんだいなし
+            RES = sh(script: 'tail -n2 tmp | head -n1', returnStdout: true).trim()
+            // sh 'docker-compose -f d.yaml down'
+            if (RES == "OK") {
+              print RES
+            } else {
+              error RES
+            }
         }
       }
     }

@@ -41,26 +41,6 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <!--shared-->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="fas fa-people-carry"></i>&nbsp;共通家計簿
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_top'%}">
-                    <i class="fas fa-tachometer-alt"></i>&nbsp;ダッシュボード
-                </a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_list' %}">
-                  <i class="fas fa-list"></i>&nbsp;レコード一覧
-                </a></li>
-              </ul>
-            </li>
-<!--            <li class="nav-item">-->
-<!--              <a class="nav-link" href="{%url 'kakeibo:shared_top'%}">-->
-<!--               <i class="fas fa-people-carry"></i> 共通家計簿-->
-<!--              </a>-->
-<!--            </li>-->
             {% if request.user.is_staff %}
             <!--kakeibo-->
             <li class="nav-item dropdown">
@@ -87,6 +67,23 @@
                 </a></li>
               </ul>
             </li>
+            {% endif %}
+            <!--shared-->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                <i class="fas fa-people-carry"></i>&nbsp;共通家計簿
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_top'%}">
+                    <i class="fas fa-tachometer-alt"></i>&nbsp;ダッシュボード
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_list' %}">
+                  <i class="fas fa-list"></i>&nbsp;レコード一覧
+                </a></li>
+              </ul>
+            </li>
+            {% if request.user.is_staff %}
             <!--asset-->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">

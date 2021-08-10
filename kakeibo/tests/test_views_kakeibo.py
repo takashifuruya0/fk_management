@@ -145,11 +145,13 @@ class KakeiboViewTest(TestCase):
         # ~~~~~~~~~~~~~~~~ logout ~~~~~~~~~~~~~~~~
         self.client.logout()
         res = self.client.get(url)
-        self.assertRedirects(res, "/")
+        self.assertTemplateNotUsed("kakeibo_top.html")
+        # self.assertRedirects(res, "/auth/login/")
         # ~~~~~~~~~~~~~~~~ user without permission ~~~~~~~~~~~~~~~~
         self.client.force_login(get_user_model().objects.get(username="user"))
         res = self.client.get(url)
-        self.assertRedirects(res, "/")
+        self.assertTemplateNotUsed("kakeibo_top.html")
+        # self.assertRedirects(res, "/auth/login/")
 
     def test_kakeibo_list(self):
         """
