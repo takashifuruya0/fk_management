@@ -35,7 +35,7 @@ pipeline {
             sh command
             sh 'cat d.yaml'
             TESTRES = sh(
-              script: 'docker-compose -f d.yaml up ',
+              script: 'docker-compose -f d.yaml up --exit-code-from backend_test',
               returnStatus: true
             )
             sh 'docker-compose -f d.yaml down'
