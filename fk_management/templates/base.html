@@ -8,7 +8,7 @@
 
 <html>
   <head>
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %}:fk-management v2</title>
     <!-- Required meta tags -->
 <!--    <meta charset="utf-8">-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
@@ -33,8 +33,9 @@
     <nav class="navbar navbar-expand-lg bg-light navbar-light navbar-toggleable-lg">
       <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'top' %}">
-          <img src="{% static 'menta.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
-          fk_management v2
+          {% comment %} <img src="{% static 'menta.png' %}" width="30" height="30" class="d-inline-block align-top" alt=""> {% endcomment %}
+          <i class="fas fa-cat"></i>
+          fk-management v2
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
