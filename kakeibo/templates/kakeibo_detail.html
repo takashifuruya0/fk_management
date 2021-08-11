@@ -37,11 +37,11 @@ Kakeibo Detail
               <td>
                 {%if object.currency == 'JPY'%}
                   <label class="badge bg-info">
-                    <i class="fas fa-yen-sign"></i>
+                    <i class="fas fa-yen-sign"></i>&nbsp;JPY
                   </label>
                 {%elif object.currency == 'USD'%}
                   <label class="badge bg-warning">
-                    <i class="fas fa-dollar-sign"></i>
+                    <i class="fas fa-dollar-sign"></i>&nbsp;USD
                   </label>
                 {%endif%}
               </td>
@@ -90,6 +90,25 @@ Kakeibo Detail
               <td>
                 <a href="{%url 'kakeibo:event_detail' pk=object.event.pk%}" class="btn btn-sm btn-info">
                   {{object.event}}
+                </a>
+              </td>
+            </tr>
+            {% endif %}
+            {% if object.exchange_from %}
+            <tr>
+              <th>Exchange (To)</th>
+              <td>
+                <a href="{%url 'kakeibo:kakeibo_detail' pk=object.exchange_from.kakeibo_to.pk%}">
+                  Link: {{object.exchange_from.kakeibo_to.fee |usd}}
+                </a>
+              </td>
+            </tr>
+            {% elif object.exchange_to %}
+            <tr>
+              <th>Exchange (From)</th>
+              <td>
+                <a href="{%url 'kakeibo:kakeibo_detail' pk=object.exchange_to.kakeibo_from.pk%}">
+                  Link: {{object.exchange_to.kakeibo_from.fee |yen}}
                 </a>
               </td>
             </tr>
