@@ -21,14 +21,14 @@
   <div class="row">
     <div class="col-12 col-lg-9">
       <h3>
-        共通家計簿({{target_ym.year}}/{{target_ym.month}})
+        <i class="fas fa-people-carry"></i> 共通家計簿({{target_ym.year}}/{{target_ym.month}})
         {%if is_black %}
         <span class="badge bg-dark">
-          黒字：{{diff |mul:-1 |yen}}
+          黒字：{{diff |mul:-1 |yen}} <i class="fas fa-thumbs-up"></i>
         </span>
         {% else %}
         <span class="badge bg-danger">
-          赤字：{{diff |yen}}
+          赤字：{{diff |yen}} <i class="fas fa-thumbs-down"></i>
         </span>
         {% endif %}
       </h3>
@@ -94,8 +94,8 @@
           <table class="table">
             <tr>
               <th>用途</th>
-              <th class="right">{{target_ym.year}}年{{target_ym.month}}月</th>
-              <th class="right">{{last_ym.year}}年{{last_ym.month}}月</th>
+              <th class="right">{{target_ym.year}}/{{target_ym.month}}</th>
+              <th class="right">{{last_ym.year}}/{{last_ym.month}}</th>
             </tr>
             {% for k, u in usages.items %}
             <tr>
