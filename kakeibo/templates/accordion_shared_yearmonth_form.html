@@ -1,0 +1,19 @@
+<!-- Create -->
+<div class="accordion-item">
+  <h4 class="accordion-header" id="headingYearmonth">
+    <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+      data-bs-target="#collapseYearmonth" aria-expanded="true" aria-controls="collapseYearmonth">
+      <i class="fas fa-plus"></i>&nbsp;年月指定
+    </button>
+  </h4>
+  <div id="collapseYearmonth" class="accordion-collapse collapse" 
+    aria-labelledby="headingYearmonth" data-bs-parent="#accordionExample">
+    <div class="accordion-body">
+      <form class="form" method="GET" action="">
+        <input type="month" name="target_ym" value="{{initial_val}}">
+        <input type="submit" class="btn btn-primary btn-sm" value="送信">
+      </form>
+    </div>
+  </div>
+</div>
+<hr>
