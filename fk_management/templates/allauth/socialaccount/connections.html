@@ -30,7 +30,7 @@ Social Connections
             <p>{% blocktrans %}You can sign in to your account using any of the following third party accounts:{% endblocktrans %}</p>
 
 
-            <form method="post" action="{% url 'socialaccount_connections' %}">
+            <form method="post" action="{% url 'socialaccount_connections' %}" class="form">
             {% csrf_token %}
 
             <fieldset>
@@ -51,7 +51,9 @@ Social Connections
             {% endfor %}
 
             <div>
-            <button type="submit">{% trans 'Remove' %}</button>
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-unlink"></i> {% trans 'Remove' %}
+            </button>
             </div>
 
             </fieldset>
