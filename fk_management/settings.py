@@ -272,6 +272,9 @@ LOGGING = {
 # output email content on console
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# LINE
+LINE_ACCESS_TOKEN = env('LINE_ACCESS_TOKEN')
+
 
 # Model Choice: Generator不可
 CHOICES_CARD = (
