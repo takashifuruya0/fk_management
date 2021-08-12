@@ -196,9 +196,9 @@ SOCIALACCOUNT_PROVIDERS = {
 ACCOUNT_EMAIL_VERIFICATION = "none"  # mandatory / optional / none
 AUTH_USER_MODEL = "accounts.CustomUser"
 SOCIALACCOUNT_AUTO_SIGNUP = False
-#ACCOUNT_FORMS = {
-#    'signup': 'accounts.forms.CustomSignupForm',
-#}
+ACCOUNT_FORMS = {
+   'signup': 'accounts.forms.UserCreationForm',
+}
 
 ENVIRONMENT = "default"
 
@@ -264,6 +264,10 @@ LOGGING = {
         },
     }
 }
+
+# output email content on console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 
 # Model Choice: Generator不可
 CHOICES_CARD = (

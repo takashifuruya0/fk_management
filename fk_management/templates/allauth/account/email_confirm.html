@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load account socialaccount %}
+{% load i18n %}
+
+
+
+{% block title %}
+Email Confirmation
+{% endblock %}
+
+{% block page-title %}
+Email Confirmation
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-6 offset-sm-3">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Email Confirmation</h2>
+        </div>
+        <div class="card-body">
+          {% if confirmation %}
+
+          {% user_display confirmation.email_address.user as user_display %}
+
+          <p>{% blocktrans with confirmation.email_address.email as email %}Please confirm that <a href="mailto:{{ email }}">{{ email }}</a> is an e-mail address for user {{ user_display }}.{% endblocktrans %}</p>
+
+          <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+          {% csrf_token %}
+              <button class="btn btn-primary" type="submit">{% trans 'Confirm' %}</button>
+          </form>
+
+          {% else %}
+
+          {% url 'account_email' as email_url %}
+
+          <p>{% blocktrans %}This e-mail confirmation link expired or is invalid. Please <a href="{{ email_url }}">issue a new e-mail confirmation request</a>.{% endblocktrans %}</p>
+
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
