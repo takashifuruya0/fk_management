@@ -30,12 +30,12 @@
         </div>
         <div class="card-body table-responsive">
           <h5>
-            {{object.name}}
             {% if object.kind == "返済" %}
             <label class="badge bg-warning">返済</label>
             {% elif object.kind == "貯金" %}
             <label class="badge bg-success">貯金</label>
             {% endif %}
+            {{object.name}}
           </h5>
           <div class="progress" style="height: 40px;">
             <div class="progress-bar" role="progressbar" style="width: {{object.progress_100}}%" 
@@ -49,7 +49,6 @@
             </div>
             {% endwith %}
           </div>
-          
           <table class="table">
             <tr>
               <th>開始日</th>
@@ -72,34 +71,6 @@
               <td>{{object.detail |default:"" |linebreaksbr}}</td>
             </tr>
           </table>
-          <hr>
-          <h5>一覧</h5>
-          <table class="table">
-            <tr>
-              <th>No</th>
-              <th>日付</th>
-              <th class="right">金額</th>
-              <th>支払者</th>
-              <th>メモ</th>
-            </tr>
-            {% for ob in object_list %}
-            <tr>
-              <td>{{ob.pk}}</td>
-              <td>{{ob.date}}</td>
-              <td class="right">{{ob.val |yen}}</td>
-              <td>{{ob.paid_by}}</td>
-              <td>{{ob.memo |default:"-"}}</td>
-            </tr>
-            {% endfor %}
-          </table>
-          <div class="d-none d-sm-block">
-            {% bootstrap_pagination page_obj url="?page=1" size="md" pages_to_show=9%}
-          </div>
-          <div class="d-block d-sm-none">
-            {% bootstrap_pagination page_obj url="?page=1" size="sm" pages_to_show=3%}
-          </div>
-        </div>
-        <div class="card-footer">
           <a class="btn btn-info" href="{%url 'kakeibo:shared_resource_update' pk=object.pk%}">
             <i class="fas fa-edit"></i> 更新
           </a>
@@ -111,6 +82,47 @@
             <i class="fas fa-trash-alt"></i> 削除
           </a>
           {% endif %}
+          <hr>
+
+          <h5>
+            <i class="fas fa-sticky-note"></i> 明細一覧
+          </h5>
+          <table class="table">
+            <tr>
+              <th>日付</th>
+              <th class="right">金額</th>
+              <th>支払者</th>
+              <th>メモ</th>
+              <th>編集</th>
+            </tr>
+            {% for ob in object_list %}
+            <tr>
+              <td>{{ob.date}}</td>
+              <td class="right">{{ob.val |yen}}</td>
+              <td>{{ob.paid_by}}</td>
+              <td>{{ob.memo |default:"-"}}</td>
+              <td>
+                <a href="{%url 'kakeibo:shared_transaction_update' pk=ob.pk%}" class="btn btn-info">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{%url 'kakeibo:shared_transaction_delete' pk=ob.pk%}" class="btn btn-danger">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </table>
+          <div class="d-none d-sm-block">
+            {% bootstrap_pagination page_obj url="?page=1" size="md" pages_to_show=9%}
+          </div>
+          <div class="d-block d-sm-none">
+            {% bootstrap_pagination page_obj url="?page=1" size="sm" pages_to_show=3%}
+          </div>
+          <a class="btn btn-primary" href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{object.pk}}">
+            <i class="fas fa-plus"></i> 明細追加
+          </a>
+        </div>
+        <div class="card-footer">
         </div>
       </div>
     </div>

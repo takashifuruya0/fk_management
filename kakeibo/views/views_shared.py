@@ -1,16 +1,16 @@
-from django.shortcuts import render
 from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic.list import MultipleObjectMixin
 from django.contrib import messages
-from django.shortcuts import redirect, reverse
+from django.shortcuts import redirect
+from django.urls import reverse
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
 from django.contrib import messages
 import math
 from kakeibo.models import Resource, SharedKakeibo, Budget, Usage, SharedResource, SharedTransaction
-from kakeibo.forms import SharedForm, SharedSearchForm, SharedResourceForm
+from kakeibo.forms import SharedForm, SharedSearchForm, SharedResourceForm, SharedTransactionForm
 from kakeibo.functions import calculation_shared
 # Create your views here.
 
@@ -55,7 +55,7 @@ class SharedTop(LoginRequiredMixin, TemplateView):
                 "lm": lm_sum if lm_sum else 0,
             }
         # SharedResource
-        shared_resources = SharedResource.objects.filter(date_close=None)
+        shared_resources = SharedResource.objects.filter(date_close=None, is_active=True).order_by('-pk')
         shared_resourcce_form = SharedResourceForm(initial={"date": date.today()})
         # return
         context.update({
@@ -69,6 +69,7 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             "usages": usages,
             "shared_resources": shared_resources,
             "shared_resource_form": shared_resourcce_form,
+            "shared_transaction_form": SharedTransactionForm()
         })
         return context
 
@@ -159,7 +160,7 @@ class SharedDelete(LoginRequiredMixin, DeleteView):
 
 class SharedResourceDetail(LoginRequiredMixin, DetailView, MultipleObjectMixin):
     model = SharedResource
-    paginate_by = 10
+    paginate_by = 5
     template_name = "shared_resource_detail.html"
 
     def get_context_data(self, **kwargs):
@@ -173,7 +174,7 @@ class SharedResourceDetail(LoginRequiredMixin, DetailView, MultipleObjectMixin):
 
 class SharedResourceList(LoginRequiredMixin, ListView):
     model = SharedResource
-    paginate_by = 20
+    paginate_by = 10
     template_name = "shared_resource_list.html"
 
     def get_context_data(self, **kwargs):
@@ -200,3 +201,59 @@ class SharedResourceCreate(LoginRequiredMixin, CreateView):
     def get_success_url(self) -> str:
         messages.success(self.request, f"{self.object}を作成しました")
         return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})
+
+
+
+class SharedTransactionDetail(LoginRequiredMixin, DetailView):
+    model = SharedTransaction
+    template_name = "shared_transaction_detail.html"
+
+
+class SharedTransactionCreate(LoginRequiredMixin, CreateView):
+    model = SharedTransaction
+    template_name = "shared_transaction_create.html"
+    form_class = SharedTransactionForm
+
+    def get_success_url(self) -> str:
+        messages.success(self.request, f"{self.object}を作成しました")
+        return reverse('kakeibo:shared_transaction_detail', kwargs={"pk": self.object.pk})
+
+    def get_form(self, form_class=form_class):
+        form = super().get_form(form_class=form_class)
+        form.initial={
+            "shared_resource": self.request.GET.get("shared_resource", None),
+            "date": date.today(),
+            "paid_by": self.request.user,
+        }
+        return form 
+
+class SharedTransactionUpdate(LoginRequiredMixin, UpdateView):
+    model = SharedTransaction
+    template_name = "shared_transaction_update.html"
+    form_class = SharedTransactionForm
+
+    def get_success_url(self) -> str:
+        messages.success(self.request, f"{self.object}を更新しました")
+        return reverse('kakeibo:shared_transaction_detail', kwargs={"pk": self.object.pk})
+
+
+class SharedTransactionDelete(LoginRequiredMixin, DeleteView):
+    model = SharedTransaction
+    template_name = "shared_transaction_delete.html"
+
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.is_active:
+            messages.warning(request, "{}は削除済みです".format(obj))
+            return redirect("kakeibo:shared_top") 
+        return super(SharedTransactionDelete, self).get(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.shared_resource.pk})
+
+
+    def post(self, request, *args, **kwargs):
+        ob = self.get_object()
+        result = super().delete(request, *args, **kwargs)
+        messages.success(self.request, '「{}」を削除しました'.format(ob))
+        return result

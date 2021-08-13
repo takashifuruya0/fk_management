@@ -128,7 +128,7 @@
         <div class="card-body">
           <table class="table">
             <tr>
-              <th>詳細</th>
+              <th>詳細/追加</th>
               <th>名前</th>
               <th class="right">実績</th>
               <th class="d-none d-sm-table-cell right">目標</th>
@@ -138,6 +138,10 @@
               <td>
                 <a href="{%url 'kakeibo:shared_resource_detail' pk=sr.pk%}" class="btn btn-info btn-sm btn-block">
                   <i class="fas fa-external-link-square-alt"></i>
+                </a>
+                <a class="btn btn-primary btn-sm" 
+                  href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{sr.pk}}">
+                  <i class="fas fa-plus"></i>
                 </a>
               </td>
               <td>

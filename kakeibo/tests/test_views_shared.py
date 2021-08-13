@@ -297,3 +297,285 @@ class SharedViewTest(TestCase):
         self.client.post(url, data)
         sr_updated = SharedResource.objects.get(pk=sr.pk)
         self.assertNotEqual(sr_updated.val_goal, data['val_goal'])
+
+    def test_shared_resource_detail(self):
+        """
+        SharedResourceDetail: Normal GET
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_detail", kwargs={"pk": sr.pk})
+        self.assertEqual(f"/kakeibo/shared/resource/{sr.pk}", url)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "shared_resource_detail.html")
+
+    # ========================================
+    # SharedTransaction
+    # ========================================
+    def test_shared_transaction_detail(self):
+        """
+        SharedTransactionDetail: Normal GET
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        st = SharedTransaction.objects.create(
+            shared_resource=sr, val=1000, date=date.today(), memo="", paid_by=self.user_hoko
+        )
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_detail", kwargs={"pk": sr.pk})
+        self.assertEqual(f"/kakeibo/shared/transaction/{sr.pk}", url)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "shared_transaction_detail.html")
+
+    def test_shared_transaction_update_get(self):
+        """
+        SharedTransactionUpdate: Normal GET
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        st = SharedTransaction.objects.create(
+            shared_resource=sr, val=1000, date=date.today(), memo="", paid_by=self.user_hoko
+        )
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_update", kwargs={"pk": sr.pk})
+        self.assertEqual(f"/kakeibo/shared/transaction/{sr.pk}/edit", url)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "shared_transaction_update.html")
+
+    def test_shared_transaction_update_post(self):
+        """
+        SharedTransactionUpdate: Normal POST
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        st = SharedTransaction.objects.create(
+            shared_resource=sr, val=1000, date=date.today(), memo="", paid_by=self.user_hoko
+        )
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_update", kwargs={"pk": st.pk})
+        self.assertEqual(f"/kakeibo/shared/transaction/{st.pk}/edit", url)
+        d = {
+            "shared_resource": sr.pk, 
+            "val": 2000, 
+            "date": date.today(), 
+            "memo": "", 
+            "paid_by": self.user_hoko.pk,
+        }
+        response = self.client.post(url, data=d)
+        self.assertRedirects(response, reverse("kakeibo:shared_transaction_detail", kwargs={"pk": st.pk}))
+        st_updated = SharedTransaction.objects.get(pk=st.pk)
+        self.assertEqual(st_updated.val, d['val'])
+
+
+    def test_shared_transaction_update_post_exception(self):
+        """
+        SharedTransactionUpdate: Exception POST
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        st = SharedTransaction.objects.create(
+            shared_resource=sr, val=1000, date=date.today(), memo="", paid_by=self.user_hoko
+        )
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_update", kwargs={"pk": st.pk})
+        self.assertEqual(f"/kakeibo/shared/transaction/{st.pk}/edit", url)
+        d = {
+            "shared_resource": sr.pk, 
+            "val": 2000, 
+            "memo": "", 
+            "paid_by": self.user_hoko.pk
+        }
+        response = self.client.post(url, data=d)
+        st_updated = SharedTransaction.objects.get(pk=st.pk)
+        self.assertNotEqual(st_updated.val, d['val'])
+
+
+    def test_shared_transaction_create_get(self):
+        """
+        SharedTransactionCreate: Normal GET
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_create")
+        self.assertEqual(f"/kakeibo/shared/transaction/create", url)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "shared_transaction_create.html")
+
+    def test_shared_transaction_create_post(self):
+        """
+        SharedTransactionCreate: Normal POST
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_create")
+        d = {
+            "shared_resource": sr.pk, 
+            "val": 2000, 
+            "date": date.today(), 
+            "memo": "", 
+            "paid_by": self.user_hoko.pk,
+        }
+        response = self.client.post(url, data=d)
+        st = SharedTransaction.objects.last()
+        self.assertRedirects(response, reverse("kakeibo:shared_transaction_detail", kwargs={"pk": st.pk}))
+        self.assertEqual(st.val, d['val'])
+
+
+    def test_shared_transaction_create_post_exception(self):
+        """
+        SharedTransactionCreate: Exception POST
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_create")
+        d = {
+            "shared_resource": sr.pk, 
+            "val": 2000, 
+            "memo": "", 
+            "paid_by": self.user_hoko.pk
+        }
+        response = self.client.post(url, data=d)
+        self.assertEqual(SharedTransaction.objects.all().count(), 0)
+
+    def test_shared_transaction_delete_get(self):
+        """
+        SharedTransactionDelte: Normal GET
+        """
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        d = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**d)
+        data = {
+            "date": "2021-06-01",
+            "val": 100,
+            "memo": "test",
+            "paid_by": self.user_takashi,
+            "shared_resource": sr,
+        }
+        st = SharedTransaction.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_delete", kwargs={"pk": st.pk})
+        self.assertEqual(f"/kakeibo/shared/transaction/{st.pk}/delete", url)
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertTemplateUsed(res, "shared_transaction_delete.html")
+
+    def test_shared_transaction_delete_get_exception(self):
+        """
+        SharedTransactionDelte: Exception GET, Inactive
+        """
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        d = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**d)
+        data = {
+            "date": "2021-06-01",
+            "val": 100,
+            "memo": "test",
+            "paid_by": self.user_takashi,
+            "shared_resource": sr,
+            "is_active": False,
+        }
+        st = SharedTransaction.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_delete", kwargs={"pk": st.pk})
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertEqual(SharedResource.objects.all_active().count(), 1)
+        self.assertRedirects(res, reverse("kakeibo:shared_top"))
+
+
+    def test_shared_transaction_delete_post(self):
+        """
+        SharedTransactionDelte: Normal POST
+        """
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        d = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**d)
+        data = {
+            "date": "2021-06-01",
+            "val": 100,
+            "memo": "test",
+            "paid_by": self.user_takashi,
+            "shared_resource": sr,
+        }
+        st = SharedTransaction.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_transaction_delete", kwargs={"pk": st.pk})
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        res = self.client.post(url)
+        self.assertEqual(SharedTransaction.objects.all_active().count(), 0)
+        self.assertEqual(SharedResource.objects.all_active().count(), 1)
+        self.assertRedirects(res, reverse("kakeibo:shared_resource_detail", kwargs={"pk": sr.pk}))
