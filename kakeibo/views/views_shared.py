@@ -61,7 +61,7 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             "is_black": is_black,
             "target_ym": target_ym,
             "last_ym": last_ym,
-            "form": SharedForm(),
+            "form": SharedForm(initial={"paid_by": self.request.user, "date": date.today()}),
             "initial_val": initial_val,
             "usages": usages,
         })
@@ -100,7 +100,7 @@ class SharedList(LoginRequiredMixin, ListView):
         if params:
             messages.info(self.request, "検索結果を表示します。{}".format(params))
         context.update({
-            'form': SharedForm(),
+            'form': SharedForm(initial={"paid_by": self.request.user, "date": date.today()}),
             "search_form": SharedSearchForm(self.request.GET),
             "params": params,
         })
