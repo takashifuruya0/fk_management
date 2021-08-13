@@ -253,7 +253,7 @@ class Command(BaseCommand):
                     "action": {
                         "type": "uri",
                         "label": "fk-management",
-                        "uri": "http://dev.fk-management.com/kakeibo/shared"
+                        "uri": settings.BASE_URL
                     },
                     "style": "primary"
                 }
