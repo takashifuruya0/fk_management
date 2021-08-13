@@ -10,7 +10,7 @@ from django.contrib import messages
 import math
 from kakeibo.models import SharedKakeibo, Budget, Usage
 from kakeibo.forms import SharedForm, SharedSearchForm
-from kakeibo.functions import calc_shared
+from kakeibo.functions import calculation_shared
 # Create your views here.
 
 
@@ -34,14 +34,14 @@ class SharedTop(LoginRequiredMixin, TemplateView):
         # budget
         budget = Budget.objects.filter(date__lte=target_ym).latest('date')
         # payment
-        context.update(calc_shared.calc_payment(records_this_month))
+        context.update(calculation_shared.calc_payment(records_this_month))
         # Black/Red
         diff = context['payment']['total'] - budget.total
         is_black = diff < 0
         # seisan
-        context.update(calc_shared.calc_seisan(budget, diff, context['payment']))
+        context.update(calculation_shared.calc_seisan(budget, diff, context['payment']))
         # p_budget
-        context.update(calc_shared.calc_p_budget(budget, diff))
+        context.update(calculation_shared.calc_p_budget(budget, diff))
         # usage
         usages_shared = Usage.objects.filter(is_active=True, is_shared=True).prefetch_related('sharedkakeibo_set')
         usages = dict()

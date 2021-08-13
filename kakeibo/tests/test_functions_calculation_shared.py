@@ -2,14 +2,14 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from kakeibo.models import SharedKakeibo, Budget, Usage
-from kakeibo.functions import calc_shared
+from kakeibo.functions import calculation_shared
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import math
 # Create your tests here.
 
 
-class CalcSharedTest(TestCase):
+class CalculationSharedTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -45,10 +45,10 @@ class CalcSharedTest(TestCase):
         SharedKakeibo.objects.create(fee=6000, paid_by=self.u_t, usage=self.u_elec, date=today)
         SharedKakeibo.objects.create(fee=6000, paid_by=self.u_t, usage=self.u_gas, date=today)
         budget = Budget.objects.create(takashi=10000, hoko=6000, date="1999-01-01")
-        payment = calc_shared.calc_payment(SharedKakeibo.objects.all())['payment']
+        payment = calculation_shared.calc_payment(SharedKakeibo.objects.all())['payment']
         diff = SharedKakeibo.objects.all().aggregate(sum=Sum('fee'))['sum'] - budget.total
         # calculation
-        seisan = calc_shared.calc_seisan(budget=budget,diff=diff, payment=payment)
+        seisan = calculation_shared.calc_seisan(budget=budget,diff=diff, payment=payment)
         # assert
         test_scenarios = [
             (seisan['seisan']['takashi'], 0),
@@ -70,10 +70,10 @@ class CalcSharedTest(TestCase):
         SharedKakeibo.objects.create(fee=10000, paid_by=self.u_t, usage=self.u_elec, date=today)
         SharedKakeibo.objects.create(fee=6000, paid_by=self.u_t, usage=self.u_gas, date=today)
         budget = Budget.objects.create(takashi=10000, hoko=6000, date="1999-01-01")
-        payment = calc_shared.calc_payment(SharedKakeibo.objects.all())['payment']
+        payment = calculation_shared.calc_payment(SharedKakeibo.objects.all())['payment']
         diff = SharedKakeibo.objects.all().aggregate(sum=Sum('fee'))['sum'] - budget.total
         # calculation
-        seisan = calc_shared.calc_seisan(budget=budget,diff=diff, payment=payment)
+        seisan = calculation_shared.calc_seisan(budget=budget,diff=diff, payment=payment)
         # assert
         test_scenarios = [
             (seisan['seisan']['takashi'], 0),
@@ -97,7 +97,7 @@ class CalcSharedTest(TestCase):
         budget = Budget.objects.create(takashi=10000, hoko=6000, date="1999-01-01")
         diff = SharedKakeibo.objects.all().aggregate(sum=Sum('fee'))['sum'] - budget.total
         # calculation
-        p_budget = calc_shared.calc_p_budget(budget, diff)
+        p_budget = calculation_shared.calc_p_budget(budget, diff)
         # assert
         test_scenarios = [
             (p_budget['p_budget']['takashi'], math.floor(10000/16000*100), "takashi"),
@@ -125,7 +125,7 @@ class CalcSharedTest(TestCase):
         budget = Budget.objects.create(takashi=10000, hoko=6000, date="1999-01-01") 
         diff = SharedKakeibo.objects.all().aggregate(sum=Sum('fee'))['sum'] - budget.total
         # calculation
-        p_budget = calc_shared.calc_p_budget(budget, diff)
+        p_budget = calculation_shared.calc_p_budget(budget, diff)
         # assert
         test_scenarios = [
             (p_budget['p_budget']['takashi'], math.floor(10000/18000*100), "takashi"),
@@ -152,7 +152,7 @@ class CalcSharedTest(TestCase):
         SharedKakeibo.objects.create(fee=10000, paid_by=self.u_t, usage=self.u_elec, date=today)
         SharedKakeibo.objects.create(fee=6000, paid_by=self.u_t, usage=self.u_gas, date=today)
         # calculation
-        payment = calc_shared.calc_payment(SharedKakeibo.objects.all())
+        payment = calculation_shared.calc_payment(SharedKakeibo.objects.all())
         # assert
         test_scenarios = [
             (payment['payment']['takashi'], 17000),

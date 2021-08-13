@@ -3,8 +3,19 @@ from django.db.models import Sum
 from kakeibo.models import Budget
 
 def calc_payment(records_this_month):
-    """
-    Calculate payment and payment percentage
+    """Calculate payment and payment percentage
+
+    Args:
+    - records_this_month: Queryset of SharedKakeibo
+
+    Returns: dict
+    - payment
+        - takashi: int: amount paid by takashi
+        - hoko: int: amount paid by hoko 
+        - total: int: total amount
+    - p_payment
+        - takashi: int: ratio of amount paid by takashi (0-100)
+        - hoko: int: ratio of amount paid by hoko (0-100)
     """
     if records_this_month.exists():
         # Payment
@@ -36,8 +47,17 @@ def calc_payment(records_this_month):
     }
 
 def calc_seisan(budget:Budget, diff:int, payment:dict):
-    """
-    Calculate seisan
+    """Calculate seisan
+
+    Args:
+    - budget: Budget Object
+    - diff: int: total payment - total budget
+    - payment: payment dict gained by calc_payment
+
+    Returns: dict
+    - seisan
+        - takashi
+        - hoko
     """
     is_black = diff < 0
     if is_black:
@@ -57,8 +77,17 @@ def calc_seisan(budget:Budget, diff:int, payment:dict):
     }
 
 def calc_p_budget(budget:Budget, diff:int):
-    """
-    Calculate percentage of budget
+    """Calculate percentage of budget
+
+    Args:
+    - budget: Budget Object
+    - diff: int: total payment - total budget
+
+    Returns: dict
+    - p_budget
+        - takashi: int: ratio of budget from takashi per total including over (0-100)
+        - hoko: int: ratio of budget from hoko per total including over (0-100)
+        - over: int: ratio ofover per total including over (0-100)
     """
     is_black = diff < 0
     if is_black:
