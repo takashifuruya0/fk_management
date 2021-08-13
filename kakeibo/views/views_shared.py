@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, CreateView, UpdateView, ListView, DetailView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic.list import MultipleObjectMixin
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
 from datetime import date, datetime
@@ -8,8 +9,8 @@ from dateutil.relativedelta import relativedelta
 from django.db.models import Sum
 from django.contrib import messages
 import math
-from kakeibo.models import SharedKakeibo, Budget, Usage
-from kakeibo.forms import SharedForm, SharedSearchForm
+from kakeibo.models import Resource, SharedKakeibo, Budget, Usage, SharedResource, SharedTransaction
+from kakeibo.forms import SharedForm, SharedSearchForm, SharedResourceForm
 from kakeibo.functions import calculation_shared
 # Create your views here.
 
@@ -30,7 +31,6 @@ class SharedTop(LoginRequiredMixin, TemplateView):
         )
         # last month
         last_ym = target_ym - relativedelta(months=1)
-
         # budget
         budget = Budget.objects.filter(date__lte=target_ym).latest('date')
         # payment
@@ -54,6 +54,9 @@ class SharedTop(LoginRequiredMixin, TemplateView):
                 "tm": tm_sum if tm_sum else 0,
                 "lm": lm_sum if lm_sum else 0,
             }
+        # SharedResource
+        shared_resources = SharedResource.objects.filter(date_close=None)
+        shared_resourcce_form = SharedResourceForm(initial={"date": date.today()})
         # return
         context.update({
             "budget": budget,
@@ -64,6 +67,8 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             "form": SharedForm(initial={"paid_by": self.request.user, "date": date.today()}),
             "initial_val": initial_val,
             "usages": usages,
+            "shared_resources": shared_resources,
+            "shared_resource_form": shared_resourcce_form,
         })
         return context
 
@@ -127,6 +132,7 @@ class SharedUpdate(LoginRequiredMixin, UpdateView):
     form_class = SharedForm
 
     def get_success_url(self):
+        messages.success(self.request, f"{self.object}を更新しました")
         return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
 
 
@@ -151,77 +157,46 @@ class SharedDelete(LoginRequiredMixin, DeleteView):
         return result
 
 
-# def calc_payment(records_this_month):
-#     """
-#     Calculate payment and payment percentage
-#     """
-#     if records_this_month.exists():
-#         # Payment
-#         payment_total = records_this_month.aggregate(sum=Sum('fee'))['sum']
-#         payment_hoko = records_this_month.filter(paid_by__last_name="朋子").aggregate(sum=Sum('fee'))['sum']
-#         if payment_hoko:
-#             payment_takashi = payment_total - payment_hoko
-#         else:
-#             payment_takashi = payment_total
-#             payment_hoko = 0
-#         # Payment (%)
-#         pp_takashi = math.floor(100 * payment_takashi / payment_total)
-#         pp_hoko = 100 - pp_takashi
-#     else:
-#         # Payment
-#         payment_total = payment_hoko = payment_takashi = 0
-#         # Payment (%)
-#         pp_takashi = pp_hoko = 0
-#     return {
-#         "payment": {
-#             "takashi": payment_takashi,
-#             "hoko": payment_hoko,
-#             "total": payment_total,
-#         },
-#         "p_payment": {
-#             "takashi": pp_takashi,
-#             "hoko": pp_hoko,
-#         },
-#     }
+class SharedResourceDetail(LoginRequiredMixin, DetailView, MultipleObjectMixin):
+    model = SharedResource
+    paginate_by = 10
+    template_name = "shared_resource_detail.html"
 
-# def calc_seisan(budget:Budget, diff:int, is_black:bool, payment:dict):
-#     """
-#     Calculate seisan
-#     """
-#     if is_black:
-#         # seisan
-#         seisan_hoko = budget.hoko + diff - payment['hoko']
-#         seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
-#     else:
-#         # seisan
-#         seisan_hoko = budget.hoko + diff/2 - payment['hoko']
-#         seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
-#     seisan_hoko = 0 if seisan_hoko < 0 else math.floor(seisan_hoko/1000)*1000
-#     return {
-#         "seisan": {
-#             "takashi": seisan_takashi,
-#             "hoko": seisan_hoko,
-#         },
-#     }
+    def get_context_data(self, **kwargs):
+        object_list = SharedTransaction.objects.filter(
+            shared_resource=self.get_object(), is_active=True).order_by('-date')
+        res = super(SharedResourceDetail, self).get_context_data(
+            object_list=object_list, **kwargs
+        )
+        return res
 
-# def calc_p_budget(budget:Budget, diff:int, is_black:bool):
-#     """
-#     Calculate percentage of budget
-#     """
-#     if is_black:
-#         # budget (%)
-#         p_takashi = math.floor(100 * budget.takashi / budget.total)
-#         p_hoko = 100 - p_takashi
-#         p_over = 0
-#     else:
-#         # budget (%)
-#         p_over = math.floor(100 * abs(diff) / (budget.total + diff))
-#         p_takashi = math.floor(100 * budget.takashi / (budget.total + diff))
-#         p_hoko = 100 - p_takashi - p_over
-#     return {
-#         'p_budget': {
-#             "takashi": p_takashi,
-#             "hoko": p_hoko,
-#             "over": p_over,
-#         },
-#     }
+
+class SharedResourceList(LoginRequiredMixin, ListView):
+    model = SharedResource
+    paginate_by = 20
+    template_name = "shared_resource_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = SharedResourceForm(initial={"date_open": date.today()})
+        return context
+
+
+class SharedResourceUpdate(LoginRequiredMixin, UpdateView):
+    model = SharedResource
+    template_name = "shared_resource_update.html"
+    form_class = SharedResourceForm
+    
+    def get_success_url(self) -> str:
+        messages.success(self.request, f"{self.object}を更新しました")
+        return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})
+
+
+class SharedResourceCreate(LoginRequiredMixin, CreateView):
+    model = SharedResource
+    template_name = "shared_resource_create.html"
+    form_class = SharedResourceForm
+
+    def get_success_url(self) -> str:
+        messages.success(self.request, f"{self.object}を作成しました")
+        return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})

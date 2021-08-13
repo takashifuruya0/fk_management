@@ -1,5 +1,5 @@
 from django.test import TestCase
-from kakeibo.models import Resource, Usage, SharedKakeibo, Budget
+from kakeibo.models import Resource, Usage, SharedKakeibo, Budget, SharedResource, SharedTransaction
 from kakeibo.forms import SharedForm
 from datetime import date
 from django.contrib.auth import get_user_model
@@ -189,3 +189,111 @@ class SharedViewTest(TestCase):
         res = self.client.post(url)
         self.assertRedirects(res, reverse("kakeibo:shared_list"))
         self.assertEqual(SharedKakeibo.objects.all_active().count(), 0)
+
+    # ========================================
+    # SharedResource
+    # ========================================
+    def test_shared_resource_create_post(self):
+        """
+        SharedResouceCreate: Normal POST
+        """
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_create")
+        self.assertEqual("/kakeibo/shared/resource/create", url)
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金したい！！",
+            "kind": "貯金",
+        }
+        response = self.client.post(url, data)
+        shared_resource_created = SharedResource.objects.last()
+        # assert
+        self.assertRedirects(
+            response, reverse("kakeibo:shared_resource_detail", kwargs={"pk": shared_resource_created.pk})
+        )
+        self.assertEqual(shared_resource_created.val_goal, data['val_goal'])
+        self.assertEqual(SharedResource.objects.all().count(), 1)
+
+    def test_shared_resource_create_post_exception(self):
+        """
+        SharedResouceCreate: Exception, POST, lack of necessary fields
+        """
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_create")
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        data = {
+            "date_open": "2021-04-01",
+            "detail": "t",
+            "kind": "貯金",
+        }
+        response = self.client.post(url, data)
+        
+        # assert
+        self.assertEqual(SharedKakeibo.objects.all().count(), 0)
+
+    def test_shared_resource_list_get(self):
+        """
+        SharedResouceList: Normal GET
+        """
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_list")
+        self.assertEqual("/kakeibo/shared/resource", url)
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        
+
+    def test_shared_resource_update_post(self):
+        """
+        SharedResouceCreate: Normal POST
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金したい！！",
+            "kind": "貯金",
+        }
+        sr = SharedResource.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_update", kwargs={"pk": sr.pk})
+        self.assertEqual(f"/kakeibo/shared/resource/{sr.pk}/edit", url)
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 200000,
+            "detail": "t",
+            "name": "貯金したい",
+            "kind": "貯金",
+        }
+        response = self.client.post(url, data)
+        sr_updated = SharedResource.objects.get(pk=sr.pk)
+        self.assertEqual(sr_updated.val_goal, data['val_goal'])
+        self.assertRedirects(
+            response, reverse('kakeibo:shared_resource_detail', kwargs={"pk": sr_updated.pk})
+        )
+
+    def test_shared_resource_update_post_exception(self):
+        """
+        SharedResouceCreate: Normal POST
+        """
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_update", kwargs={"pk": sr.pk})
+        self.assertEqual(f"/kakeibo/shared/resource/{sr.pk}/edit", url)
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        data = {
+            "val_goal": 200000,
+        }
+        self.client.post(url, data)
+        sr_updated = SharedResource.objects.get(pk=sr.pk)
+        self.assertNotEqual(sr_updated.val_goal, data['val_goal'])

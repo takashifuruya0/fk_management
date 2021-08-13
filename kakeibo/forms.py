@@ -1,7 +1,7 @@
 # coding: UTF-8
 from django import forms
 from django.contrib.auth import get_user_model
-from kakeibo.models import Kakeibo, Usage, SharedKakeibo, Event, Resource, Exchange
+from kakeibo.models import Kakeibo, Usage, SharedKakeibo, Event, Resource, Exchange, SharedResource
 from dal import autocomplete
 from django.conf import settings
 
@@ -101,6 +101,18 @@ class SharedSearchForm(forms.Form):
     )
     memo = forms.CharField(label="メモ", required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
 
+
+class SharedResourceForm(forms.ModelForm):
+    class Meta:
+        model = SharedResource
+        fields = ("name", "kind", "date_open", "val_goal", "detail", )
+        widgets = {
+            'date_open': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "kind": forms.Select(attrs={"class": "form-control"}),
+            "detail": forms.Textarea(attrs={"class": "form-control"}),
+            "val_goal": forms.NumberInput(attrs={"class": "form-control"}),
+        }
 
 class EventForm(forms.ModelForm):
     class Meta:

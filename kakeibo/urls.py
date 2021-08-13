@@ -7,6 +7,7 @@ from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, Eve
 from kakeibo.views.views_kakeibo import ExchangeCreate
 from kakeibo.views.views_autocomplete import UsageAutocomplete, ResourceAutocomplete
 from kakeibo.views.views_shared import SharedTop, SharedList, SharedDetail, SharedCreate, SharedUpdate, SharedDelete
+from kakeibo.views.views_shared import SharedResourceDetail, SharedResourceList, SharedResourceUpdate, SharedResourceCreate
 from kakeibo.views.views_credit import CreditImport, CreditLink, CreditLinkFromKakeibo
 
 app_name = 'kakeibo'
@@ -18,6 +19,10 @@ urlpatterns = [
     path('shared/<int:pk>/edit', SharedUpdate.as_view(), name="shared_update"),
     path('shared/<int:pk>/delete', SharedDelete.as_view(), name="shared_delete"),
     path('shared/create', SharedCreate.as_view(), name="shared_create"),
+    path('shared/resource', SharedResourceList.as_view(), name="shared_resource_list"),
+    path('shared/resource/create', SharedResourceCreate.as_view(), name="shared_resource_create"),
+    path('shared/resource/<int:pk>', SharedResourceDetail.as_view(), name="shared_resource_detail"),
+    path('shared/resource/<int:pk>/edit', SharedResourceUpdate.as_view(), name="shared_resource_update"),
     # mine
     path('mine', KakeiboTop.as_view(), name="kakeibo_top"),
     path('mine/list', KakeiboList.as_view(), name="kakeibo_list"),
