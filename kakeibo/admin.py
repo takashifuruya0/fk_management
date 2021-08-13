@@ -17,6 +17,14 @@ class KakeiboInline(admin.TabularInline):
     can_delete = False
 
 
+class SharedTransactionInline(admin.TabularInline):
+    model = SharedTransaction
+    verbose_name = "関連取引"
+    verbose_name_plural = "関連取引"
+    fields = ("date", "val", "memo", "paid_by")
+    can_delete = True
+
+
 # ===========================
 # Resources
 # ===========================
@@ -136,6 +144,22 @@ class ExchangeAdmin(admin.ModelAdmin):
         return "{} ({})".format(obj.kakeibo_to.fee, obj.kakeibo_to.resource_to.currency)
 
 
+class SharedResourceAdmin(admin.ModelAdmin):
+    list_display = [
+        "pk", "name", "kind", "date_open", "date_close", "val_goal", "_val_actual" 
+    ]
+    readonly_fields = ["_val_actual", ]
+    inlines = [SharedTransactionInline, ]
+
+    def _val_actual(self, obj):
+        return obj.val_actual
+    _val_actual.short_description = "実績金額"
+    
+
+class SharedTransactionAdmin(admin.ModelAdmin):
+    list_display = ["pk", "shared_resource", "date", "val", "paid_by", "memo"]
+
+
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Credit, CreditAdmin)
 admin.site.register(Usage, UsageAdmin)
@@ -146,3 +170,5 @@ admin.site.register(Kakeibo, KakeiboAdmin)
 admin.site.register(Target)
 admin.site.register(Budget, BudgetAdmin)
 admin.site.register(Exchange, ExchangeAdmin)
+admin.site.register(SharedResource, SharedResourceAdmin)
+admin.site.register(SharedTransaction, SharedTransactionAdmin)

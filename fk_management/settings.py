@@ -300,6 +300,9 @@ CHOICES_CURRENCY = (
 CHOICES_EXCHANGE_METHOD = (
     ("Wire", "Wire"), ("prestia", "prestia")
 )
+CHOICES_KIND_SHARED_RESOURCE = (
+    ("貯金", "貯金"), ("返済", "返済")
+)
 
 # MAPPING
 MAPPING_RESOURCE = {
