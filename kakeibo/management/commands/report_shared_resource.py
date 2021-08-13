@@ -164,7 +164,7 @@ class Command(BaseCommand):
                     }
                 ]
             },
-            "size": "giga",
+            # "size": "giga",
             "styles": {
                 "footer": {
                     "separator": False
