@@ -10,6 +10,7 @@ from django.contrib import messages
 import math
 from kakeibo.models import SharedKakeibo, Budget, Usage
 from kakeibo.forms import SharedForm, SharedSearchForm
+from kakeibo.functions import calculation_shared
 # Create your views here.
 
 
@@ -29,48 +30,18 @@ class SharedTop(LoginRequiredMixin, TemplateView):
         )
         # last month
         last_ym = target_ym - relativedelta(months=1)
-        records_last_month = SharedKakeibo.objects.filter(
-            is_active=True, date__year=last_ym.year, date__month=last_ym.month
-        )
+
         # budget
         budget = Budget.objects.filter(date__lte=target_ym).latest('date')
-        if records_this_month.exists():
-            # Payment
-            payment_total = records_this_month.aggregate(sum=Sum('fee'))['sum']
-            payment_hoko = records_this_month.filter(paid_by__last_name="朋子").aggregate(sum=Sum('fee'))['sum']
-            if payment_hoko:
-                payment_takashi = payment_total - payment_hoko
-            else:
-                payment_takashi = payment_total
-                payment_hoko = 0
-            # Payment (%)
-            pp_takashi = math.floor(100 * payment_takashi / payment_total)
-            pp_hoko = 100 - pp_takashi
-        else:
-            # Payment
-            payment_total = payment_hoko = payment_takashi = 0
-            # Payment (%)
-            pp_takashi = pp_hoko = 0
+        # payment
+        context.update(calculation_shared.calc_payment(records_this_month))
         # Black/Red
-        diff = payment_total - budget.total
+        diff = context['payment']['total'] - budget.total
         is_black = diff < 0
-        if is_black:
-            # seisan
-            seisan_hoko = budget.hoko + diff - payment_hoko
-            seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
-            # budget (%)
-            p_takashi = math.floor(100 * budget.takashi / budget.total)
-            p_hoko = 100 - p_takashi
-            p_over = 0
-        else:
-            # seisan
-            seisan_hoko = budget.hoko + diff/2 - payment_hoko
-            seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
-            # budget (%)
-            p_over = math.floor(100 * abs(diff) / (budget.total + diff))
-            p_takashi = math.floor(100 * budget.takashi / (budget.total + diff))
-            p_hoko = 100 - p_takashi - p_over
-        seisan_hoko = 0 if seisan_hoko < 0 else math.floor(seisan_hoko/1000)*1000
+        # seisan
+        context.update(calculation_shared.calc_seisan(budget, diff, context['payment']))
+        # p_budget
+        context.update(calculation_shared.calc_p_budget(budget, diff))
         # usage
         usages_shared = Usage.objects.filter(is_active=True, is_shared=True).prefetch_related('sharedkakeibo_set')
         usages = dict()
@@ -83,32 +54,13 @@ class SharedTop(LoginRequiredMixin, TemplateView):
                 "tm": tm_sum if tm_sum else 0,
                 "lm": lm_sum if lm_sum else 0,
             }
-
         # return
         context.update({
             "budget": budget,
-            'p_budget': {
-                "takashi": p_takashi,
-                "hoko": p_hoko,
-                "over": p_over,
-            },
             "diff": diff,
             "is_black": is_black,
             "target_ym": target_ym,
             "last_ym": last_ym,
-            "payment": {
-                "takashi": payment_takashi,
-                "hoko": payment_hoko,
-                "total": payment_total,
-            },
-            "p_payment": {
-                "takashi": pp_takashi,
-                "hoko": pp_hoko,
-            },
-            "seisan": {
-                "takashi": seisan_takashi,
-                "hoko": seisan_hoko,
-            },
             "form": SharedForm(),
             "initial_val": initial_val,
             "usages": usages,
@@ -197,3 +149,79 @@ class SharedDelete(LoginRequiredMixin, DeleteView):
         result = super().delete(request, *args, **kwargs)
         messages.success(self.request, '「{}」を削除しました'.format(ob))
         return result
+
+
+# def calc_payment(records_this_month):
+#     """
+#     Calculate payment and payment percentage
+#     """
+#     if records_this_month.exists():
+#         # Payment
+#         payment_total = records_this_month.aggregate(sum=Sum('fee'))['sum']
+#         payment_hoko = records_this_month.filter(paid_by__last_name="朋子").aggregate(sum=Sum('fee'))['sum']
+#         if payment_hoko:
+#             payment_takashi = payment_total - payment_hoko
+#         else:
+#             payment_takashi = payment_total
+#             payment_hoko = 0
+#         # Payment (%)
+#         pp_takashi = math.floor(100 * payment_takashi / payment_total)
+#         pp_hoko = 100 - pp_takashi
+#     else:
+#         # Payment
+#         payment_total = payment_hoko = payment_takashi = 0
+#         # Payment (%)
+#         pp_takashi = pp_hoko = 0
+#     return {
+#         "payment": {
+#             "takashi": payment_takashi,
+#             "hoko": payment_hoko,
+#             "total": payment_total,
+#         },
+#         "p_payment": {
+#             "takashi": pp_takashi,
+#             "hoko": pp_hoko,
+#         },
+#     }
+
+# def calc_seisan(budget:Budget, diff:int, is_black:bool, payment:dict):
+#     """
+#     Calculate seisan
+#     """
+#     if is_black:
+#         # seisan
+#         seisan_hoko = budget.hoko + diff - payment['hoko']
+#         seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
+#     else:
+#         # seisan
+#         seisan_hoko = budget.hoko + diff/2 - payment['hoko']
+#         seisan_takashi = 0 if seisan_hoko > 0 else abs(seisan_hoko)
+#     seisan_hoko = 0 if seisan_hoko < 0 else math.floor(seisan_hoko/1000)*1000
+#     return {
+#         "seisan": {
+#             "takashi": seisan_takashi,
+#             "hoko": seisan_hoko,
+#         },
+#     }
+
+# def calc_p_budget(budget:Budget, diff:int, is_black:bool):
+#     """
+#     Calculate percentage of budget
+#     """
+#     if is_black:
+#         # budget (%)
+#         p_takashi = math.floor(100 * budget.takashi / budget.total)
+#         p_hoko = 100 - p_takashi
+#         p_over = 0
+#     else:
+#         # budget (%)
+#         p_over = math.floor(100 * abs(diff) / (budget.total + diff))
+#         p_takashi = math.floor(100 * budget.takashi / (budget.total + diff))
+#         p_hoko = 100 - p_takashi - p_over
+#     return {
+#         'p_budget': {
+#             "takashi": p_takashi,
+#             "hoko": p_hoko,
+#             "over": p_over,
+#         },
+#     }

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.line',
     # others
     'debug_toolbar',  # debug-toolbar
     'django_extensions',
@@ -191,14 +192,17 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'online',
         }
-    }
+    },
+    'line': {
+        'SCOPE': ['profile', 'openid'],
+    },
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"  # mandatory / optional / none
 AUTH_USER_MODEL = "accounts.CustomUser"
 SOCIALACCOUNT_AUTO_SIGNUP = False
-#ACCOUNT_FORMS = {
-#    'signup': 'accounts.forms.CustomSignupForm',
-#}
+ACCOUNT_FORMS = {
+   'signup': 'accounts.forms.UserCreationForm',
+}
 
 ENVIRONMENT = "default"
 
@@ -264,6 +268,13 @@ LOGGING = {
         },
     }
 }
+
+# output email content on console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# LINE
+LINE_ACCESS_TOKEN = env('LINE_ACCESS_TOKEN')
+
 
 # Model Choice: Generator不可
 CHOICES_CARD = (

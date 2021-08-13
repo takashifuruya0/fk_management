@@ -10,13 +10,25 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'username')
+        fields = ('email', 'username', "first_name", "last_name")
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if CustomUser.objects.filter(username=username).exists():
+            raise forms.ValidationError("このユーザ名は登録済みです")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError("このメールアドレスは登録済みです")
+        return email
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords don't match")
+            raise forms.ValidationError("パスワードが一致しません")
         return password2
 
     def save(self, commit=True):

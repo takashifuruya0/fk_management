@@ -140,11 +140,14 @@
                 <li><hr class="dropdown-divider"></li>
                 {% endif %}
                 {% if request.user.is_authenticated %}
-                <li><a class="dropdown-item" href='/auth/logout'>
-                  <i class="fas fa-sign-out-alt"></i> Log Out
+                <li><a class="dropdown-item" href='/auth/password/change'>
+                  <i class="fas fa-key"></i> Change Password
                 </a></li>
                 <li><a class="dropdown-item" href="/auth/social/connections">
                   <i class="fab fa-google-plus-square"></i>&nbsp;Social Auth
+                </a></li>
+                <li><a class="dropdown-item" href='/auth/logout'>
+                  <i class="fas fa-sign-out-alt"></i> Log Out
                 </a></li>
                 {% else %}
                 <li><a class="dropdown-item" href='/auth/login'>

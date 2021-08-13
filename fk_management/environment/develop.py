@@ -13,3 +13,11 @@ DATABASES = {
 }
 
 ENVIRONMENT = "develop"
+
+# sendgrid
+EMAIL_BACKEND = "sgbackend.SendGridBackend"
+SENDGRID_API_KEY = env("SENDGRID_API_KEY", None)
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+DEFAULT_FROM_EMAIL = "noreply@fk-management.com"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_EMAIL_REQUIRED = "true"
