@@ -241,6 +241,9 @@ class SharedResource(BaseModel):
         val_sum = self.sharedtransaction_set.filter(is_active=True).aggregate(sum=Sum('val'))['sum']
         return val_sum if val_sum else 0
     
+    @property
+    def progress_100(self):
+        return math.floor(self.val_actual / self.val_goal * 100)
 
 class SharedTransaction(BaseModel):
     shared_resource = models.ForeignKey(SharedResource, verbose_name="共通口座", on_delete=models.CASCADE)
