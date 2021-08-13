@@ -320,3 +320,5 @@ MAPPING_WAY = {
     "共通支出": "その他",
     "その他": "その他",
 }
+
+BASE_URL = env('BASE_URL')
