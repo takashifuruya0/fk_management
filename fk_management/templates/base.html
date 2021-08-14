@@ -82,6 +82,9 @@
                 <li><a class="dropdown-item" href="{%url 'kakeibo:shared_list' %}">
                   <i class="fas fa-list"></i>&nbsp;レコード一覧
                 </a></li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_resource_list' %}">
+                  <i class="fas fa-piggy-bank"></i>&nbsp;共通口座一覧
+                </a></li>
               </ul>
             </li>
             {% if request.user.is_staff %}

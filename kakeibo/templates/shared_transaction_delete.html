@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load humanize %}
+{% load my_templatetags %}
+
+{% block title %}
+共通口座明細 削除確認
+{% endblock %}
+
+{% block page-title %}
+共通口座明細 削除確認
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card bg-light">
+        <div class="card-header">
+          <h2 class="card-title">共通口座明細 削除確認</h2>
+        </div>
+        <div class="card-body table-responsive">
+          <h5>
+            <label class="badge bg-warning text-reset">
+              <i class="fas fa-exclamation-circle"></i> 削除しますか ?
+            </label>
+          </h5>
+          <table class="table">
+            <tr>
+              <th>共通口座</th>
+              <td>{{object.shared_resource}}</td>
+            </tr>
+            <tr>
+              <th>日付</th>
+              <td>{{object.date}}</td>
+            </tr>
+            <tr>
+              <th>金額</th>
+              <td>{{object.val |yen}}</td>
+            </tr>
+            <tr>
+              <th>支払者</th>
+              <td>{{object.paid_by}}</td>
+            </tr>
+            <tr>
+              <th>メモ</th>
+              <td>{{object.memo |default:""}}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="card-footer">
+          <form method="POST">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">
+              <i class="fas fa-trash-alt"></i> 削除
+            </button>
+            <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_detail' pk=object.shared_resource.pk%}">
+              <i class="fas fa-backward"></i> 共通口座に戻る
+            </a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

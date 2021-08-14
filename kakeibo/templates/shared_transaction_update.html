@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}
+共通口座明細 編集
+{% endblock %}
+
+{% block page-title %}
+共通口座明細 編集
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <form method="POST" class="form">
+        <div class="card bg-light">
+          <div class="card-header">
+            <h2 class="card-title">
+              <i class="fas fa-sticky-note"></i>　共通口座明細 更新
+            </h2>
+          </div>
+          <div class="card-body table-responsive">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-upload"></i> 送信
+            </button>
+            <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_detail' pk=object.shared_resource.pk%}">
+              <i class="fas fa-backward"></i> 共通口座に戻る
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{{ form.media }}
+{% endblock %}

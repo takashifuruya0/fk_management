@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load humanize %}
+{% load my_templatetags %}
+
+{% block title %}
+共通口座 削除確認
+{% endblock %}
+
+{% block page-title %}
+共通口座 削除確認
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card bg-light">
+        <div class="card-header">
+          <h2 class="card-title">共通口座 削除確認</h2>
+        </div>
+        <div class="card-body table-responsive">
+          <h5>
+            <label class="badge bg-warning text-reset">
+              <i class="fas fa-exclamation-circle"></i> 削除しますか ?
+            </label>
+          </h5>
+          <h5>
+            <i class="fas fa-piggy-bank"></i> 共通口座 詳細
+          </h5>
+          <table class="table">
+            <tr>
+              <th>名前</th>
+              <td>{{object.name}}</td>
+            </tr>
+            <tr>
+              <th>期間</th>
+              <td>{{object.date_open}}〜{{object.date_close |default:""}}</td>
+            </tr>
+            <tr>
+              <th>目標金額</th>
+              <td>{{object.val_goal |yen}}</td>
+            </tr>
+            <tr>
+              <th>実績</th>
+              <td>{{object.val_actual |yen}}</td>
+            </tr>
+            <tr>
+              <th>詳細</th>
+              <td>{{object.detail |linebreaksbr |default:""}}</td>
+            </tr>
+          </table>
+          <h5>
+            <i class="fas fa-sticky-note"></i> 明細一覧
+          </h5>
+          <table class="table">
+            <tr>
+              <th>日付</th>
+              <th class="right">金額</th>
+              <th>支払者</th>
+              <th>メモ</th>
+            </tr>
+            {% for ob in object.sharedtransaction_set.all %}
+            <tr>
+              <td>{{ob.date}}</td>
+              <td class="right">{{ob.val |yen}}</td>
+              <td>{{ob.paid_by}}</td>
+              <td>{{ob.memo |default:"-"}}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="card-footer">
+          <form method="POST">
+            {% csrf_token %}
+            <button class="btn btn-danger" type="submit">
+              <i class="fas fa-trash-alt"></i> 削除
+            </button>
+            <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_detail' pk=object.pk%}">
+              <i class="fas fa-backward"></i> 共通口座に戻る
+            </a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

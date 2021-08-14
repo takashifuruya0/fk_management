@@ -224,3 +224,30 @@ class Exchange(BaseModel):
     commission = models.FloatField("Commission")
     currency = models.CharField("Currency of commission", max_length=3, choices=settings.CHOICES_CURRENCY)
 
+
+class SharedResource(BaseModel):
+    name = models.CharField('名前', max_length=255)
+    kind = models.CharField('種別', max_length=255, choices=settings.CHOICES_KIND_SHARED_RESOURCE)
+    date_open = models.DateField('開始日')
+    date_close = models.DateField('終了日', null=True, blank=True)
+    detail = models.TextField("詳細", blank=True, null=True)
+    val_goal = models.IntegerField("目標金額")
+
+    def __str__(self) -> str:
+        return f"【{self.kind}】{self.name}:{self.val_goal:,}円"
+
+    @property
+    def val_actual(self):
+        val_sum = self.sharedtransaction_set.filter(is_active=True).aggregate(sum=Sum('val'))['sum']
+        return val_sum if val_sum else 0
+    
+    @property
+    def progress_100(self):
+        return math.floor(self.val_actual / self.val_goal * 100)
+
+class SharedTransaction(BaseModel):
+    shared_resource = models.ForeignKey(SharedResource, verbose_name="共通口座", on_delete=models.CASCADE)
+    date = models.DateField('日付')
+    val = models.IntegerField('金額')
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
+    paid_by = models.ForeignKey(get_user_model(), verbose_name="支払者", on_delete=models.CASCADE)

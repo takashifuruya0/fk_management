@@ -45,6 +45,9 @@
       <div class="accordion" id="accordionExample">
         {% include 'accordion_shared_form.html' %}
         {% include 'accordion_shared_yearmonth_form.html' %}
+        {% with form=shared_resource_form%}
+        {% include 'accordion_shared_resource_form.html' %}
+        {% endwith%}
       </div>
     </div>
     <div class="col-lg-8">
@@ -53,27 +56,27 @@
       <h5>
         支出： {{payment.total |yen}}
       </h5>
-      <div class="progress" style="height:25px">
+      <div class="progress" style="height:40px">
         <div class="progress-bar" role="progressbar" style="width: {{p_payment.takashi}}%"
           aria-valuenow="{{p_budget.takashi}}" aria-valuemin="0" aria-valuemax="100"
-        >敬士/{{payment.takashi |yen}}</div>
+        >敬士<br>{{payment.takashi |yen}}</div>
         <div class="progress-bar bg-success" role="progressbar" style="width: {{p_payment.hoko}}%"
           aria-valuenow="{{p_budget.hoko}}" aria-valuemin="0" aria-valuemax="100"
-        >朋子/{{payment.hoko |yen}}</div>
+        >朋子<br>{{payment.hoko |yen}}</div>
       </div>
       <hr>
       <h5>予算：{{budget.total |yen}}</h5>
-      <div class="progress" style="height:25px">
+      <div class="progress" style="height:40px">
         <div class="progress-bar" role="progressbar" style="width: {{p_budget.takashi}}%"
           aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-        >敬士/{{budget.takashi |yen}}</div>
+        >敬士<br>{{budget.takashi |yen}}</div>
         <div class="progress-bar bg-success" role="progressbar" style="width: {{p_budget.hoko}}%"
           aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-        >朋子/{{budget.hoko |yen}}</div>
+        >朋子<br>{{budget.hoko |yen}}</div>
         {% if not is_black %}
         <div class="progress-bar bg-danger" role="progressbar" style="width: {{p_budget.over}}%"
           aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
-        >{{diff |yen_no_color}}</div>
+        >超過<br>{{diff |yen_no_color}}</div>
         {% endif %}
       </div>
     </div>
@@ -86,7 +89,7 @@
       <div class="card bg-light">
         <div class="card-header">
           <h3 class="card-title">
-            概要
+            <i class="fas fa-columns"></i> 概要
           </h3>
         </div>
         <div class="card-body">
@@ -112,13 +115,63 @@
           </a>
         </div>
       </div>
+      <hr>
     </div>
 
-    <!--Chart.js-->
     <div class="col-lg-7">
       <div class="card bg-light">
         <div class="card-header">
-          <h3 class="card-title">ダッシュボード</h3>
+          <h3 class="card-title">
+            <i class="fas fa-piggy-bank"></i> 共通口座
+          </h3>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <tr>
+              <th>詳細/追加</th>
+              <th>名前</th>
+              <th class="right">実績</th>
+              <th class="d-none d-sm-table-cell right">目標</th>
+            </tr>
+            {% for sr in shared_resources %}
+            <tr>
+              <td>
+                <a href="{%url 'kakeibo:shared_resource_detail' pk=sr.pk%}" class="btn btn-info btn-sm btn-block">
+                  <i class="fas fa-external-link-square-alt"></i>
+                </a>
+                {% comment %} <a class="btn btn-primary btn-sm" 
+                  href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{sr.pk}}">
+                  <i class="fas fa-plus"></i>
+                </a> {% endcomment %}
+                {% include 'modal/shared_transaction_form.html' %}
+              </td>
+              <td>
+                {{sr.name}}
+                <div class="d-none d-sm-block progress" style="height: 20px;">
+                  <div class="progress-bar" role="progressbar" style="width: {{sr.progress_100}}%" 
+                    aria-valuenow="{{sr.progress_100}}" aria-valuemin="0" aria-valuemax="100">
+                    {{sr.progress_100}}%
+                  </div>
+                </div>
+              </td>
+              <td class="right">{{sr.val_actual |yen}}</td>
+              <td class="right d-none d-sm-table-cell ">{{sr.val_goal |yen}}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_list'%}">
+            <i class="fas fa-list"></i> 共通口座一覧
+          </a>
+        </div>
+      </div>
+      <hr>
+      <div class="card bg-light">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-chart-pie"></i> ダッシュボード
+          </h3>
         </div>
         <div class="card-body">
           <div class="row">
