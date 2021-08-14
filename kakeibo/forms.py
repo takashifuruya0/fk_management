@@ -1,7 +1,7 @@
 # coding: UTF-8
 from django import forms
 from django.contrib.auth import get_user_model
-from kakeibo.models import Kakeibo, Usage, SharedKakeibo, Event, Resource, Exchange
+from kakeibo.models import Kakeibo, SharedTransaction, Usage, SharedKakeibo, Event, Resource, Exchange, SharedResource
 from dal import autocomplete
 from django.conf import settings
 
@@ -100,6 +100,32 @@ class SharedSearchForm(forms.Form):
         label="用途", required=False, widget=forms.SelectMultiple(attrs={"class": "form-control"}),
     )
     memo = forms.CharField(label="メモ", required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
+
+
+class SharedResourceForm(forms.ModelForm):
+    class Meta:
+        model = SharedResource
+        fields = ("name", "kind", "date_open", "val_goal", "detail", )
+        widgets = {
+            'date_open': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "kind": forms.Select(attrs={"class": "form-control"}),
+            "detail": forms.Textarea(attrs={"class": "form-control"}),
+            "val_goal": forms.NumberInput(attrs={"class": "form-control"}),
+        }
+
+
+class SharedTransactionForm(forms.ModelForm):
+    class Meta:
+        model = SharedTransaction
+        fields = ("shared_resource", "date", "val", "memo", "paid_by")
+        widgets = {
+            'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "memo": forms.TextInput(attrs={"class": "form-control"}),
+            "val": forms.NumberInput(attrs={"class": "form-control"}),
+            "paid_by": forms.Select(attrs={"class": "form-class"}),
+            "shared_resource": forms.Select(attrs={"class": "form-class"}),
+        }
 
 
 class EventForm(forms.ModelForm):

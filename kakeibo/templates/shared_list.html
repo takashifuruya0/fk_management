@@ -2,6 +2,7 @@
 {% load django_bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
+{% bootstrap_pagination page %}
 {% load humanize %}
 {% load mathfilters %}
 {% load my_templatetags %}
@@ -45,7 +46,9 @@
             {% for object in object_list %}
             <tr>
               <td>
-                <a href="{%url 'kakeibo:shared_detail' pk=object.pk%}">{{object.pk}}</a>
+                <a href="{%url 'kakeibo:shared_detail' pk=object.pk%}" class="btn btn-sm btn-info">
+                  <i class="fas fa-external-link-square-alt"></i> {{object.pk}}
+                </a>
               </td>
               <td>{{object.date}}</td>
               <td>{{object.usage}}</td>
@@ -57,66 +60,12 @@
           </table>
         </div>
         <div class="card-footer">
-          {% if page_obj.has_other_pages %}
-          <nav>
-            <ul class="pagination">
-              <!--previous-->
-              {% if page_obj.has_previous %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{page_obj.previous_page_number}}{{params}}"
-                >&laquo;</a>
-              </li>
-              {% else %}
-              <li class="page-item disabled"><a class="page-link">&laquo;</a></li>
-              {% endif %}
-              <!--first-->
-              {% if page_obj.number|sub:5 > 0 %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page=1{{params}}"
-                >1</a>
-              </li>
-              {% endif %}
-              <!--pages-->
-              {% for i in page_obj.paginator.page_range %}
-              {% if page_obj.number == i %}
-              <li class="page-item active">
-                <a class="page-link" href="#">{{i}}</a>
-              </li>
-              {% elif page_obj.number|sub:i < 5 and page_obj.number|sub:i > -5 %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{i}}{{params}}"
-                >{{i}}</a>
-              </li>
-              {% elif page_obj.number|sub:i == 5 or page_obj.number|sub:i == -5 %}
-              <li class="disabled">
-                <a class="page-link text-secondary d-inline-block text-muted" href="#">・・・</a>
-              </li>
-              {% endif %}
-              {% endfor %}
-              <!--last-->
-              {% if not page_obj.number == page_obj.paginator.num_pages %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{page_obj.paginator.num_pages}}{{params}}"
-                >{{page_obj.paginator.num_pages}}</a>
-              </li>
-              {% endif %}
-              <!--next-->
-              {% if page_obj.has_next %}
-              <li class="page-item">
-                <a class="page-link"
-                   href="{%url 'kakeibo:shared_list'%}?page={{page_obj.next_page_number}}{{params}}"
-                >&raquo;</a>
-              </li>
-              {% else %}
-              <li class="page-item disabled"><a class="page-link">&raquo;</a></li>
-              {% endif %}
-            </ul>
-          </nav>
-          {% endif %}
+          <div class="d-none d-sm-block">
+            {% bootstrap_pagination page_obj url="?page=1" size="md" pages_to_show=9%}
+          </div>
+          <div class="d-block d-sm-none">
+            {% bootstrap_pagination page_obj url="?page=1" size="sm" pages_to_show=3%}
+          </div>
         </div>
       </div>
     </div>

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.line',
     # others
     'debug_toolbar',  # debug-toolbar
     'django_extensions',
@@ -191,14 +192,17 @@ SOCIALACCOUNT_PROVIDERS = {
         'AUTH_PARAMS': {
             'access_type': 'online',
         }
-    }
+    },
+    'line': {
+        'SCOPE': ['profile', 'openid'],
+    },
 }
 ACCOUNT_EMAIL_VERIFICATION = "none"  # mandatory / optional / none
 AUTH_USER_MODEL = "accounts.CustomUser"
 SOCIALACCOUNT_AUTO_SIGNUP = False
-#ACCOUNT_FORMS = {
-#    'signup': 'accounts.forms.CustomSignupForm',
-#}
+ACCOUNT_FORMS = {
+   'signup': 'accounts.forms.UserCreationForm',
+}
 
 ENVIRONMENT = "default"
 
@@ -265,6 +269,13 @@ LOGGING = {
     }
 }
 
+# output email content on console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# LINE
+LINE_ACCESS_TOKEN = env('LINE_ACCESS_TOKEN')
+
+
 # Model Choice: Generator不可
 CHOICES_CARD = (
     ("SFC", "SFC"), ("SFC（家族）", "SFC（家族）"), ("GoldPoint", "GoldPoint")
@@ -289,6 +300,9 @@ CHOICES_CURRENCY = (
 CHOICES_EXCHANGE_METHOD = (
     ("Wire", "Wire"), ("prestia", "prestia")
 )
+CHOICES_KIND_SHARED_RESOURCE = (
+    ("貯金", "貯金"), ("返済", "返済")
+)
 
 # MAPPING
 MAPPING_RESOURCE = {
@@ -306,3 +320,5 @@ MAPPING_WAY = {
     "共通支出": "その他",
     "その他": "その他",
 }
+
+BASE_URL = env('BASE_URL')

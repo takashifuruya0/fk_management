@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% bootstrap_pagination page %}
+{% load humanize %}
+{% load mathfilters %}
+{% load my_templatetags %}
+
+{% block title %}
+共通口座 詳細
+{% endblock %}
+
+{% block page-title %}
+共通口座 詳細
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="card bg-light">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="fas fa-piggy-bank"></i> 共通口座 詳細
+          </h2>
+          {% if not object.is_active %}
+            <label class="badge bg-danger">削除済み</label>
+          {% endif %}
+        </div>
+        <div class="card-body table-responsive">
+          <h5>
+            {% if object.kind == "返済" %}
+            <label class="badge bg-warning">返済</label>
+            {% elif object.kind == "貯金" %}
+            <label class="badge bg-success">貯金</label>
+            {% endif %}
+            {{object.name}}
+          </h5>
+          <div class="progress" style="height: 40px;">
+            <div class="progress-bar" role="progressbar" style="width: {{object.progress_100}}%" 
+              aria-valuenow="{{object.progress_100}}" aria-valuemin="0" aria-valuemax="100">
+              {{object.progress_100}}%<br>{{object.val_actual |yen}}
+            </div>
+            {% with remaining=object.progress_100|sub:100|mul:-1 %}
+            <div class="progress-bar bg-secondary" role="progressbar" style="width: {{remaining}}%" 
+              aria-valuenow="{{remaining}}" aria-valuemin="0" aria-valuemax="100">
+              残り{{remaining}}%<br>{{object.val_goal|sub:object.val_actual |yen}}
+            </div>
+            {% endwith %}
+          </div>
+          <table class="table">
+            <tr>
+              <th>期間</th>
+              <td>{{object.date_open}}〜{{object.date_close |default:""}}</td>
+            </tr>
+            <tr>
+              <th>目標金額</th>
+              <td>{{object.val_goal |yen}}</td>
+            </tr>
+            <tr>
+              <th>実績</th>
+              <td>{{object.val_actual |yen}}</td>
+            </tr>
+            <tr>
+              <th>詳細</th>
+              <td>{{object.detail |default:"" |linebreaksbr}}</td>
+            </tr>
+          </table>
+          <a class="btn btn-info" href="{%url 'kakeibo:shared_resource_update' pk=object.pk%}">
+            <i class="fas fa-edit"></i> 更新
+          </a>
+          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_list'%}">
+            <i class="fas fa-list"></i> 一覧
+          </a>
+          {% if object.is_active %}
+          <a class="btn btn-danger" href="{%url 'kakeibo:shared_resource_delete' pk=object.pk%}">
+            <i class="fas fa-trash-alt"></i> 削除
+          </a>
+          {% endif %}
+          <hr>
+
+          <h5>
+            <i class="fas fa-sticky-note"></i> 明細一覧
+          </h5>
+          <table class="table">
+            <tr>
+              <th>日付</th>
+              <th class="right">金額</th>
+              <th>支払者</th>
+              <th>メモ</th>
+              <th>編集</th>
+            </tr>
+            {% for ob in object_list %}
+            <tr>
+              <td>{{ob.date}}</td>
+              <td class="right">{{ob.val |yen}}</td>
+              <td>{{ob.paid_by}}</td>
+              <td>{{ob.memo |default:"-"}}</td>
+              <td>
+                <a href="{%url 'kakeibo:shared_transaction_update' pk=ob.pk%}" class="btn btn-info">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{%url 'kakeibo:shared_transaction_delete' pk=ob.pk%}" class="btn btn-danger">
+                  <i class="fas fa-trash"></i>
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td colspan=5>
+                追加する{% include 'modal/shared_transaction_form.html' %}
+              </td>
+            <tr>
+          </table>
+          <div class="d-none d-sm-block">
+            {% bootstrap_pagination page_obj url="?page=1" size="md" pages_to_show=9%}
+          </div>
+          <div class="d-block d-sm-none">
+            {% bootstrap_pagination page_obj url="?page=1" size="sm" pages_to_show=3%}
+          </div>
+          {% comment %} <a class="btn btn-primary" href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{object.pk}}">
+            <i class="fas fa-plus"></i> 明細追加
+          </a> {% endcomment %}
+        </div>
+        <div class="card-footer">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

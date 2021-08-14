@@ -4,8 +4,9 @@ services:
     build: .
     command: >
       bash -c '
-        coverage run manage.py test -v3;
+        coverage run manage.py test -v3 &> tmp;
         coverage html;
-        coverage xml'
+        coverage xml;
+        cat tmp;'
     volumes:
       - .:/home/fk_management

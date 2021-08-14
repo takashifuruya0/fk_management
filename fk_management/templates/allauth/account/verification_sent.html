@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{% load account socialaccount %}
+{% load i18n %}
+
+
+
+{% block title %}
+Verification Sent
+{% endblock %}
+
+{% block page-title %}
+Verification Sent
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-6 offset-sm-3">
+      <div class="card">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="card-header bg-primary text-white">
+            <h2 class="card-title">Verification Sent</h2>
+          </div>
+          <div class="card-body">
+            <p>確認のメールを送信しました。</p>
+            <p>メールに記載されたリンクをクリックして、ユーザー登録を完了させてください。</p>
+            <p>数分待っても確認のメールが届かない場合はご連絡ください。</p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

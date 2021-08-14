@@ -17,6 +17,14 @@ class KakeiboInline(admin.TabularInline):
     can_delete = False
 
 
+class SharedTransactionInline(admin.TabularInline):
+    model = SharedTransaction
+    verbose_name = "関連取引"
+    verbose_name_plural = "関連取引"
+    fields = ("date", "val", "memo", "paid_by")
+    can_delete = True
+
+
 # ===========================
 # Resources
 # ===========================
@@ -44,7 +52,7 @@ class KakeiboResource(resources.ModelResource):
 class ResourceAdmin(ImportExportModelAdmin):
     resource_class = ResourceResource
     list_display = [
-        "pk", "name", "is_investment", "currency",
+        "pk", "is_active", "name", "is_investment", "currency",
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
     search_fields = ("name", )
@@ -53,7 +61,7 @@ class ResourceAdmin(ImportExportModelAdmin):
 class UsageAdmin(ImportExportModelAdmin):
     resource_class = UsageResource
     list_display = [
-        "pk", "name", "is_expense", "is_shared",
+        "pk", "is_active", "name", "is_expense", "is_shared",
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
     readonly_fields = ["_count_kakeibo", "_count_shared"]
@@ -69,13 +77,13 @@ class UsageAdmin(ImportExportModelAdmin):
 
 
 class BudgetAdmin(admin.ModelAdmin):
-    list_display = ["pk", "date", "takashi", "hoko"]
+    list_display = ["pk", "is_active", "date", "takashi", "hoko"]
 
 
 class KakeiboAdmin(ImportExportModelAdmin):
     resource_class = KakeiboResource
     list_display = [
-        "pk", "date", "usage", "way", "fee", "memo"
+        "pk", "is_active", "date", "usage", "way", "fee", "memo"
     ]
     autocomplete_fields = ("usage",)
     list_filter = ("way", "usage", "date", )
@@ -83,14 +91,14 @@ class KakeiboAdmin(ImportExportModelAdmin):
 
 class CronKakeiboAdmin(admin.ModelAdmin):
     list_display = [
-        "pk", "usage", "way", "fee", "memo", "is_coping_to_shared", "kind"
+        "pk", "is_active", "usage", "way", "fee", "memo", "is_coping_to_shared", "kind"
     ]
     autocomplete_fields = ("usage", )
 
 
 class CreditAdmin(admin.ModelAdmin):
     list_display = [
-        "pk", "_debit_month", "date", "name", "fee", "card"
+        "pk", "is_active", "_debit_month", "date", "name", "fee", "card"
     ]
     list_filter = ("card", )
     search_fields = ("name", "memo")
@@ -102,7 +110,9 @@ class CreditAdmin(admin.ModelAdmin):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ["pk", "date", "name", "is_closed", "sum_plan"]
+    list_display = [
+        "pk", "is_active", "date", "name", "is_closed", "sum_plan"
+    ]
     readonly_fields = ("_sum_actual",)
     list_filter = ("is_closed", )
     inlines = [KakeiboInline, ]
@@ -136,6 +146,24 @@ class ExchangeAdmin(admin.ModelAdmin):
         return "{} ({})".format(obj.kakeibo_to.fee, obj.kakeibo_to.resource_to.currency)
 
 
+class SharedResourceAdmin(admin.ModelAdmin):
+    list_display = [
+        "pk", "is_active", "name", "kind", "date_open", "date_close", "val_goal", "_val_actual" 
+    ]
+    readonly_fields = ["_val_actual", ]
+    inlines = [SharedTransactionInline, ]
+
+    def _val_actual(self, obj):
+        return obj.val_actual
+    _val_actual.short_description = "実績金額"
+    
+
+class SharedTransactionAdmin(admin.ModelAdmin):
+    list_display = [
+        "pk", "is_active", "shared_resource", "date", "val", "paid_by", "memo"
+    ]
+
+
 admin.site.register(Resource, ResourceAdmin)
 admin.site.register(Credit, CreditAdmin)
 admin.site.register(Usage, UsageAdmin)
@@ -146,3 +174,5 @@ admin.site.register(Kakeibo, KakeiboAdmin)
 admin.site.register(Target)
 admin.site.register(Budget, BudgetAdmin)
 admin.site.register(Exchange, ExchangeAdmin)
+admin.site.register(SharedResource, SharedResourceAdmin)
+admin.site.register(SharedTransaction, SharedTransactionAdmin)

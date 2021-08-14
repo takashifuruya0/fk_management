@@ -1,0 +1,22 @@
+{% load django_bootstrap5 %}
+
+<!-- Create -->
+<div class="accordion-item">
+  <h4 class="accordion-header" id="headingResource">
+    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseResource" aria-expanded="true" aria-controls="collapseResource">
+      <i class="fas fa-plus"></i>&nbsp;共通口座作成
+    </button>
+  </h4>
+  <div id="collapseResource" class="accordion-collapse collapse" aria-labelledby="headingResource" data-bs-parent="#accordionExample">
+    <div class="accordion-body">
+      <form class="form" method="POST" action="{% url 'kakeibo:shared_resource_create' %}">
+        {%bootstrap_form form%}
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary" value="登録">
+          <i class="fas fa-plus"></i> 登録
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+<hr>

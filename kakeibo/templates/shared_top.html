@@ -4,6 +4,8 @@
 {% load django_bootstrap5 %}
 {% bootstrap_css %}
 {% bootstrap_javascript %}
+{% load mathfilters %}
+
 
 {% block title %}
 共通家計簿
@@ -17,21 +19,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
 <div class="container-fluid">
   <div class="row">
-    <div class="col-12 col-lg-8">
+    <div class="col-12 col-lg-9">
       <h3>
-        共通家計簿({{target_ym.year}}/{{target_ym.month}})
+        <i class="fas fa-people-carry"></i> 共通家計簿({{target_ym.year}}/{{target_ym.month}})
         {%if is_black %}
-        <span class="badge bg-dark">黒字</span>
+        <span class="badge bg-dark">
+          黒字：{{diff |mul:-1 |yen}} <i class="fas fa-thumbs-up"></i>
+        </span>
         {% else %}
-        <span class="badge bg-danger">赤字</span>
+        <span class="badge bg-danger">
+          赤字：{{diff |yen}} <i class="fas fa-thumbs-down"></i>
+        </span>
         {% endif %}
       </h3>
     </div>
     <div class="col-12 col-lg-3">
-      <form class="form" method="GET" action="">
-        <input type="month" name="target_ym" value="{{initial_val}}">
-        <input type="submit" class="btn btn-primary btn-sm" value="送信">
-      </form>
+      <h3>
+      </h3>
     </div>
   </div>
   <hr>
@@ -40,34 +44,39 @@
     <div class="col-lg-4">
       <div class="accordion" id="accordionExample">
         {% include 'accordion_shared_form.html' %}
+        {% include 'accordion_shared_yearmonth_form.html' %}
+        {% with form=shared_resource_form%}
+        {% include 'accordion_shared_resource_form.html' %}
+        {% endwith%}
       </div>
-      <h5>精算</h5>
-      <p>{{seisan.hoko |yen}}</p>
-      <hr>
     </div>
     <div class="col-lg-8">
-      <h5>支出： {{payment.total |yen}}</h5>
-      <div class="progress" style="height:25px">
+      <h5>精算：{{seisan.hoko |yen}}</h5>
+      <hr>
+      <h5>
+        支出： {{payment.total |yen}}
+      </h5>
+      <div class="progress" style="height:40px">
         <div class="progress-bar" role="progressbar" style="width: {{p_payment.takashi}}%"
-             aria-valuenow="{{p_budget.takashi}}" aria-valuemin="0" aria-valuemax="100"
-        >敬士/{{payment.takashi |yen}}</div>
+          aria-valuenow="{{p_budget.takashi}}" aria-valuemin="0" aria-valuemax="100"
+        >敬士<br>{{payment.takashi |yen}}</div>
         <div class="progress-bar bg-success" role="progressbar" style="width: {{p_payment.hoko}}%"
-             aria-valuenow="{{p_budget.hoko}}" aria-valuemin="0" aria-valuemax="100"
-        >朋子/{{payment.hoko |yen}}</div>
+          aria-valuenow="{{p_budget.hoko}}" aria-valuemin="0" aria-valuemax="100"
+        >朋子<br>{{payment.hoko |yen}}</div>
       </div>
       <hr>
       <h5>予算：{{budget.total |yen}}</h5>
-      <div class="progress" style="height:25px">
+      <div class="progress" style="height:40px">
         <div class="progress-bar" role="progressbar" style="width: {{p_budget.takashi}}%"
-             aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-        >敬士/{{budget.takashi |yen}}</div>
+          aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
+        >敬士<br>{{budget.takashi |yen}}</div>
         <div class="progress-bar bg-success" role="progressbar" style="width: {{p_budget.hoko}}%"
-             aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
-        >朋子/{{budget.hoko |yen}}</div>
+          aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"
+        >朋子<br>{{budget.hoko |yen}}</div>
         {% if not is_black %}
         <div class="progress-bar bg-danger" role="progressbar" style="width: {{p_budget.over}}%"
-             aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
-        >{{diff |yen_no_color}}</div>
+          aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"
+        >超過<br>{{diff |yen_no_color}}</div>
         {% endif %}
       </div>
     </div>
@@ -78,9 +87,9 @@
     <!--基本メニュ-->
     <div class="col-lg-5">
       <div class="card bg-light">
-        <div class="card-header {%if is_black %}border-dark{% else %}border-danger{% endif %}">
+        <div class="card-header">
           <h3 class="card-title">
-            概要
+            <i class="fas fa-columns"></i> 概要
           </h3>
         </div>
         <div class="card-body">
@@ -88,8 +97,8 @@
           <table class="table">
             <tr>
               <th>用途</th>
-              <th class="right">{{target_ym.year}}年{{target_ym.month}}月</th>
-              <th class="right">{{last_ym.year}}年{{last_ym.month}}月</th>
+              <th class="right">{{target_ym.year}}/{{target_ym.month}}</th>
+              <th class="right">{{last_ym.year}}/{{last_ym.month}}</th>
             </tr>
             {% for k, u in usages.items %}
             <tr>
@@ -106,13 +115,63 @@
           </a>
         </div>
       </div>
+      <hr>
     </div>
 
-    <!--Chart.js-->
     <div class="col-lg-7">
       <div class="card bg-light">
-        <div class="card-header border-primary">
-          <h3 class="card-title">ダッシュボード</h3>
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-piggy-bank"></i> 共通口座
+          </h3>
+        </div>
+        <div class="card-body">
+          <table class="table">
+            <tr>
+              <th>詳細/追加</th>
+              <th>名前</th>
+              <th class="right">実績</th>
+              <th class="d-none d-sm-table-cell right">目標</th>
+            </tr>
+            {% for sr in shared_resources %}
+            <tr>
+              <td>
+                <a href="{%url 'kakeibo:shared_resource_detail' pk=sr.pk%}" class="btn btn-info btn-sm btn-block">
+                  <i class="fas fa-external-link-square-alt"></i>
+                </a>
+                {% comment %} <a class="btn btn-primary btn-sm" 
+                  href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{sr.pk}}">
+                  <i class="fas fa-plus"></i>
+                </a> {% endcomment %}
+                {% include 'modal/shared_transaction_form.html' %}
+              </td>
+              <td>
+                {{sr.name}}
+                <div class="d-none d-sm-block progress" style="height: 20px;">
+                  <div class="progress-bar" role="progressbar" style="width: {{sr.progress_100}}%" 
+                    aria-valuenow="{{sr.progress_100}}" aria-valuemin="0" aria-valuemax="100">
+                    {{sr.progress_100}}%
+                  </div>
+                </div>
+              </td>
+              <td class="right">{{sr.val_actual |yen}}</td>
+              <td class="right d-none d-sm-table-cell ">{{sr.val_goal |yen}}</td>
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_list'%}">
+            <i class="fas fa-list"></i> 共通口座一覧
+          </a>
+        </div>
+      </div>
+      <hr>
+      <div class="card bg-light">
+        <div class="card-header">
+          <h3 class="card-title">
+            <i class="fas fa-chart-pie"></i> ダッシュボード
+          </h3>
         </div>
         <div class="card-body">
           <div class="row">
@@ -140,34 +199,40 @@ if (diff > 0) {
 }
 let chart = new Chart(ctx, {
   type: "bar",
+  //"rgba(250,153,  0,0.4)",
+  //"rgba(  0,153,253,0.4)",
+  //"rgba(153,250,  0,0.4)",
+  //"rgba(153,  0,253,0.4)",
+  //"rgba(253,  0,150,0.4)",
+  //"rgba(  0,253,153,0.4)",
   data: {
-     labels: ["予算（朋子）", "支払（朋子）", "予算（敬士）", "支払（敬士）"],
-     datasets: [
-        {
-          label: "精算",
-          backgroundColor: "#79AEC8",
-          borderColor: "#417690",
-          data: [0, {{seisan.hoko}}, 0, {{seisan.takashi}}]
-        },
-        {
-          label: "予算",
-          backgroundColor: "#C879AE",
-          borderColor: "#904176",
-          data: [{{budget.hoko}}, 0, {{budget.takashi}}, 0]
-        },
-        {
-          label: "赤字",
-          backgroundColor: "#AEC879",
-          borderColor: "#904176",
-          data: [diff_half, 0, diff_half, 0]
-        },
-        {
-          label: "支払",
-          backgroundColor: "#5ED91E",
-          borderColor: "#904176",
-          data: [0, {{payment.hoko}}, 0, {{payment.takashi}}]
-        },
-     ],
+    labels: ["予算（朋子）", "支払（朋子）", "予算（敬士）", "支払（敬士）"],
+    datasets: [
+      {
+        label: "精算",
+        backgroundColor: "rgba(250,153,  0,0.4)",
+        borderColor: "#904176",
+        data: [0, {{seisan.hoko}}, 0, {{seisan.takashi}}]
+      },
+      {
+        label: "予算",
+        backgroundColor: "rgba(  0,153,253,0.4)",
+        borderColor: "#904176",
+        data: [{{budget.hoko}}, 0, {{budget.takashi}}, 0]
+      },
+      {
+        label: "赤字",
+        backgroundColor: "rgba(153,  0,253,0.4)",
+        borderColor: "#904176",
+        data: [diff_half, 0, diff_half, 0]
+      },
+      {
+        label: "支払",
+        backgroundColor: "rgba(153,250,  0,0.4)",
+        borderColor: "#904176",
+        data: [0, {{payment.hoko}}, 0, {{payment.takashi}}]
+      },
+    ],
   },
   options: {
     title: {
@@ -191,12 +256,12 @@ let ctx_pie = document.getElementById("chart_pie").getContext("2d");
 let chart_pie = new Chart(ctx_pie, {
   type: "pie",
   data: {
-     labels: [{% for u in usages.keys %}"{{u}}",{% endfor %}],
-     datasets: [
-        {
-          label: "Yen (¥)",
-          data: [{% for v in usages.values %}{{v.tm}},{% endfor %}],
-          backgroundColor: [
+    labels: [{% for u in usages.keys %}"{{u}}",{% endfor %}],
+    datasets: [
+      {
+        label: "Yen (¥)",
+        data: [{% for v in usages.values %}{{v.tm}},{% endfor %}],
+        backgroundColor: [
           "#2ecc71",
           "#3498db",
           "#95a5a6",
@@ -204,9 +269,9 @@ let chart_pie = new Chart(ctx_pie, {
           "#f1c40f",
           "#e74c3c",
           "#34495e",
-         ]
-        }
-     ]
+        ]
+      }
+    ]
   },
   options: {
     title: {

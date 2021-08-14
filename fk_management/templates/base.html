@@ -8,7 +8,7 @@
 
 <html>
   <head>
-    <title>{% block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %}:fk-management v2</title>
     <!-- Required meta tags -->
 <!--    <meta charset="utf-8">-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
@@ -33,34 +33,15 @@
     <nav class="navbar navbar-expand-lg bg-light navbar-light navbar-toggleable-lg">
       <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'top' %}">
-          <img src="{% static 'menta.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
-          fk_management v2
+          {% comment %} <img src="{% static 'menta.png' %}" width="30" height="30" class="d-inline-block align-top" alt=""> {% endcomment %}
+          <i class="fas fa-cat"></i>
+          fk-management v2
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <!--shared-->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
-                <i class="fas fa-people-carry"></i>&nbsp;共通家計簿
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_top'%}">
-                    <i class="fas fa-tachometer-alt"></i>&nbsp;ダッシュボード
-                </a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_list' %}">
-                  <i class="fas fa-list"></i>&nbsp;レコード一覧
-                </a></li>
-              </ul>
-            </li>
-<!--            <li class="nav-item">-->
-<!--              <a class="nav-link" href="{%url 'kakeibo:shared_top'%}">-->
-<!--               <i class="fas fa-people-carry"></i> 共通家計簿-->
-<!--              </a>-->
-<!--            </li>-->
             {% if request.user.is_staff %}
             <!--kakeibo-->
             <li class="nav-item dropdown">
@@ -87,6 +68,26 @@
                 </a></li>
               </ul>
             </li>
+            {% endif %}
+            <!--shared-->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                <i class="fas fa-people-carry"></i>&nbsp;共通家計簿
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_top'%}">
+                    <i class="fas fa-tachometer-alt"></i>&nbsp;ダッシュボード
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_list' %}">
+                  <i class="fas fa-list"></i>&nbsp;レコード一覧
+                </a></li>
+                <li><a class="dropdown-item" href="{%url 'kakeibo:shared_resource_list' %}">
+                  <i class="fas fa-piggy-bank"></i>&nbsp;共通口座一覧
+                </a></li>
+              </ul>
+            </li>
+            {% if request.user.is_staff %}
             <!--asset-->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
@@ -142,11 +143,14 @@
                 <li><hr class="dropdown-divider"></li>
                 {% endif %}
                 {% if request.user.is_authenticated %}
-                <li><a class="dropdown-item" href='/auth/logout'>
-                  <i class="fas fa-sign-out-alt"></i> Log Out
+                <li><a class="dropdown-item" href='/auth/password/change'>
+                  <i class="fas fa-key"></i> Change Password
                 </a></li>
                 <li><a class="dropdown-item" href="/auth/social/connections">
                   <i class="fab fa-google-plus-square"></i>&nbsp;Social Auth
+                </a></li>
+                <li><a class="dropdown-item" href='/auth/logout'>
+                  <i class="fas fa-sign-out-alt"></i> Log Out
                 </a></li>
                 {% else %}
                 <li><a class="dropdown-item" href='/auth/login'>

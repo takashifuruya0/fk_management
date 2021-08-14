@@ -1,5 +1,7 @@
 from django.test import TestCase
-from kakeibo.models import Resource, Usage, Kakeibo, Event, SharedKakeibo, Budget, Exchange, Target, Credit
+from django.contrib.auth import get_user_model
+from kakeibo.models import Resource, Usage, Kakeibo, Event, SharedKakeibo, Budget, Exchange
+from kakeibo.models import Target, Credit, SharedResource, SharedTransaction
 from datetime import date
 from dateutil.relativedelta import relativedelta
 import math
@@ -7,8 +9,18 @@ import math
 
 
 class KakeiboModelTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        get_user_model().objects.all().delete()
+        get_user_model().objects.create(username="hoko", password="test", is_superuser=False, is_staff=False)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        get_user_model().objects.all().delete()
 
     def setUp(self) -> None:
+        self.user = get_user_model().objects.first()
         self.r_wallet = Resource.objects.create(name="wallet", is_investment=False)
         self.r_usd = Resource.objects.create(name="wallet", is_investment=False, currency="USD")
         self.r_saving = Resource.objects.create(name="saving", is_investment=False)
@@ -206,3 +218,48 @@ class KakeiboModelTest(TestCase):
         self.assertEqual(f"({d['date']}) {d['name']}", str(c))
         self.assertEqual(Credit.objects.all().count(), 1)
 
+    def test_shared_resource(self):
+        """SharedResource
+        - without SharedTransaction associated
+        - with SharedTransaction associated
+        """
+        self.assertEqual(SharedResource.objects.all().count(), 0)
+        dsr = {
+            "val_goal": 10000,
+            "date_open": date.today(),
+            "name": "借金返済",
+            "kind": "返済",
+            "detail": "詳細",
+        }
+        sr = SharedResource.objects.create(**dsr)
+        # test scenario
+        test_scenarios = [
+            (sr.val_goal, dsr['val_goal'], "check_val_goal"),
+            (str(sr), f"【{sr.kind}】{sr.name}:{sr.val_goal:,}円", "check_str"),
+            (sr.val_actual, 0, "before:check_val_actual"),
+            (sr.progress_100, 0, "before:check_progress_100"),
+            (SharedResource.objects.all().count(), 1, "before:check_num"),
+        ]
+        # SharedTransactionを紐付け
+        dst = {
+            "val": 1000,
+            "date": date.today(),
+            "paid_by": self.user,
+            "shared_resource": sr,
+            "memo": "test"
+        }
+        st1 = SharedTransaction.objects.create(**dst)
+        st2 = SharedTransaction.objects.create(**dst)
+        # add test scenarios
+        test_scenarios += [
+            (sr.val_actual, dst['val']*2, "after:check_val_actual"),
+            (sr.progress_100, math.floor(100*dst['val']*2/sr.val_goal), "after:check_progress_100"),
+            (SharedTransaction.objects.all().count(), 2, "after:check_num"),
+        ]
+        # execute tests
+        for actual, expected, name in test_scenarios:
+            with self.subTest(actual=actual, expected=expected, name=name):
+                self.assertEqual(actual, expected)
+
+
+    
