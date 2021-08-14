@@ -7,7 +7,8 @@ from kakeibo.views.views_kakeibo import EventList, EventCreate, EventUpdate, Eve
 from kakeibo.views.views_kakeibo import ExchangeCreate
 from kakeibo.views.views_autocomplete import UsageAutocomplete, ResourceAutocomplete
 from kakeibo.views.views_shared import SharedTop, SharedList, SharedDetail, SharedCreate, SharedUpdate, SharedDelete
-from kakeibo.views.views_shared import SharedResourceDetail, SharedResourceList, SharedResourceUpdate, SharedResourceCreate
+from kakeibo.views.views_shared import SharedResourceDetail, SharedResourceList, SharedResourceUpdate
+from kakeibo.views.views_shared import SharedResourceCreate, SharedResourceDelete
 from kakeibo.views.views_shared import SharedTransactionDetail,SharedTransactionUpdate
 from kakeibo.views.views_shared import SharedTransactionCreate, SharedTransactionDelete
 from kakeibo.views.views_credit import CreditImport, CreditLink, CreditLinkFromKakeibo
@@ -25,6 +26,7 @@ urlpatterns = [
     path('shared/resource/create', SharedResourceCreate.as_view(), name="shared_resource_create"),
     path('shared/resource/<int:pk>', SharedResourceDetail.as_view(), name="shared_resource_detail"),
     path('shared/resource/<int:pk>/edit', SharedResourceUpdate.as_view(), name="shared_resource_update"),
+    path('shared/resource/<int:pk>/delete', SharedResourceDelete.as_view(), name="shared_resource_delete"),
     path('shared/transaction/create', SharedTransactionCreate.as_view(), name="shared_transaction_create"),
     path('shared/transaction/<int:pk>', SharedTransactionDetail.as_view(), name="shared_transaction_detail"),
     path('shared/transaction/<int:pk>/edit', SharedTransactionUpdate.as_view(), name="shared_transaction_update"),

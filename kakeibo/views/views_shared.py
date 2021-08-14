@@ -43,20 +43,26 @@ class SharedTop(LoginRequiredMixin, TemplateView):
         # p_budget
         context.update(calculation_shared.calc_p_budget(budget, diff))
         # usage
-        usages_shared = Usage.objects.filter(is_active=True, is_shared=True).prefetch_related('sharedkakeibo_set')
+        usages_shared = Usage.objects.filter(
+            is_active=True, is_shared=True).prefetch_related('sharedkakeibo_set')
         usages = dict()
         for us in usages_shared.order_by('pk'):
             tm_sum = us.sharedkakeibo_set.filter(
-                is_active=True, date__year=target_ym.year, date__month=target_ym.month).aggregate(sum=Sum('fee'))['sum']
+                is_active=True, date__year=target_ym.year, date__month=target_ym.month
+            ).aggregate(sum=Sum('fee'))['sum']
             lm_sum = us.sharedkakeibo_set.filter(
-                is_active=True, date__year=last_ym.year, date__month=last_ym.month).aggregate(sum=Sum('fee'))['sum']
+                is_active=True, date__year=last_ym.year, date__month=last_ym.month
+            ).aggregate(sum=Sum('fee'))['sum']
             usages[us.name] = {
                 "tm": tm_sum if tm_sum else 0,
                 "lm": lm_sum if lm_sum else 0,
             }
         # SharedResource
-        shared_resources = SharedResource.objects.filter(date_close=None, is_active=True).order_by('-pk')
+        shared_resources = SharedResource.objects.filter(
+            date_close=None, is_active=True).order_by('-pk')
         shared_resourcce_form = SharedResourceForm(initial={"date": date.today()})
+        shared_transaction_form = SharedTransactionForm(
+            initial={"date": date.today(), "paid_by": self.request.user})
         # return
         context.update({
             "budget": budget,
@@ -69,11 +75,13 @@ class SharedTop(LoginRequiredMixin, TemplateView):
             "usages": usages,
             "shared_resources": shared_resources,
             "shared_resource_form": shared_resourcce_form,
-            "shared_transaction_form": SharedTransactionForm()
+            "shared_transaction_form": shared_transaction_form,
         })
         return context
 
-
+#!====================================
+#! SharedKakeibo
+#!====================================
 class SharedList(LoginRequiredMixin, ListView):
     template_name = "shared_list.html"
     model = SharedKakeibo
@@ -158,6 +166,9 @@ class SharedDelete(LoginRequiredMixin, DeleteView):
         return result
 
 
+#!====================================
+#! SharedResource
+#!====================================
 class SharedResourceDetail(LoginRequiredMixin, DetailView, MultipleObjectMixin):
     model = SharedResource
     paginate_by = 5
@@ -166,8 +177,12 @@ class SharedResourceDetail(LoginRequiredMixin, DetailView, MultipleObjectMixin):
     def get_context_data(self, **kwargs):
         object_list = SharedTransaction.objects.filter(
             shared_resource=self.get_object(), is_active=True).order_by('-date')
+        shared_transaction_form = SharedTransactionForm(
+            initial={"date": date.today(), "shared_resource": self.object, "paid_by": self.request.user}
+        )
         res = super(SharedResourceDetail, self).get_context_data(
-            object_list=object_list, **kwargs
+            object_list=object_list, shared_transaction_form=shared_transaction_form,
+            **kwargs
         )
         return res
 
@@ -203,7 +218,33 @@ class SharedResourceCreate(LoginRequiredMixin, CreateView):
         return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})
 
 
+class SharedResourceDelete(LoginRequiredMixin, DeleteView):
+    model = SharedResource
+    template_name = "shared_resource_delete.html"
 
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj.is_active:
+            messages.warning(request, "{}は削除済みです".format(obj))
+            return redirect("kakeibo:shared_top") 
+        return super(SharedResourceDelete, self).get(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('kakeibo:shared_resource_list')
+
+    def post(self, request, *args, **kwargs):
+        ob = self.get_object()
+        result = super().delete(request, *args, **kwargs)
+        sts = SharedTransaction.objects.filter(shared_resource=ob)
+        num = sts.count()
+        sts.delete()
+        messages.success(self.request, '「{}」と紐づく{}件の明細を削除しました'.format(ob, num))
+        return result
+
+
+#!====================================
+#! SharedTransaction
+#!====================================
 class SharedTransactionDetail(LoginRequiredMixin, DetailView):
     model = SharedTransaction
     template_name = "shared_transaction_detail.html"
@@ -216,7 +257,7 @@ class SharedTransactionCreate(LoginRequiredMixin, CreateView):
 
     def get_success_url(self) -> str:
         messages.success(self.request, f"{self.object}を作成しました")
-        return reverse('kakeibo:shared_transaction_detail', kwargs={"pk": self.object.pk})
+        return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.shared_resource.pk})
 
     def get_form(self, form_class=form_class):
         form = super().get_form(form_class=form_class)
@@ -250,7 +291,6 @@ class SharedTransactionDelete(LoginRequiredMixin, DeleteView):
 
     def get_success_url(self):
         return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.shared_resource.pk})
-
 
     def post(self, request, *args, **kwargs):
         ob = self.get_object()

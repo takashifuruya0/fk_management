@@ -51,12 +51,8 @@
           </div>
           <table class="table">
             <tr>
-              <th>開始日</th>
-              <td>{{object.date_open}}</td>
-            </tr>
-            <tr>
-              <th>終了日</th>
-              <td>{{object.date_close |default:"-"}}</td>
+              <th>期間</th>
+              <td>{{object.date_open}}〜{{object.date_close |default:""}}</td>
             </tr>
             <tr>
               <th>目標金額</th>
@@ -78,7 +74,7 @@
             <i class="fas fa-list"></i> 一覧
           </a>
           {% if object.is_active %}
-          <a class="btn btn-danger" href="{%url 'kakeibo:shared_delete' pk=object.pk%}">
+          <a class="btn btn-danger" href="{%url 'kakeibo:shared_resource_delete' pk=object.pk%}">
             <i class="fas fa-trash-alt"></i> 削除
           </a>
           {% endif %}
@@ -111,6 +107,11 @@
               </td>
             </tr>
             {% endfor %}
+            <tr>
+              <td colspan=5>
+                追加する{% include 'modal/shared_transaction_form.html' %}
+              </td>
+            <tr>
           </table>
           <div class="d-none d-sm-block">
             {% bootstrap_pagination page_obj url="?page=1" size="md" pages_to_show=9%}
@@ -118,9 +119,9 @@
           <div class="d-block d-sm-none">
             {% bootstrap_pagination page_obj url="?page=1" size="sm" pages_to_show=3%}
           </div>
-          <a class="btn btn-primary" href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{object.pk}}">
+          {% comment %} <a class="btn btn-primary" href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{object.pk}}">
             <i class="fas fa-plus"></i> 明細追加
-          </a>
+          </a> {% endcomment %}
         </div>
         <div class="card-footer">
         </div>

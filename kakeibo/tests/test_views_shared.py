@@ -466,7 +466,10 @@ class SharedViewTest(TestCase):
         }
         response = self.client.post(url, data=d)
         st = SharedTransaction.objects.last()
-        self.assertRedirects(response, reverse("kakeibo:shared_transaction_detail", kwargs={"pk": st.pk}))
+        self.assertRedirects(
+            response, 
+            reverse("kakeibo:shared_resource_detail", kwargs={"pk": st.shared_resource.pk})
+        )
         self.assertEqual(st.val, d['val'])
 
 

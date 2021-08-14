@@ -139,10 +139,11 @@
                 <a href="{%url 'kakeibo:shared_resource_detail' pk=sr.pk%}" class="btn btn-info btn-sm btn-block">
                   <i class="fas fa-external-link-square-alt"></i>
                 </a>
-                <a class="btn btn-primary btn-sm" 
+                {% comment %} <a class="btn btn-primary btn-sm" 
                   href="{%url 'kakeibo:shared_transaction_create'%}?shared_resource={{sr.pk}}">
                   <i class="fas fa-plus"></i>
-                </a>
+                </a> {% endcomment %}
+                {% include 'modal/shared_transaction_form.html' %}
               </td>
               <td>
                 {{sr.name}}
