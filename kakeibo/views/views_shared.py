@@ -191,6 +191,7 @@ class SharedResourceList(LoginRequiredMixin, ListView):
     model = SharedResource
     paginate_by = 10
     template_name = "shared_resource_list.html"
+    queryset = SharedResource.objects.all_active()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -237,7 +238,7 @@ class SharedResourceDelete(LoginRequiredMixin, DeleteView):
         result = super().delete(request, *args, **kwargs)
         sts = SharedTransaction.objects.filter(shared_resource=ob)
         num = sts.count()
-        sts.delete()
+        sts.update(is_active=False)
         messages.success(self.request, '「{}」と紐づく{}件の明細を削除しました'.format(ob, num))
         return result
 
