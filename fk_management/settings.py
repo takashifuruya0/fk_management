@@ -201,8 +201,9 @@ ACCOUNT_EMAIL_VERIFICATION = "none"  # mandatory / optional / none
 AUTH_USER_MODEL = "accounts.CustomUser"
 SOCIALACCOUNT_AUTO_SIGNUP = False
 ACCOUNT_FORMS = {
-   'signup': 'accounts.forms.UserCreationForm',
+    'signup': 'accounts.forms.UserCreationForm',
 }
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = env('ACCOUNT_DEFAULT_HTTP_PROTOCOL')
 
 ENVIRONMENT = "default"
 
