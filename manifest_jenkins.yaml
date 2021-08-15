@@ -1,4 +1,6 @@
+# ------------------------
 # ConfigMap
+# ------------------------
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,8 +12,25 @@ data:
   DB_HOST: "127.0.0.1"
 
 ---
+# ------------------------
+# PersistentVolumeClaim
+# ------------------------
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+    name: static-pvc
+spec:
+    accessModes:
+      # - ReadWriteOnce
+      - ReadOnlyMany
+    resources:
+        requests:
+            storage: 1Gi
 
-
+---
+# ------------------------
+# Deployment
+# ------------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,6 +45,13 @@ spec:
       labels:
         app: fk-management-app
     spec:
+      volumes:
+        - name: test
+          configMap:
+            name: test
+        - name: static
+          persistentVolumeClaim:
+            claimName: static-pvc
       containers:
         - name: fk-management-container
           image: tfuruya/fk_management:_VERSION
@@ -41,6 +67,14 @@ spec:
             - name: test
               mountPath: "/home/fk_management/env"
               readOnly: true
+            - name: static-pvc
+              mountPath:  "/home/fk_management/static"
+          lifecycle:
+            postStart:
+              exec:
+                command: [
+                  "python3", "manage.py", "collectstatic", "--noinput"
+                ]
           resources:
             limits:
               memory: 256Mi
@@ -64,31 +98,17 @@ spec:
             requests:
               memory: 32Mi
               cpu: "0.1"
-      volumes:
-        - name: test
-          configMap:
-            name: test
 
-#      volumes:
-#        # Podレベルでボリュームを設定し、Pod内のコンテナにマウントします。
-#        - name: config
-#          configMap:
-#            # マウントしたいConfigMapの名前を指定します。
-#            name: game-demo
-#            # ファイルとして作成するConfigMapのキーの配列
-#            items:
-#              - key: "game.properties"
-#                path: "game.properties"
-#              - key: "user-interface.properties"
-#                path: "user-interface.properties"
 ---
-
+# ------------------------
+# Service: ClusterIP
+# ------------------------
 apiVersion: v1
 kind: Service
 metadata:
   name: fk-management-externalip
 spec:
-  type: ClusterIP # <- ClusterIPから変更
+  type: ClusterIP 
   ports:
     - name: "http-port"
       protocol: "TCP"
@@ -99,13 +119,15 @@ spec:
 
 
 ---
-
+# ------------------------
+# Service: NodePort
+# ------------------------
 apiVersion: v1
 kind: Service
 metadata:
   name: fk-management-externalip2
 spec:
-  type: NodePort # <- ClusterIPから変更
+  type: NodePort
   ports:
     - name: "http-port"
       protocol: "TCP"
@@ -117,7 +139,9 @@ spec:
 
 
 ---
-
+# ------------------------
+# Service ExternalName 
+# ------------------------
 apiVersion: v1
 kind: Service
 metadata:
