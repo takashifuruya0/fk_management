@@ -14,9 +14,13 @@ services:
     build: .
     command: >
       bash -c '
-        python3 manage.py migrate --settings=fk_management.environment.develop &&
-        python3 manage.py collectstatic --no-input  --settings=fk_management.environment.develop &&
-        python3 manage.py runserver 0.0.0.0:8000 --settings=fk_management.environment.develop '
+        python3 manage.py migrate --settings=${SETTINGS} &&
+        python3 manage.py collectstatic --no-input  --settings=${SETTINGS} &&
+        gunicorn fk_management.wsgi:application -b 0.0.0.0:8000 --env DJANGO_SETTINGS_MODULE=${SETTINGS}'
+    # command: [
+    #   "gunicorn", "fk_management.wsgi:application", "-b", "0.0.0.0:8000", 
+    #   "--env", "DJANGO_SETTINGS_MODULE=fk_management.environment.develop"
+    # ]
     ports:
       - 8000
     volumes:

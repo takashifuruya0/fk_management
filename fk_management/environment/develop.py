@@ -14,8 +14,8 @@ DATABASES = {
 
 ENVIRONMENT = "develop"
 
-# sendgrid
-EMAIL_BACKEND = "sgbackend.SendGridBackend"
+# sendgrid by django-sendgrid-v5==1.1.0
+EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
 SENDGRID_API_KEY = env("SENDGRID_API_KEY", None)
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 DEFAULT_FROM_EMAIL = "noreply@fk-management.com"
