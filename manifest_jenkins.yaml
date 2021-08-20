@@ -46,9 +46,9 @@ spec:
         app: fk-management-app
     spec:
       volumes:
-        - name: test
+        - name: envfile
           configMap:
-            name: test
+            name: envfile
         - name: static
           persistentVolumeClaim:
             claimName: static-pvc
@@ -64,7 +64,7 @@ spec:
           ports:
             - containerPort: 8000
           volumeMounts:
-            - name: test
+            - name: envfile
               mountPath: "/home/fk_management/env"
               readOnly: true
             - name: static-pvc
