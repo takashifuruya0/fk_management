@@ -27,11 +27,11 @@ services:
     build: .
     command: >
       bash -c '
-        python3 manage.py migrate --settings=fk_management.environment.develop &&
-        python3 manage.py collectstatic --no-input  --settings=fk_management.environment.develop &&
-        python3 manage.py runserver 0.0.0.0:8000 --settings=fk_management.environment.develop '
+        python3 manage.py migrate --settings=${SETTINGS} &&
+        python3 manage.py collectstatic --no-input  --settings=${SETTINGS} &&
+        python3 manage.py runserver 0.0.0.0:8000 --settings=${SETTINGS}'
     ports:
-      - 8000:8000
+      - 8000
     volumes:
       - .:/home/fk_management
     depends_on:
