@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'django_extensions',
     "django_bootstrap5",
     "import_export",
-    'bootstrap_datepicker_plus',
     "mathfilters",
     # Django REST Framework
     'rest_framework',
