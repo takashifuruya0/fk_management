@@ -27,6 +27,9 @@
           {% if not object.is_active %}
             <label class="badge bg-danger">削除済み</label>
           {% endif %}
+          {% if object.is_done %}
+            <label class="badge bg-warning">達成！</label>
+          {% endif %}
         </div>
         <div class="card-body table-responsive">
           <h5>
@@ -38,16 +41,18 @@
             {{object.name}}
           </h5>
           <div class="progress" style="height: 40px;">
-            <div class="progress-bar" role="progressbar" style="width: {{object.progress_100}}%" 
+            <div class="progress-bar {%if object.is_done%}bg-success{%endif%}" role="progressbar" style="width: {{object.progress_100}}%" 
               aria-valuenow="{{object.progress_100}}" aria-valuemin="0" aria-valuemax="100">
               {{object.progress_100}}%<br>{{object.val_actual |yen}}
             </div>
+            {% if not object.is_done %}
             {% with remaining=object.progress_100|sub:100|mul:-1 %}
             <div class="progress-bar bg-secondary" role="progressbar" style="width: {{remaining}}%" 
               aria-valuenow="{{remaining}}" aria-valuemin="0" aria-valuemax="100">
               残り{{remaining}}%<br>{{object.val_goal|sub:object.val_actual |yen}}
             </div>
             {% endwith %}
+            {% endif %}
           </div>
           <table class="table">
             <tr>
@@ -69,9 +74,6 @@
           </table>
           <a class="btn btn-info" href="{%url 'kakeibo:shared_resource_update' pk=object.pk%}">
             <i class="fas fa-edit"></i> 更新
-          </a>
-          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_list'%}">
-            <i class="fas fa-list"></i> 一覧
           </a>
           {% if object.is_active %}
           <a class="btn btn-danger" href="{%url 'kakeibo:shared_resource_delete' pk=object.pk%}">
@@ -124,6 +126,9 @@
           </a> {% endcomment %}
         </div>
         <div class="card-footer">
+          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_list'%}">
+            <i class="fas fa-list"></i> 一覧
+          </a>
         </div>
       </div>
     </div>

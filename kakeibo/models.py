@@ -245,6 +245,10 @@ class SharedResource(BaseModel):
     def progress_100(self):
         return math.floor(self.val_actual / self.val_goal * 100)
 
+    @property
+    def is_done(self):
+        return self.val_actual >= self.val_goal 
+
 class SharedTransaction(BaseModel):
     shared_resource = models.ForeignKey(SharedResource, verbose_name="共通口座", on_delete=models.CASCADE)
     date = models.DateField('日付')

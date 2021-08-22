@@ -148,7 +148,8 @@
               <td>
                 {{sr.name}}
                 <div class="d-none d-sm-block progress" style="height: 20px;">
-                  <div class="progress-bar" role="progressbar" style="width: {{sr.progress_100}}%" 
+                  <div class="progress-bar {%if sr.is_done%}bg-success{%endif%}" role="progressbar" 
+                    style="width: {{sr.progress_100}}%" 
                     aria-valuenow="{{sr.progress_100}}" aria-valuemin="0" aria-valuemax="100">
                     {{sr.progress_100}}%
                   </div>
