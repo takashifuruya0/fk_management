@@ -76,7 +76,7 @@ class SharedForm(forms.ModelForm):
         fields = ("date", "fee", "paid_by", 'usage', "memo")
         widgets = {
             'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "paid_by": forms.RadioSelect(),
+            "paid_by": forms.Select(attrs={"class": "form-control"}),
             "fee": forms.NumberInput(attrs={"class": "form-control"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
         }
@@ -93,7 +93,7 @@ class SharedSearchForm(forms.Form):
     )
     paid_by = forms.ModelMultipleChoiceField(
         queryset=get_user_model().objects.filter(is_active=True),
-        required=False, label="支払者", widget=forms.RadioSelect()
+        required=False, label="支払者", widget=forms.SelectMultiple(attrs={"class": "form-control"}),
     )
     usages = forms.ModelMultipleChoiceField(
         queryset=Usage.objects.filter(is_active=True, is_shared=True).order_by('-name'),
