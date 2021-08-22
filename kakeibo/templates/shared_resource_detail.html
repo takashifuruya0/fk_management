@@ -75,9 +75,6 @@
           <a class="btn btn-info" href="{%url 'kakeibo:shared_resource_update' pk=object.pk%}">
             <i class="fas fa-edit"></i> 更新
           </a>
-          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_list'%}">
-            <i class="fas fa-list"></i> 一覧
-          </a>
           {% if object.is_active %}
           <a class="btn btn-danger" href="{%url 'kakeibo:shared_resource_delete' pk=object.pk%}">
             <i class="fas fa-trash-alt"></i> 削除
@@ -129,6 +126,9 @@
           </a> {% endcomment %}
         </div>
         <div class="card-footer">
+          <a class="btn btn-secondary" href="{%url 'kakeibo:shared_resource_list'%}">
+            <i class="fas fa-list"></i> 一覧
+          </a>
         </div>
       </div>
     </div>
