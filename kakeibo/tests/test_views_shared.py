@@ -132,16 +132,22 @@ class SharedViewTest(TestCase):
             date="2023-06-01", fee=100, usage=self.u_lunch,
             memo="test2", paid_by=self.user_hoko
         )
-        res = self.client.get("{}?date_from=2020-06-01".format(url))
-        self.assertEqual(res.context['object_list'].count(), 2)
-        res = self.client.get("{}?date_to=2022-06-01".format(url))
-        self.assertEqual(res.context['object_list'].count(), 1)
-        res = self.client.get("{}?date_from=2021-06-02&date_to=2022-06-01".format(url))
-        self.assertEqual(res.context['object_list'].count(), 0)
-        res = self.client.get("{}?usages={}".format(url, self.u_shopping.pk))
-        self.assertEqual(res.context['object_list'].count(), 1)
-        res = self.client.get("{}?memo={}".format(url, "test"))
-        self.assertEqual(res.context['object_list'].count(), 2)
+        # subtest
+        test_scenarios = [  # (url, count, case_name)
+            ("{}?date_from=2020-06-01".format(url), 2, "date_from"),
+            ("{}?date_to=2022-06-01".format(url), 1, "date_to"),
+            ("{}?date_from=2021-06-02&date_to=2022-06-01".format(url), 0, "date_range"),
+            ("{}?usages={}".format(url, self.u_shopping.pk), 1, "usage"),
+            ("{}?usages={}&usages={}".format(url, self.u_shopping.pk, self.u_lunch.pk), 2, "usage_multiple"),
+            ("{}?memo={}".format(url, "test"), 2, "memo"),
+            ("{}?paid_by={}".format(url, self.user_takashi.pk), 1, "paid_by"),
+            ("{}?paid_by={}&paid_by={}".format(url, self.user_takashi.pk, self.user_hoko.pk), 2, "paid_by_multiple")
+        ]
+        for condition, num, case_name in test_scenarios:
+            with self.subTest(condition=condition, num=num, case_name=case_name):
+                res = self.client.get(condition)
+                self.assertEqual(res.context['object_list'].count(), num)
+                
 
     def test_shared_detail(self):
         # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
