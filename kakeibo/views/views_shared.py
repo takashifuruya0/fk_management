@@ -102,6 +102,9 @@ class SharedList(LoginRequiredMixin, ListView):
         # memo
         if self.request.GET.get("memo", None):
             q = q.filter(memo__icontains=self.request.GET.get("memo"))
+        # paid_by
+        if self.request.GET.getlist('paid_by', None):
+            q = q.filter(paid_by__in=self.request.GET.getlist('paid_by'))
         return q.select_related('paid_by', 'usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
