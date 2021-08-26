@@ -1,0 +1,55 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cron-sync-kakeibo
+spec:
+  schedule: "20 */1 * * *"
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          shareProcessNamespace: true
+          volumes:
+          - name: envfile
+            configMap:
+              name: envfile
+          containers:
+          - name: fk-management-get-kakeibo
+            image: tfuruya/fk_management:_VERSION
+            imagePullPolicy: Always
+            command: [ "/bin/sh", "-c" ]
+            args:
+              - |
+                python3 manage.py get_kakeibo --settings=fk_management.environment.develop ;
+                sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+            volumeMounts:
+              - name: envfile
+                mountPath: "/home/fk_management/env"
+                readOnly: true
+            resources:
+              limits:
+                memory: 256Mi
+                cpu: "0.2"
+              requests:
+                memory: 32Mi
+                cpu: "0.1"
+          - name: cloudsql-proxy
+            image: gcr.io/cloudsql-docker/gce-proxy:1.16
+            imagePullPolicy: Always
+            command:
+              - "/cloud_sql_proxy"
+            args:
+              - "-instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432"
+            ports:
+              - containerPort: 5432
+            resources:
+              limits:
+                memory: 256Mi
+                cpu: "0.2"
+              requests:
+                memory: 32Mi
+                cpu: "0.1"
