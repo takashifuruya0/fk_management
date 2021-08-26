@@ -37,9 +37,12 @@
             <label class="badge bg-warning">返済</label>
             {% elif object.kind == "貯金" %}
             <label class="badge bg-success">貯金</label>
+            {% else %}
+            <label class="badge bg-info">{{object.kind}}</label>
             {% endif %}
             {{object.name}}
           </h5>
+          {% if object.kind != "引き出し" %}
           <div class="progress" style="height: 40px;">
             <div class="progress-bar {%if object.is_done%}bg-success{%endif%}" role="progressbar" style="width: {{object.progress_100}}%" 
               aria-valuenow="{{object.progress_100}}" aria-valuemin="0" aria-valuemax="100">
@@ -54,11 +57,12 @@
             {% endwith %}
             {% endif %}
           </div>
+          {% endif %}
           <table class="table">
             <tr>
               <th>期間</th>
               <td>{{object.date_open}}〜{{object.date_close |default:""}}</td>
-            </tr>
+            </tr>            
             <tr>
               <th>目標金額</th>
               <td>{{object.val_goal |yen}}</td>

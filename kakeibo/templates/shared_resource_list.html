@@ -59,7 +59,8 @@
               <td class="d-none d-sm-table-cell">{{object.val_goal |yen}}</td>
               <td>{{object.val_actual |yen}}</td>
               <td class="d-none d-sm-table-cell">
-                <div class="progress" style="height: 40px;">
+                {% if object.kind != "引き出し" %}
+                <div class="progress" style="height: 40px;">  
                   <div class="progress-bar {%if object.is_done%}bg-success{%endif%}" role="progressbar" style="width: {{object.progress_100}}%" 
                     aria-valuenow="{{object.progress_100}}" aria-valuemin="0" aria-valuemax="100">
                     {{object.progress_100}}%<br>{{object.val_actual |yen}}
@@ -73,6 +74,7 @@
                   {% endwith %}
                   {% endif %}
                 </div>
+                {% endif %}
               </td>
             </tr>
             {% endfor %}

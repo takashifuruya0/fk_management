@@ -231,10 +231,13 @@ class SharedResource(BaseModel):
     date_open = models.DateField('開始日')
     date_close = models.DateField('終了日', null=True, blank=True)
     detail = models.TextField("詳細", blank=True, null=True)
-    val_goal = models.IntegerField("目標金額")
+    val_goal = models.IntegerField("目標金額", help_text="「引き出し」の場合は、目標金額は0とする")
 
     def __str__(self) -> str:
-        return f"【{self.kind}】{self.name}:{self.val_goal:,}円"
+        if self.kind == "引き出し" or self.val_goal == 0:
+            return f"【{self.kind}】{self.name}"
+        else:
+            return f"【{self.kind}】{self.name}:{self.val_goal:,}円"
 
     @property
     def val_actual(self):
@@ -243,11 +246,17 @@ class SharedResource(BaseModel):
     
     @property
     def progress_100(self):
-        return math.floor(self.val_actual / self.val_goal * 100)
+        if self.kind == "引き出し" or self.val_goal == 0:
+            return 0
+        else:
+            return math.floor(self.val_actual / self.val_goal * 100)
 
     @property
     def is_done(self):
-        return self.val_actual >= self.val_goal 
+        if self.kind == "引き出し" or self.val_goal == 0:
+            return False
+        else:
+            return self.val_actual >= self.val_goal 
 
 class SharedTransaction(BaseModel):
     shared_resource = models.ForeignKey(SharedResource, verbose_name="共通口座", on_delete=models.CASCADE)
