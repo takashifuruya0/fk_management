@@ -301,7 +301,7 @@ CHOICES_EXCHANGE_METHOD = (
     ("Wire", "Wire"), ("prestia", "prestia")
 )
 CHOICES_KIND_SHARED_RESOURCE = (
-    ("貯金", "貯金"), ("返済", "返済")
+    ("貯金", "貯金"), ("返済", "返済"), ("引き出し", "引き出し")
 )
 
 # MAPPING
