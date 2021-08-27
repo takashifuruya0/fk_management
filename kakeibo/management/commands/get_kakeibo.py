@@ -13,6 +13,7 @@ class Command(BaseCommand):
     help = 'Get Kakeibo data'
     mapping_resource = settings.MAPPING_RESOURCE
     mapping_way = settings.MAPPING_WAY
+    mapping_usage = settings.MAPPING_USAGE
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
     def add_arguments(self, parser):
@@ -64,7 +65,12 @@ class Command(BaseCommand):
                     pprint.pprint(f"currency: {currency}")
                     # usage
                     if r['usage']:
-                        usage = Usage.objects.get(name=r['usage']['name'])
+                        name = self.mapping_usage.get(r['usage']['name'], r['usage']['name'])
+                        usages = Usage.objects.filter(name=name)
+                        if (n:=usages.count()) != 1:
+                            raise Exception(f"Multiple Found Error: {n} Usage {name} were found")
+                        else:
+                            usage = usages[0]
                     elif not r['move_from'] or not r['move_to']:
                         # usageが設定されていないが、resourcesなし --> その他
                         usage = other
