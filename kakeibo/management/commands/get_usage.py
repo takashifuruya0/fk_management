@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from kakeibo.models import Usage
+from django.conf import settings
 import requests
 import logging
 logger = logging.getLogger('django')
@@ -21,10 +22,11 @@ class Command(BaseCommand):
         self.stdout.write("============")
         usage_list = list()
         for r in json_data['results']:
-            msg = "{}_{}".format(r['name'], r['is_expense'])
+            name = settings.MAPPING_USAGE.get(r['name'], r['name'])
+            msg = "{}_{}".format(name, r['is_expense'])
             self.stdout.write(self.style.SUCCESS(msg))
-            if not Usage.objects.filter(name=r['name']).exists():
-                u = Usage(name=r['name'], is_expense=r['is_expense'], legacy_id=r['pk'])
+            if not Usage.objects.filter(name=name).exists():
+                u = Usage(name=name, is_expense=r['is_expense'], legacy_id=r['pk'])
                 usage_list.append(u)
         self.stdout.write("追加数：{}".format(len(usage_list)))
         Usage.objects.bulk_create(usage_list)

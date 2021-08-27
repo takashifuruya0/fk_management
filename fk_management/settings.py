@@ -320,5 +320,9 @@ MAPPING_WAY = {
     "共通支出": "その他",
     "その他": "その他",
 }
+MAPPING_USAGE = {
+    "書籍": "自己研鑽",
+    "喫茶店": "娯楽費",
+}
 
 BASE_URL = env('BASE_URL')
