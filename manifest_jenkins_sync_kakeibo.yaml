@@ -15,8 +15,8 @@ spec:
           shareProcessNamespace: true
           volumes:
           - name: envfile
-            configMap:
-              name: envfile
+            secret:
+              secretName: secret-test
           containers:
           - name: fk-management-get-kakeibo
             image: tfuruya/fk_management:_VERSION

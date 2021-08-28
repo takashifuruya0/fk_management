@@ -12,8 +12,8 @@ spec:
       shareProcessNamespace: true
       volumes:
       - name: envfile
-        configMap:
-          name: envfile
+        secret:
+          secretName: secret-test
       containers:
       - name: fk-management-migrate
         image: tfuruya/fk_management:_VERSION

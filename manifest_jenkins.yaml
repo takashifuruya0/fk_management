@@ -47,8 +47,8 @@ spec:
     spec:
       volumes:
         - name: envfile
-          configMap:
-            name: envfile
+          secret:
+            secretName: secret-test
         - name: static
           persistentVolumeClaim:
             claimName: static-pvc
