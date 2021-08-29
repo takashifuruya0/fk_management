@@ -586,11 +586,12 @@ class Ipo(BaseModel):
     # 購入情報
     datetime_purchase_open = models.DateTimeField("購入意思表示開始日時", blank=True, null=True)
     datetime_purchase_close = models.DateTimeField("購入意思表示終了日時", blank=True, null=True)
-    result_buy = models.CharField("購入結果", max_length=255, blank=True, null=True)
     num_select = models.IntegerField("当選数", blank=True, null=True)
     # 評判/評価 (https://96ut.com/ipo/yoso.php)
     rank = models.CharField("評価", max_length=1, choices=settings.CHOICES_RANK, blank=True, null=True)
     val_predicted = models.FloatField("予想初値", blank=True, null=True)
+    num_comment = models.PositiveIntegerField("コメント数", blank=True, null=True)
+    managing_underwriter = models.CharField("主幹証券会社", max_length=255, blank=True, null=True)
     url = models.URLField("評価詳細URL", blank=True, null=True)
     # 上場後
     val_initial = models.FloatField("上場後初値", blank=True, null=True)
