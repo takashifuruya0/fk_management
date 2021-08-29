@@ -303,6 +303,25 @@ CHOICES_EXCHANGE_METHOD = (
 CHOICES_KIND_SHARED_RESOURCE = (
     ("貯金", "貯金"), ("返済", "返済"), ("引き出し", "引き出し")
 )
+CHOICES_ENTRY_TYPE = (
+    ("短期", "短期"), ("中期", "中期"), ("長期", "長期"), 
+)
+CHOICES_ENTRY_STATUS = (
+    # エントリー前　→　エントリー →　クローズ
+    ("01.BeforeEntry", "01.BeforeEntry"), 
+    ("11.Open", "11.Open"), 
+    ("21.CloseWon", "21.CloseWon"), ("22.CloseLost", "22.CloseLost"), 
+)
+CHOICES_RANK = (
+    ("S", "S"), ("A", "A"), ("B", "B"), ("C", "C"), ("D", "D")
+)
+CHOICES_STATUS = (
+    ("0.起票", "0.起票"),
+    ("1.評価中", "1.評価中"),
+    ("2.申込済", "2.申込済"),
+    ("3.落選（上場前）", "3.落選（上場前）"), ("3.当選（上場前）", "3.当選（上場前）"),
+    ("4.落選（上場後）", "4.落選（上場後）"), ("4.当選（上場後）", "4.当選（上場後）"),
+)
 
 # MAPPING
 MAPPING_RESOURCE = {
