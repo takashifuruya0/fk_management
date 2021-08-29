@@ -78,14 +78,14 @@ class Stock(BaseModel):
     @property
     def latest_val(self):
         """直近の株価"""
-        svd = StockValueData.objects.filter(stock=self).latest('date')
-        return svd.val_close if svd else None
+        svd = StockValueData.objects.filter(stock=self)
+        return svd.latest('date').val_close if svd.exists() else None
 
     @property
     def latest_val_date(self):
         """直近の株価の日付"""
-        svd = StockValueData.objects.filter(stock=self).latest('date')
-        return svd.date if svd else None
+        svd = StockValueData.objects.filter(stock=self)
+        return svd.latest('date').date if svd.exists() else None
     
     class Meta:
         verbose_name = "銘柄"
@@ -335,6 +335,7 @@ class Order(BaseModel):
                 self.entry.save()
                 logger.info("{} is updated with updates of {}".format(self.entry, self))
             except Exception as e:
+                # unlink Entry and save both order and entry
                 logger.error(e)
                 entry = self.entry
                 self.entry = None
