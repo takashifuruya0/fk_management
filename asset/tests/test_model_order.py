@@ -3,7 +3,7 @@ from django.db.utils import IntegrityError
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from asset.models import Stock, Order, Entry, ReasonWinLoss, Ipo, Dividend, StockValueData
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 
 class OrderTest(TestCase):
@@ -105,9 +105,6 @@ class EntryTest(TestCase):
     """
     !Test for Entry
     """
-    """
-    !Test for Order
-    """
     @classmethod
     def setUpTestData(cls):
         get_user_model().objects.all().delete()
@@ -153,8 +150,8 @@ class EntryTest(TestCase):
         # test
         test_scenarios = [
             (Entry.objects.all().count(), 2, "count"),
-            (str(e1), f"P{e1.pk:0>3}_{e1.stock}", "__str__"),
-            (str(e2), f"O{e2.pk:0>3}_{e2.stock}", "__str__")
+            (str(e1), f"P{e1.pk:0>3}_{e1.stock}", "__str__ for Plan"),
+            (str(e2), f"O{e2.pk:0>3}_{e2.stock}", "__str__ for Open")
         ]
         for result, expectation, name in test_scenarios:
             with self.subTest(result=result, expectation=expectation, name=name):
@@ -165,11 +162,92 @@ class IpoTest(TestCase):
     """
     !Test for Ipo
     """
-    pass
+    @classmethod
+    def setUpTestData(cls):
+        get_user_model().objects.all().delete()
+        get_user_model().objects.create(
+            username="takashi", password="test", is_superuser=True, is_staff=True)
+        Stock.objects.create(code="0000", name="ABC Company", is_listed=False)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        get_user_model().objects.all().delete()
+
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.first()
+        self.client.login()
+        self.s0 = Stock.objects.get(code="0000")
+
+    def tearDown(self) -> None:
+        self.client.logout()
+        return super().tearDown()
+
+    def test_ipo(self):
+        """
+        Ipo, Normal
+        """
+        # prepare
+        d1 = {
+            "stock": self.s0,
+        }
+        ipo = Ipo.objects.create(**d1)
+        # test
+        test_scenarios = [
+            (Ipo.objects.all().count(), 1, "count"),
+            (str(ipo), f"IPO_{d1['stock']}", "__str__"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
 
 
 class DividendTest(TestCase):
     """
     !Test for Dividend
     """
-    pass
+    @classmethod
+    def setUpTestData(cls):
+        get_user_model().objects.all().delete()
+        get_user_model().objects.create(
+            username="takashi", password="test", is_superuser=True, is_staff=True)
+        Stock.objects.create(code="0000", name="ABC Company")
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        get_user_model().objects.all().delete()
+
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.first()
+        self.client.login()
+        self.s0 = Stock.objects.get(code="0000")
+
+    def tearDown(self) -> None:
+        self.client.logout()
+        return super().tearDown()
+
+    def test_entry(self):
+        """
+        Entry, Normal
+        """
+        # prepare
+        e1 = Entry.objects.create(stock=self.s0)
+        d2 = {
+            "entry": e1,
+            "date": date.today(),
+            "val_unit": 100,
+            "unit": 100,
+            "val": 10000,
+            "tax": 2000,
+        }
+        div = Dividend.objects.create(**d2)
+        # test
+        test_scenarios = [
+            (Dividend.objects.all().count(), 1, "count"),
+            (str(div), f"Div_{d2['date']}_{d2['entry']}", "__str__"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)

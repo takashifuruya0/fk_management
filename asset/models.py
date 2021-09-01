@@ -662,4 +662,7 @@ class Dividend(BaseModel):
         verbose_name = "配当"
         verbose_name_plural = "配当"
 
+    def __str__(self) -> str:
+        return f"Div_{self.date}_{self.entry}"
+
 
