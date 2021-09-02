@@ -67,7 +67,7 @@ spec:
             - name: envfile
               mountPath: "/home/fk_management/env"
               readOnly: true
-            - name: static-pvc
+            - name: static
               mountPath:  "/home/fk_management/static"
           lifecycle:
             postStart:
