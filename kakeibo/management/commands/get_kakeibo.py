@@ -13,6 +13,7 @@ class Command(BaseCommand):
     help = 'Get Kakeibo data'
     mapping_resource = settings.MAPPING_RESOURCE
     mapping_way = settings.MAPPING_WAY
+    mapping_usage = settings.MAPPING_USAGE
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
     def add_arguments(self, parser):
@@ -64,7 +65,12 @@ class Command(BaseCommand):
                     pprint.pprint(f"currency: {currency}")
                     # usage
                     if r['usage']:
-                        usage = Usage.objects.get(name=r['usage']['name'])
+                        name = self.mapping_usage.get(r['usage']['name'], r['usage']['name'])
+                        usages = Usage.objects.filter(name=name)
+                        if (n:=usages.count()) != 1:
+                            raise Exception(f"Multiple Found Error: {n} Usage {name} were found")
+                        else:
+                            usage = usages[0]
                     elif not r['move_from'] or not r['move_to']:
                         # usageが設定されていないが、resourcesなし --> その他
                         usage = other
@@ -74,20 +80,21 @@ class Command(BaseCommand):
                     # resources
                     resource_from = None
                     if r['move_from']:
-                        if self.mapping_resource.get(r['move_from']['name'], None):
-                            resource_from = Resource.objects.get(
-                                name=self.mapping_resource.get(r['move_from']['name']), currency=currency)
+                        name = self.mapping_resource.get(r['move_from']['name'], r['move_from']['name'])
+                        resources_from = Resource.objects.filter(name=name, currency=currency)
+                        if (n:=resources_from.count()) != 1:
+                            raise Exception(f"Multiple Found Error: {n} ResourceFrom {name} {currency} were found")
                         else:
-                            resource_from = Resource.objects.get(
-                                name=r['move_from']['name'], currency=currency)
+                            resource_from = resources_from[0]
                         pprint.pprint(f"resource_from: {resource_from}")
                     resource_to = None
                     if r['move_to']:
-                        if self.mapping_resource.get(r['move_to']['name'], None):
-                            resource_to = Resource.objects.get(
-                                name=self.mapping_resource.get(r['move_to']['name']), currency=currency)
+                        name = self.mapping_resource.get(r['move_to']['name'], r['move_to']['name'])
+                        resources_to = Resource.objects.filter(name=name, currency=currency)
+                        if (n:=resources_to.count()) != 1:
+                            raise Exception(f"Multiple Found Error: {n} ResourceTo {name} {currency} were found")
                         else:
-                            resource_to = Resource.objects.get(name=r['move_to']['name'], currency=currency)
+                            resource_to = resources_to[0]
                         pprint.pprint(f"resource_to: {resource_to}")
                     # way
                     way = self.mapping_way[r['way']]

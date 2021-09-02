@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'django_extensions',
     "django_bootstrap5",
     "import_export",
-    'bootstrap_datepicker_plus',
     "mathfilters",
     # Django REST Framework
     'rest_framework',
@@ -201,8 +200,9 @@ ACCOUNT_EMAIL_VERIFICATION = "none"  # mandatory / optional / none
 AUTH_USER_MODEL = "accounts.CustomUser"
 SOCIALACCOUNT_AUTO_SIGNUP = False
 ACCOUNT_FORMS = {
-   'signup': 'accounts.forms.UserCreationForm',
+    'signup': 'accounts.forms.UserCreationForm',
 }
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = env('ACCOUNT_DEFAULT_HTTP_PROTOCOL')
 
 ENVIRONMENT = "default"
 
@@ -301,7 +301,26 @@ CHOICES_EXCHANGE_METHOD = (
     ("Wire", "Wire"), ("prestia", "prestia")
 )
 CHOICES_KIND_SHARED_RESOURCE = (
-    ("貯金", "貯金"), ("返済", "返済")
+    ("貯金", "貯金"), ("返済", "返済"), ("引き出し", "引き出し")
+)
+CHOICES_ENTRY_TYPE = (
+    ("短期", "短期"), ("中期", "中期"), ("長期", "長期"), 
+)
+CHOICES_ENTRY_STATUS = (
+    # エントリー前　→　エントリー →　クローズ
+    ("01.BeforeEntry", "01.BeforeEntry"), 
+    ("11.Open", "11.Open"), 
+    ("21.CloseWon", "21.CloseWon"), ("22.CloseLost", "22.CloseLost"), 
+)
+CHOICES_RANK = (
+    ("S", "S"), ("A", "A"), ("B", "B"), ("C", "C"), ("D", "D")
+)
+CHOICES_STATUS = (
+    ("0.起票", "0.起票"),
+    ("1.評価中", "1.評価中"),
+    ("2.申込済", "2.申込済"),
+    ("3.落選（上場前）", "3.落選（上場前）"), ("3.当選（上場前）", "3.当選（上場前）"),
+    ("4.落選（上場後）", "4.落選（上場後）"), ("4.当選（上場後）", "4.当選（上場後）"),
 )
 
 # MAPPING
@@ -319,6 +338,10 @@ MAPPING_WAY = {
     "振替": "振替",
     "共通支出": "その他",
     "その他": "その他",
+}
+MAPPING_USAGE = {
+    "書籍": "自己研鑽",
+    "喫茶店": "娯楽費",
 }
 
 BASE_URL = env('BASE_URL')

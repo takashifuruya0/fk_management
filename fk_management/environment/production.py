@@ -12,7 +12,8 @@ DATABASES = {
     }
 }
 
-ENVIRONMENT = "develop"
+ENVIRONMENT = "production"
+DEBUG = False
 
 # sendgrid by django-sendgrid-v5==1.1.0
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"

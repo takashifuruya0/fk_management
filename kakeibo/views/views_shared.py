@@ -102,6 +102,9 @@ class SharedList(LoginRequiredMixin, ListView):
         # memo
         if self.request.GET.get("memo", None):
             q = q.filter(memo__icontains=self.request.GET.get("memo"))
+        # paid_by
+        if self.request.GET.getlist('paid_by', None):
+            q = q.filter(paid_by__in=self.request.GET.getlist('paid_by'))
         return q.select_related('paid_by', 'usage').order_by('-date')
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -132,7 +135,11 @@ class SharedCreate(LoginRequiredMixin, CreateView):
     form_class = SharedForm
 
     def get_success_url(self):
-        return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
+        messages.success(self.request, f"{self.object}を作成しました")
+        if self.request.POST.get('source_path', None):
+            return self.request.POST['source_path']
+        else:
+            return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
 
 
 class SharedUpdate(LoginRequiredMixin, UpdateView):
@@ -142,7 +149,10 @@ class SharedUpdate(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         messages.success(self.request, f"{self.object}を更新しました")
-        return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
+        if self.request.POST.get('source_path', None):
+            return self.request.POST['source_path']
+        else:
+            return reverse("kakeibo:shared_detail", kwargs={"pk": self.object.pk})
 
 
 class SharedDelete(LoginRequiredMixin, DeleteView):
@@ -206,7 +216,10 @@ class SharedResourceUpdate(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self) -> str:
         messages.success(self.request, f"{self.object}を更新しました")
-        return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})
+        if self.request.POST.get('source_path', None):
+            return self.request.POST['source_path']
+        else:
+            return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})
 
 
 class SharedResourceCreate(LoginRequiredMixin, CreateView):
@@ -216,7 +229,10 @@ class SharedResourceCreate(LoginRequiredMixin, CreateView):
 
     def get_success_url(self) -> str:
         messages.success(self.request, f"{self.object}を作成しました")
-        return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})
+        if self.request.POST.get('source_path', None):
+            return self.request.POST['source_path']
+        else:
+            return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.pk})
 
 
 class SharedResourceDelete(LoginRequiredMixin, DeleteView):
@@ -276,7 +292,7 @@ class SharedTransactionUpdate(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self) -> str:
         messages.success(self.request, f"{self.object}を更新しました")
-        return reverse('kakeibo:shared_transaction_detail', kwargs={"pk": self.object.pk})
+        return reverse('kakeibo:shared_resource_detail', kwargs={"pk": self.object.shared_resource.pk})
 
 
 class SharedTransactionDelete(LoginRequiredMixin, DeleteView):

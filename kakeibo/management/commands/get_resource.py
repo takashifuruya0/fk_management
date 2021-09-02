@@ -25,10 +25,7 @@ class Command(BaseCommand):
         for r in json_data['results']:
             msg = "{}_{}".format(r['name'], r['is_saving'])
             self.stdout.write(self.style.SUCCESS(msg))
-            if mapping_resource.get(r['name'], None):
-                rname = mapping_resource.get(r['name'], None)
-            else:
-                rname = r['name']
+            rname = mapping_resource.get(r['name'], r['name'])
             if not Resource.objects.filter(name=rname).exists():
                 r = Resource(name=rname, is_investment=r['is_saving'], legacy_id=r['pk'])
                 resouce_list.append(r)

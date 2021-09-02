@@ -50,9 +50,9 @@ class SharedViewTest(TestCase):
         Budget.objects.all().delete()
         self.client.logout()
 
-    # ========================================
-    # SharedKakeibo
-    # ========================================
+    #! ========================================
+    #! SharedKakeibo
+    #! ========================================
     def test_shared_create(self):
         # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
         url = reverse("kakeibo:shared_create")
@@ -69,6 +69,26 @@ class SharedViewTest(TestCase):
         shared_created = SharedKakeibo.objects.last()
         # assert
         self.assertRedirects(response, reverse("kakeibo:shared_detail", kwargs={"pk": shared_created.pk}))
+        self.assertEqual(data['fee'], shared_created.fee)
+        self.assertEqual(1, SharedKakeibo.objects.all().count())
+
+    def test_shared_create_source_path(self):
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_create")
+        self.assertEqual("/kakeibo/shared/create", url)
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        data = {
+            "date": "2021-04-01",
+            "fee": 100,
+            "memo": "t",
+            "usage": self.u_shopping.pk,
+            "paid_by": self.user_takashi.pk,
+            "source_path": "/kakeibo/shared"
+        }
+        response = self.client.post(url, data)
+        shared_created = SharedKakeibo.objects.last()
+        # assert
+        self.assertRedirects(response, data["source_path"])
         self.assertEqual(data['fee'], shared_created.fee)
         self.assertEqual(1, SharedKakeibo.objects.all().count())
 
@@ -112,16 +132,22 @@ class SharedViewTest(TestCase):
             date="2023-06-01", fee=100, usage=self.u_lunch,
             memo="test2", paid_by=self.user_hoko
         )
-        res = self.client.get("{}?date_from=2020-06-01".format(url))
-        self.assertEqual(res.context['object_list'].count(), 2)
-        res = self.client.get("{}?date_to=2022-06-01".format(url))
-        self.assertEqual(res.context['object_list'].count(), 1)
-        res = self.client.get("{}?date_from=2021-06-02&date_to=2022-06-01".format(url))
-        self.assertEqual(res.context['object_list'].count(), 0)
-        res = self.client.get("{}?usages={}".format(url, self.u_shopping.pk))
-        self.assertEqual(res.context['object_list'].count(), 1)
-        res = self.client.get("{}?memo={}".format(url, "test"))
-        self.assertEqual(res.context['object_list'].count(), 2)
+        # subtest
+        test_scenarios = [  # (url, count, case_name)
+            ("{}?date_from=2020-06-01".format(url), 2, "date_from"),
+            ("{}?date_to=2022-06-01".format(url), 1, "date_to"),
+            ("{}?date_from=2021-06-02&date_to=2022-06-01".format(url), 0, "date_range"),
+            ("{}?usages={}".format(url, self.u_shopping.pk), 1, "usage"),
+            ("{}?usages={}&usages={}".format(url, self.u_shopping.pk, self.u_lunch.pk), 2, "usage_multiple"),
+            ("{}?memo={}".format(url, "test"), 2, "memo"),
+            ("{}?paid_by={}".format(url, self.user_takashi.pk), 1, "paid_by"),
+            ("{}?paid_by={}&paid_by={}".format(url, self.user_takashi.pk, self.user_hoko.pk), 2, "paid_by_multiple")
+        ]
+        for condition, num, case_name in test_scenarios:
+            with self.subTest(condition=condition, num=num, case_name=case_name):
+                res = self.client.get(condition)
+                self.assertEqual(res.context['object_list'].count(), num)
+                
 
     def test_shared_detail(self):
         # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
@@ -190,9 +216,9 @@ class SharedViewTest(TestCase):
         self.assertRedirects(res, reverse("kakeibo:shared_list"))
         self.assertEqual(SharedKakeibo.objects.all_active().count(), 0)
 
-    # ========================================
-    # SharedResource
-    # ========================================
+    #! ========================================
+    #! SharedResource
+    #! ========================================
     def test_shared_resource_create_post(self):
         """
         SharedResouceCreate: Normal POST
@@ -214,6 +240,29 @@ class SharedViewTest(TestCase):
         self.assertRedirects(
             response, reverse("kakeibo:shared_resource_detail", kwargs={"pk": shared_resource_created.pk})
         )
+        self.assertEqual(shared_resource_created.val_goal, data['val_goal'])
+        self.assertEqual(SharedResource.objects.all().count(), 1)
+
+    def test_shared_resource_create_post_source_path(self):
+        """
+        SharedResouceCreate: Normal POST, SourcePath
+        """
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_create")
+        self.assertEqual("/kakeibo/shared/resource/create", url)
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        data = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金したい！！",
+            "kind": "貯金",
+            "source_path": "/kakeibo/shared"
+        }
+        response = self.client.post(url, data)
+        shared_resource_created = SharedResource.objects.last()
+        # assert
+        self.assertRedirects(response, data['source_path'])
         self.assertEqual(shared_resource_created.val_goal, data['val_goal'])
         self.assertEqual(SharedResource.objects.all().count(), 1)
 
@@ -317,9 +366,79 @@ class SharedViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "shared_resource_detail.html")
 
-    # ========================================
-    # SharedTransaction
-    # ========================================
+    def test_shared_resource_delete_get(self):
+        """
+        SharedResourceDelte: Normal GET
+        """
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        d = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**d)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_delete", kwargs={"pk": sr.pk})
+        self.assertEqual(f"/kakeibo/shared/resource/{sr.pk}/delete", url)
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertTemplateUsed(res, "shared_resource_delete.html")
+
+    def test_shared_resource_delete_get_exception(self):
+        """
+        SharedResourceDelte: Exception GET, Inactive
+        """
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        d = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+            "is_active": False,
+        }
+        sr = SharedResource.objects.create(**d)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_delete", kwargs={"pk": sr.pk})
+        # ~~~~~~~~~~~~~~~~ get ~~~~~~~~~~~~~~~~
+        res = self.client.get(url)
+        self.assertEqual(SharedResource.objects.all_active().count(), 0)
+        self.assertRedirects(res, reverse("kakeibo:shared_top"))
+
+    def test_shared_resource_delete_post(self):
+        """
+        SharedResourceDelte: Normal POST
+        """
+        # ~~~~~~~~~~~~~~~~ prepare ~~~~~~~~~~~~~~~~
+        d = {
+            "date_open": "2021-04-01",
+            "val_goal": 100000,
+            "detail": "t",
+            "name": "貯金",
+            "kind": "貯金したい！！",
+        }
+        sr = SharedResource.objects.create(**d)
+        data = {
+            "date": "2021-06-01",
+            "val": 100,
+            "memo": "test",
+            "paid_by": self.user_takashi,
+            "shared_resource": sr,
+        }
+        st = SharedTransaction.objects.create(**data)
+        # ~~~~~~~~~~~~~~~~ url ~~~~~~~~~~~~~~~~
+        url = reverse("kakeibo:shared_resource_delete", kwargs={"pk": sr.pk})
+        # ~~~~~~~~~~~~~~~~ post ~~~~~~~~~~~~~~~~
+        res = self.client.post(url)
+        self.assertEqual(SharedTransaction.objects.all_active().count(), 0)
+        self.assertEqual(SharedResource.objects.all_active().count(), 0)
+        self.assertRedirects(res, reverse("kakeibo:shared_resource_list"))
+
+    #! ========================================
+    #! SharedTransaction
+    #! ========================================
     def test_shared_transaction_detail(self):
         """
         SharedTransactionDetail: Normal GET
@@ -390,7 +509,8 @@ class SharedViewTest(TestCase):
             "paid_by": self.user_hoko.pk,
         }
         response = self.client.post(url, data=d)
-        self.assertRedirects(response, reverse("kakeibo:shared_transaction_detail", kwargs={"pk": st.pk}))
+        self.assertRedirects(
+            response, reverse("kakeibo:shared_resource_detail", kwargs={"pk": sr.pk}))
         st_updated = SharedTransaction.objects.get(pk=st.pk)
         self.assertEqual(st_updated.val, d['val'])
 

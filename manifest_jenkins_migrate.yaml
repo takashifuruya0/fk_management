@@ -11,9 +11,9 @@ spec:
       restartPolicy: Never
       shareProcessNamespace: true
       volumes:
-      - name: test
-        configMap:
-          name: test
+      - name: envfile
+        secret:
+          secretName: secret-test
       containers:
       - name: fk-management-migrate
         image: tfuruya/fk_management:_VERSION
@@ -24,7 +24,7 @@ spec:
             python3 manage.py migrate --settings=fk_management.environment.develop ;
             sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
         volumeMounts:
-          - name: test
+          - name: envfile
             mountPath: "/home/fk_management/env"
             readOnly: true
         resources:
