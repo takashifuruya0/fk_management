@@ -32,6 +32,7 @@ MarkupPy==1.14
 oauthlib==3.1.0
 odfpy==1.4.1
 openpyxl==3.0.7
+Pillow==8.3.1
 psycopg2==2.8.6
 py-moneyed==1.2
 pycparser==2.20
