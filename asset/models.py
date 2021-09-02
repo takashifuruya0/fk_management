@@ -102,7 +102,7 @@ class StockValueData(BaseModel):
     turnover = models.FloatField("出来高")
 
     def __str__(self):
-        return "{}_{}".format(self.date, self.stock)
+        return "SVD_{}_{}".format(self.date, self.stock)
 
     class Meta:
         verbose_name = "銘柄日次情報"
