@@ -22,3 +22,6 @@ https://django-extensions.readthedocs.io/en/latest/
 
 ### Admin
 https://kurozumi.github.io/django-import-export/
+
+# Memo
+again
