@@ -2,8 +2,9 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: cron-sync-kakeibo
+  namespace: fk-management
 spec:
-  schedule: "20 */1 * * *"
+  schedule: "30 */1 * * *"
   jobTemplate:
     spec:
       completions: 1
@@ -19,7 +20,7 @@ spec:
               secretName: secret-test
           containers:
           - name: fk-management-get-kakeibo
-            image: tfuruya/fk_management:_VERSION
+            image: tfuruya/fk_management:_VERSION  # to be replaced by Jenkins
             imagePullPolicy: Always
             command: [ "/bin/sh", "-c" ]
             args:

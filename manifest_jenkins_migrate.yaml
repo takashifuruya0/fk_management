@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: migrate-job
+  namespace: fk-management
 spec:
   completions: 1
   parallelism: 1
@@ -16,7 +17,7 @@ spec:
           secretName: secret-test
       containers:
       - name: fk-management-migrate
-        image: tfuruya/fk_management:_VERSION
+        image: tfuruya/fk_management:_VERSION  # to be replaced by Jenkins
         imagePullPolicy: Always
         command: [ "/bin/sh", "-c" ]
         args:

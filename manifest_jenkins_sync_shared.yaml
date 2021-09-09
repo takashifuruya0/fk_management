@@ -2,8 +2,9 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: cron-sync-shared
+  namespace: fk-management
 spec:
-  schedule: "0 */1 * * *"
+  schedule: "10 */1 * * *"
   jobTemplate:
     spec:
       completions: 1
@@ -19,7 +20,7 @@ spec:
               secretName: secret-test
           containers:
           - name: fk-management-get-shared
-            image: tfuruya/fk_management:_VERSION
+            image: tfuruya/fk_management:_VERSION  # to be replaced by Jenkins
             imagePullPolicy: Always
             command: [ "/bin/sh", "-c" ]
             args:
