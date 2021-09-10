@@ -84,42 +84,6 @@ spec:
             requests:
               memory: 32Mi
               cpu: "0.1"
-        - name: cloudsql-proxy
-          image: gcr.io/cloudsql-docker/gce-proxy:1.16
-          imagePullPolicy: Always
-          command:
-            - "/cloud_sql_proxy"
-          args:
-            - "-instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432"
-          ports:
-            - containerPort: 5432
-          resources:
-            limits:
-              memory: 256Mi
-              cpu: "0.5"
-            requests:
-              memory: 32Mi
-              cpu: "0.1"
-
----
-# ------------------------
-# Service: ClusterIP
-# ------------------------
-apiVersion: v1
-kind: Service
-metadata:
-  name: fk-management-externalip
-  namespace: fk-management
-spec:
-  type: ClusterIP 
-  ports:
-    - name: "http-port"
-      protocol: "TCP"
-      port: 80
-      targetPort: 8000
-  selector:
-    app: fk-management-app
-
 
 ---
 # ------------------------
@@ -128,7 +92,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: fk-management-externalip2
+  name: fk-management-nodeport
   namespace: fk-management
 spec:
   type: NodePort
@@ -137,6 +101,6 @@ spec:
       protocol: "TCP"
       port: 80
       targetPort: 8000
-      nodePort: 30002
+      nodePort: 30001
   selector:
     app: fk-management-app
