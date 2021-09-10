@@ -22,31 +22,13 @@ spec:
           - name: fk-management-get-event
             image: tfuruya/fk_management:_VERSION  # to be replaced by Jenkins
             imagePullPolicy: Always
-            command: [ "/bin/sh", "-c" ]
-            args:
-              - |
-                python3 manage.py get_event --settings=fk_management.environment.develop ;
-                sql_proxy_pid=$(pgrep cloud_sql_proxy) && kill -INT $sql_proxy_pid;
+            command: 
+              - python3
+            args: ["manage.py", "get_event", "--settings=fk_management.environment.develop"]
             volumeMounts:
               - name: envfile
                 mountPath: "/home/fk_management/env"
                 readOnly: true
-            resources:
-              limits:
-                memory: 256Mi
-                cpu: "0.2"
-              requests:
-                memory: 32Mi
-                cpu: "0.1"
-          - name: cloudsql-proxy
-            image: gcr.io/cloudsql-docker/gce-proxy:1.16
-            imagePullPolicy: Always
-            command:
-              - "/cloud_sql_proxy"
-            args:
-              - "-instances=fmanage-202213:asia-northeast1:cloudsql-fk-management=tcp:0.0.0.0:5432"
-            ports:
-              - containerPort: 5432
             resources:
               limits:
                 memory: 256Mi
