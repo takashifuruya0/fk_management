@@ -139,7 +139,7 @@ class Entry(BaseModel):
         if orders.exists():
             for o in orders:
                 val += (o.val * o.num)
-            val = val/self.num_order(is_buy)
+            val = val/self.get_num_order(is_buy)
         return val
 
     def get_num_order(self, is_buy):
