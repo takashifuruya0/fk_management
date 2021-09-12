@@ -1,6 +1,7 @@
+from asset.admin import DividendAdmin
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from asset.models import Entry, Stock, ReasonWinLoss
+from asset.models import Dividend, Entry, Stock, ReasonWinLoss
 from datetime import datetime
 import requests
 import pprint
@@ -91,6 +92,29 @@ class Command(BaseCommand):
                         pprint.pprint(entry.__dict__)
                     else:
                         entry = Entry.objects.get(legacy_id=r["id"])
+                        # dividend
+                        url_dividend = f"https://www.fk-management.com/drm/web/dividend/?entry={r['id']}"
+                        r_dividend = requests.get(url_dividend)
+                        if r_dividend.status_code == 200:
+                            json_data_dividend = r_dividend.json()
+                            for rd in json_data_dividend['results']:
+                                dd = {
+                                    "legacy_id": rd["id"],
+                                    "date": rd["date"],
+                                    "val_unit": rd["val_unit"],
+                                    "unit":rd["unit"],
+                                    "val": rd["val"],
+                                    "tax": rd["tax"],
+                                    "entry": entry
+                                }
+                                if Dividend.objects.filter(legacy_id=rd["id"]).exists():
+                                    dividends = Dividend.objects.filter(legacy_id=rd["id"])
+                                    dividends.update(**dd)
+                                    self.stdout.write(self.style.SUCCESS(f"Updated Dividend {dividends} successfully"))
+                                else:
+                                    dividend = Dividend.objects.create(**dd)
+                                    self.stdout.write(self.style.SUCCESS(f"Created Dividend {dividend} successfully"))
+                        # check updates
                         updated_at = datetime.strptime(r['updated_at'], "%Y-%m-%dT%H:%M:%S.%f%z")
                         if entry.last_updated_at > updated_at:
                             # update
@@ -114,8 +138,6 @@ class Command(BaseCommand):
             pprint.pprint(error_list)
         # Bulk Create
         Entry.objects.bulk_create(data_list)
-        
-            
 
 # {
 #     "id": 10,
