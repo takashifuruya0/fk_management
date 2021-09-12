@@ -14,7 +14,7 @@ class Command(BaseCommand):
         
     # コマンドが実行された際に呼ばれるメソッド
     def handle(self, *args, **options):
-        url = "https://www.fk-management.com/drm/web/stock/?limits=100"
+        url = "https://www.fk-management.com/drm/web/stock/?limit=100"
         stock_list = list()
         error_list = list()
         while True:
