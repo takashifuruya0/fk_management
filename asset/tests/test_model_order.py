@@ -3,7 +3,7 @@ from django.db.utils import IntegrityError
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from asset.models import Stock, Order, Entry, ReasonWinLoss, Ipo, Dividend, StockValueData
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, tzinfo
 
 
 class OrderTest(TestCase):
@@ -156,6 +156,249 @@ class EntryTest(TestCase):
         for result, expectation, name in test_scenarios:
             with self.subTest(result=result, expectation=expectation, name=name):
                 self.assertEqual(result, expectation)
+
+
+class EntryMethodTest(TestCase):
+    """
+    ! Tests for methods of Entry 
+    """
+    @classmethod
+    def setUpTestData(cls):
+        get_user_model().objects.all().delete()
+        get_user_model().objects.create(
+            username="takashi", password="test", is_superuser=True, is_staff=True)
+        # Stock
+        s0= Stock.objects.create(code="0000", name="ABC Company")
+        s1= Stock.objects.create(code="0001", name="DEF Company")
+        st= Stock.objects.create(code="ABC0000EFG", name="newe trust", is_trust=True)
+        # StockValueData
+        svd0 = StockValueData.objects.create(
+            stock=s0, val_high=2020, val_low=2020, val_open=2020, val_close=2020, 
+            turnover=10000, date=date(2021,4,5))
+        svd1 = StockValueData.objects.create(
+            stock=s1, val_high=1980, val_low=1980, val_open=1980, val_close=1980, 
+            turnover=10000, date=date(2021,4,5))
+        svdt = StockValueData.objects.create(
+            stock=st, val_high=2.2020, val_low=2.2020, val_open=2.2020, val_close=2.2020, 
+            turnover=10000, date=date(2021,4,5))
+        # Open Entry of Stock
+        e0 = Entry.objects.create(stock=s0, memo="without dividend")
+        o0b1 = Order.objects.create(
+            datetime=datetime(2021,4,1,9, 0, tzinfo=timezone.utc), 
+            val=2000, num=100, commission=525, is_nisa=False, is_buy=True,
+            stock=s0, entry=e0)
+        # Open Entry of Stock
+        e0d = Entry.objects.create(stock=s0, memo="with dividend")
+        o0b1 = Order.objects.create(
+            datetime=datetime(2021,4,2,9, 0, tzinfo=timezone.utc), 
+            val=2000, num=1000, commission=525, is_nisa=False, is_buy=True,
+            stock=s0, entry=e0d)
+        div0 = Dividend.objects.create(
+            entry=e0d, val_unit=10, unit=1000, val=10000, tax=2000, date=date(2021,4,8))
+        # Open Entry of Trust
+        et = Entry.objects.create(stock=st)
+        otb1 = Order.objects.create(
+            datetime=datetime(2021,4,1,9, 0, tzinfo=timezone.utc), 
+            val=2.1010, num=10000, commission=0, is_nisa=True, is_buy=True,
+            stock=st, entry=et)
+        # Open Entry with multiple orders
+        e1 = Entry.objects.create(stock=s1)
+        o1b1 = Order.objects.create(
+            datetime=datetime(2021,4,1,9, 0, tzinfo=timezone.utc), 
+            val=2000, num=100, commission=525, is_nisa=False, is_buy=True,
+            stock=s1, entry=e1)
+        o1b2 = Order.objects.create(
+            datetime=datetime(2021,4,3,9, 0, tzinfo=timezone.utc), 
+            val=2100, num=200, commission=525, is_nisa=False, is_buy=True,
+            stock=s1, entry=e1)
+        # Closed Entry
+        e11 = Entry.objects.create(stock=s1)
+        o11b = Order.objects.create(
+            datetime=datetime(2021,4,1,9, 0, tzinfo=timezone.utc), 
+            val=2000, num=100, commission=525, is_nisa=False, is_buy=True,
+            stock=s1, entry=e11)
+        o11s = Order.objects.create(
+            datetime=datetime(2021,4,3,9, 0, tzinfo=timezone.utc), 
+            val=2100, num=100, commission=525, is_nisa=False, is_buy=False,
+            stock=s1, entry=e11)
+        
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        get_user_model().objects.all().delete()
+
+    def setUp(self) -> None:
+        self.user = get_user_model().objects.first()
+        self.client.login()
+        # Stock
+        self.s0 = Stock.objects.get(code="0000")
+        self.s1 = Stock.objects.get(code="0001")
+        self.st = Stock.objects.get(is_trust=True)
+        # StockValueData
+        self.svd0 = StockValueData.objects.get(stock=self.s0)
+        self.svd1 = StockValueData.objects.get(stock=self.s1)
+        self.svdt = StockValueData.objects.get(stock=self.st)
+        # Open Entry of Stock
+        self.e0 = Entry.objects.get(stock=self.s0, memo="without dividend")
+        self.o0b = Order.objects.get(stock=self.s0, is_buy=True, entry=self.e0)
+        # Open Entry of Stock with Dividend
+        self.e0d = Entry.objects.get(stock=self.s0, memo="with dividend")
+        self.o0db = Order.objects.get(stock=self.s0, is_buy=True, entry=self.e0d)
+        self.div0 = Dividend.objects.get(entry=self.e0d)
+        # Open Entry with multiple orders
+        self.e1 = Entry.objects.get(stock=self.s1, is_closed=False)
+        self.o1b1 = Order.objects.get(stock=self.s1, is_buy=True, num=100, entry=self.e1)
+        self.o1b2 = Order.objects.get(stock=self.s1, is_buy=True, num=200, entry=self.e1)
+        # Open Entry of Trust
+        self.et = Entry.objects.get(stock=self.st)
+        self.otb = Order.objects.get(stock=self.st, is_buy=True)
+        # Closed Entry
+        self.e11 = Entry.objects.get(stock=self.s1, is_closed=True)
+        self.o11b = Order.objects.get(stock=self.s1, is_buy=True, entry=self.e11)
+        self.o11s = Order.objects.get(stock=self.s1, is_buy=False, entry=self.e11)
+
+    def tearDown(self) -> None:
+        self.client.logout()
+        return super().tearDown()
+
+    def test_num_buy(self):
+        """
+        num_buy, Normal
+        """
+        # test
+        test_scenarios = [
+            (self.e0.num_buy, self.o0b.num, "Stock with one order"),
+            (self.et.num_buy, self.otb.num, "Trust with one order"),
+            (self.e1.num_buy, self.o1b1.num+self.o1b2.num, "Stock with multiple orders"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_val_buy(self):
+        """
+        val_buy, Normal
+        """
+        # prepare
+        e1_val_buy = (self.o1b1.val*self.o1b1.num+self.o1b2.val*self.o1b2.num)/(self.o1b1.num+self.o1b2.num)
+        # test
+        test_scenarios = [
+            (self.e0.val_buy, self.o0b.val, "Stock with one order"),
+            (self.et.val_buy, self.otb.val, "Trust with one order"),
+            (self.e1.val_buy, e1_val_buy, "Stock with multiple orders"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_total_buy(self):
+        """
+        total_buy, Normal
+        """
+        # prepare
+        e1_total_buy = self.o1b1.val*self.o1b1.num+self.o1b2.val*self.o1b2.num
+        # test
+        test_scenarios = [
+            (self.e0.total_buy, self.o0b.val*self.o0b.num, "Stock with one order"),
+            (self.et.total_buy, self.otb.val*self.otb.num, "Trust with one order"),
+            (self.e1.total_buy, e1_total_buy, "Stock with multiple orders"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_num_sell(self):
+        """
+        num_sell, Normal
+        """
+        # test
+        test_scenarios = [
+            (self.e11.num_sell, self.o11s.num, "Stock with one order"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_val_sell(self):
+        """
+        num_val, Normal
+        """
+        # test
+        test_scenarios = [
+            (self.e11.val_sell, self.o11s.val, "Stock with one order"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_total_sell(self):
+        """
+        toal_sell, Normal
+        """
+        # test
+        test_scenarios = [
+            (self.e11.total_sell, self.o11s.num*self.o11s.val, "Stock with one order"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_profit(self):
+        """
+        profit, Normal
+        """
+        # prepare
+        profit11 = self.o11s.num * self.o11s.val - self.o11b.num * self.o11b.val - self.o11b.commission - self.o11s.commission
+        profit0 = (self.s0.latest_val - self.o0b.val) * self.o0b.num - self.o0b.commission
+        # test
+        test_scenarios = [
+            (self.e11.profit, profit11, "Closed Entry"),
+            (self.e0.profit, profit0, "Open Entry")
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_profit_after_tax(self):
+        """
+        profit_after_tax, Normal
+        """
+        # prepare
+        profit_after_tax11 = self.o11s.num * self.o11s.val - self.o11b.num * self.o11b.val - self.o11b.commission - self.o11s.commission
+        profit_after_tax0 = (self.s0.latest_val - self.o0b.val) * self.o0b.num - self.o0b.commission
+        profit_after_tax1 = self.s1.latest_val * (self.o1b1.num + self.o1b2.num) \
+            - self.o1b1.val * self.o1b1.num - self.o1b1.commission \
+            - self.o1b2.val * self.o1b2.num - self.o1b2.commission
+        # test
+        test_scenarios = [
+            (self.e11.profit_after_tax, round(profit_after_tax11*0.8), "Closed Entry Black"),
+            (self.e0.profit_after_tax, round(profit_after_tax0*0.8), "Open Entry Black"),
+            (self.e1.profit_after_tax, profit_after_tax1, "Open Entry Red"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_profit_pct(self):
+        """
+        profit_pct, Normal
+        """
+        # prepare
+        profit_pct = (
+            self.o11s.num * self.o11s.val 
+            - self.o11b.num * self.o11b.val 
+            - self.o11b.commission - self.o11s.commission
+            ) / (self.o11b.num * self.o11b.val)
+        # test
+        test_scenarios = [
+            (self.e11.profit_pct, profit_pct, "Stock with one order"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+
 
 
 class IpoTest(TestCase):
