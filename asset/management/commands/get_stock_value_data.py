@@ -40,6 +40,7 @@ class Command(BaseCommand):
                         continue
                     d = {
                         "legacy_id": r["id"],
+                        "date": r["date"],
                         "val_high": r['val_high'],
                         "val_low": r['val_low'],
                         "val_open": r['val_open'],
