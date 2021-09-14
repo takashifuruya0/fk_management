@@ -182,22 +182,23 @@ class EntryMethodTest(TestCase):
             stock=st, val_high=2.2020, val_low=2.2020, val_open=2.2020, val_close=2.2020, 
             turnover=10000, date=date(2021,4,5))
         # Open Entry of Stock
-        e0 = Entry.objects.create(stock=s0, memo="without dividend")
-        o0b1 = Order.objects.create(
+        e0 = Entry.objects.create(stock=s0, memo="without dividend", 
+            border_loss_cut=1900, border_profit_determination=2100)
+        o0b = Order.objects.create(
             datetime=datetime(2021,4,1,9, 0, tzinfo=timezone.utc), 
             val=2000, num=100, commission=525, is_nisa=False, is_buy=True,
             stock=s0, entry=e0)
-        # Open Entry of Stock
+        # Open Entry of Stock with dividend
         e0d = Entry.objects.create(stock=s0, memo="with dividend")
-        o0b1 = Order.objects.create(
+        o0db = Order.objects.create(
             datetime=datetime(2021,4,2,9, 0, tzinfo=timezone.utc), 
             val=2000, num=1000, commission=525, is_nisa=False, is_buy=True,
             stock=s0, entry=e0d)
-        div0 = Dividend.objects.create(
+        div = Dividend.objects.create(
             entry=e0d, val_unit=10, unit=1000, val=10000, tax=2000, date=date(2021,4,8))
         # Open Entry of Trust
         et = Entry.objects.create(stock=st)
-        otb1 = Order.objects.create(
+        otb = Order.objects.create(
             datetime=datetime(2021,4,1,9, 0, tzinfo=timezone.utc), 
             val=2.1010, num=10000, commission=0, is_nisa=True, is_buy=True,
             stock=st, entry=et)
@@ -261,6 +262,36 @@ class EntryMethodTest(TestCase):
     def tearDown(self) -> None:
         self.client.logout()
         return super().tearDown()
+
+    def test_profit_profit_determination(self):
+        """
+        profit_profit_determination
+        """
+        # prepare
+        profit_profit_determination = self.o0b.num * (self.e0.border_profit_determination - self.o0b.val)
+        # test
+        test_scenarios = [
+            (self.e0.profit_profit_determination, profit_profit_determination, "Stock with border_profit_determination"),
+            (self.e1.profit_profit_determination, None, "Stock without border_profit_determination"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+    
+    def test_profit_loss_cut(self):
+        """
+        profit_loss_cut
+        """
+        # prepare
+        profit_loss_cut = self.o0b.num * (self.e0.border_loss_cut - self.o0b.val)
+        # test
+        test_scenarios = [
+            (self.e0.profit_loss_cut, profit_loss_cut, "Stock with border_loss_cut"),
+            (self.e1.profit_loss_cut, None, "Stock without border_loss_cut"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
 
     def test_num_buy(self):
         """
@@ -351,10 +382,12 @@ class EntryMethodTest(TestCase):
         # prepare
         profit11 = self.o11s.num * self.o11s.val - self.o11b.num * self.o11b.val - self.o11b.commission - self.o11s.commission
         profit0 = (self.s0.latest_val - self.o0b.val) * self.o0b.num - self.o0b.commission
+        profit0d = (self.s0.latest_val - self.o0db.val) * self.o0db.num - self.o0db.commission + self.div0.val
         # test
         test_scenarios = [
             (self.e11.profit, profit11, "Closed Entry"),
-            (self.e0.profit, profit0, "Open Entry")
+            (self.e0.profit, profit0, "Open Entry"),
+            (self.e0d.profit, profit0d, "Entry with Dividend")
         ]
         for result, expectation, name in test_scenarios:
             with self.subTest(result=result, expectation=expectation, name=name):
