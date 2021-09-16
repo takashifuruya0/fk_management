@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.db.models import Max
 from asset.models import Stock, StockValueData
 import requests
 import pprint
@@ -14,9 +15,17 @@ class Command(BaseCommand):
         
     # コマンドが実行された際に呼ばれるメソッド
     def handle(self, *args, **options):
-        url = "https://www.fk-management.com/drm/web/stockvaluedata/?limit=1000"
+        # check the latest date of SVD
+        if StockValueData.objects.exists():
+            ldate = StockValueData.objects.aggregate(ldate=Max('date'))['ldate']
+            url = f"https://www.fk-management.com/drm/web/stockvaluedata/?limit=1000&date_range_after={ldate}"
+        else:
+            url = "https://www.fk-management.com/drm/web/stockvaluedata/?limit=1000"
+        self.stdout.write(f"url: {url}")
+        # init list
         stock_list = list()
         error_list = list()
+        # start loop
         while True:
             r = requests.get(url)
             if not r.status_code == 200:
@@ -40,6 +49,7 @@ class Command(BaseCommand):
                         continue
                     d = {
                         "legacy_id": r["id"],
+                        "date": r["date"],
                         "val_high": r['val_high'],
                         "val_low": r['val_low'],
                         "val_open": r['val_open'],
