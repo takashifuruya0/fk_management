@@ -310,7 +310,8 @@ CHOICES_ENTRY_STATUS = (
     # エントリー前　→　エントリー →　クローズ
     ("01.BeforeEntry", "01.BeforeEntry"), 
     ("11.Open", "11.Open"), 
-    ("21.CloseWon", "21.CloseWon"), ("22.CloseLost", "22.CloseLost"), 
+    ("21.CloseWon", "21.CloseWon"), ("22.CloseLost", "22.CloseLost"),
+    ("91.Others", "91.Others")
 )
 CHOICES_RANK = (
     ("S", "S"), ("A", "A"), ("B", "B"), ("C", "C"), ("D", "D")
