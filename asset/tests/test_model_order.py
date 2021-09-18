@@ -157,6 +157,101 @@ class EntryTest(TestCase):
             with self.subTest(result=result, expectation=expectation, name=name):
                 self.assertEqual(result, expectation)
 
+    def test_entry_exception_different_stocks(self):
+        """
+        Entry, Exception
+        Orders for different stocks are not linked with the same entry
+        """
+        # prepare
+        e2 =Entry.objects.create(stock=self.s1)
+        d2 = {
+            "stock": self.s1,
+            "datetime": datetime.now(timezone.utc),
+            "is_buy": True,
+            "val": 1000.1,
+            "num": 100,
+            "commission": 525,
+            "entry": e2
+        }
+        o2 = Order.objects.create(**d2)
+        d1 = {
+            "stock": self.s0, 
+            "datetime": datetime.now(timezone.utc),
+            "is_buy": True,
+            "val": 1000,
+            "num": 100,
+            "commission": 525,
+            "entry": e2
+        }
+        # with self.assertRaises(Exception, msg='Different stocks are linked'):
+        o1 = Order(**d1)
+        o1.save()
+        self.assertEqual(o1.entry, None)
+
+    def test_entry_exception_order_datetime(self):
+        """
+        Entry, Exception
+        Buy Orders should be earlier than Sell Orders
+        """
+        # prepare
+        e2 =Entry.objects.create(stock=self.s1)
+        d2 = {
+            "stock": self.s1,
+            "datetime": datetime(2021, 3, 13, 11, 0, tzinfo=timezone.utc),
+            "is_buy": True,
+            "val": 1000.1,
+            "num": 100,
+            "commission": 525,
+            "entry": e2
+        }
+        o2 = Order.objects.create(**d2)
+        d1 = {
+            "stock": self.s1,
+            "datetime": datetime(2021, 3, 12, 10, 0, tzinfo=timezone.utc),
+            "is_buy": False,
+            "val": 1200,
+            "num": 100,
+            "commission": 525,
+            "entry": e2
+        }
+        # with self.assertRaises(Exception, msg='Different stocks are linked'):
+        o1 = Order(**d1)
+        o1.save()
+        self.assertEqual(o1.entry, None)
+        self.assertEqual(e2.remaining, 100)
+
+    def test_entry_exception_remaining(self):
+        """
+        Entry, Exception
+        Remaining should be greater than or equal to 0
+        """
+        # prepare
+        e2 =Entry.objects.create(stock=self.s1)
+        d2 = {
+            "stock": self.s1,
+            "datetime": datetime(2021, 3, 13, 11, 0, tzinfo=timezone.utc),
+            "is_buy": True,
+            "val": 1000.1,
+            "num": 100,
+            "commission": 525,
+            "entry": e2
+        }
+        o2 = Order.objects.create(**d2)
+        d1 = {
+            "stock": self.s1,
+            "datetime": datetime(2021, 3, 14, 10, 0, tzinfo=timezone.utc),
+            "is_buy": False,
+            "val": 1200,
+            "num": 120,
+            "commission": 525,
+            "entry": e2
+        }
+        # with self.assertRaises(Exception, msg='Different stocks are linked'):
+        o1 = Order(**d1)
+        o1.save()
+        self.assertEqual(o1.entry, None)
+        self.assertEqual(e2.remaining, 100)
+
 
 class EntryMethodTest(TestCase):
     """
@@ -263,9 +358,22 @@ class EntryMethodTest(TestCase):
         self.client.logout()
         return super().tearDown()
 
+    def test_total_now(self):
+        """
+        total_now, Normal
+        """
+        # test
+        test_scenarios = [
+            (self.e0.total_now, self.svd0.val_close*self.o0b.num, "Stock with one order"),
+            (self.e1.total_now, self.svd1.val_close*(self.o1b1.num+self.o1b2.num), "Stock with multiple orders"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
     def test_profit_profit_determination(self):
         """
-        profit_profit_determination
+        profit_profit_determination, Normal
         """
         # prepare
         profit_profit_determination = self.o0b.num * (self.e0.border_profit_determination - self.o0b.val)
@@ -277,10 +385,25 @@ class EntryMethodTest(TestCase):
         for result, expectation, name in test_scenarios:
             with self.subTest(result=result, expectation=expectation, name=name):
                 self.assertEqual(result, expectation)
+
+    def test_border_profit_determination_percent(self):
+        """
+        border_profit_determination_percent, Normal
+        """
+        # prepare
+        border_profit_determination_percent = self.o0b.num * (self.e0.border_profit_determination - self.o0b.val) / self.o0b.val 
+        # test
+        test_scenarios = [
+            (self.e0.border_profit_determination_percent, border_profit_determination_percent, "Stock with border_profit_determination"),
+            (self.e1.border_profit_determination_percent, None, "Stock without border_profit_determination"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
     
     def test_profit_loss_cut(self):
         """
-        profit_loss_cut
+        profit_loss_cut, Normal
         """
         # prepare
         profit_loss_cut = self.o0b.num * (self.e0.border_loss_cut - self.o0b.val)
@@ -288,6 +411,21 @@ class EntryMethodTest(TestCase):
         test_scenarios = [
             (self.e0.profit_loss_cut, profit_loss_cut, "Stock with border_loss_cut"),
             (self.e1.profit_loss_cut, None, "Stock without border_loss_cut"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_border_loss_cut_percent(self):
+        """
+        border_loss_cut_percent, Normal
+        """
+        # prepare
+        border_loss_cut_percent = self.o0b.num * (self.e0.border_loss_cut - self.o0b.val) / self.o0b.val
+        # test
+        test_scenarios = [
+            (self.e0.border_loss_cut_percent, border_loss_cut_percent, "Stock with border_loss_cut"),
+            (self.e1.border_loss_cut_percent, None, "Stock without border_loss_cut"),
         ]
         for result, expectation, name in test_scenarios:
             with self.subTest(result=result, expectation=expectation, name=name):
@@ -370,6 +508,46 @@ class EntryMethodTest(TestCase):
         # test
         test_scenarios = [
             (self.e11.total_sell, self.o11s.num*self.o11s.val, "Stock with one order"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_holding_period(self):
+        """
+        holding_period, Normal
+        """
+        # prepare
+        holding_period11 = (self.o11s.datetime.date()  - self.o11b.datetime.date()).days + 1
+        holding_period0 = (date.today()  - self.o0b.datetime.date()).days + 1
+        # test
+        test_scenarios = [
+            (self.e11.holding_period, holding_period11, "Closed Entry"),
+            (self.e0.holding_period, holding_period0, "Open Entry"),
+        ]
+        for result, expectation, name in test_scenarios:
+            with self.subTest(result=result, expectation=expectation, name=name):
+                self.assertEqual(result, expectation)
+
+    def test_profit_per_days(self):
+        """
+        profit_per_days, Normal
+        """
+        # prepare
+        profit_per_days11 = (
+            self.o11s.num * self.o11s.val - self.o11b.num * self.o11b.val - self.o11b.commission - self.o11s.commission
+            ) / ((self.o11s.datetime.date() - self.o11b.datetime.date()).days + 1) 
+        profit_per_days0 = (
+            (self.s0.latest_val - self.o0b.val) * self.o0b.num - self.o0b.commission
+            ) / ((date.today() - self.o0b.datetime.date()).days + 1) 
+        profit_per_days0d = (
+            (self.s0.latest_val - self.o0db.val) * self.o0db.num - self.o0db.commission + self.div0.val
+            ) / ((date.today() - self.o0db.datetime.date()).days + 1) 
+        # test
+        test_scenarios = [
+            (self.e11.profit_per_days, profit_per_days11, "Closed Entry"),
+            (self.e0.profit_per_days, profit_per_days0, "Open Entry"),
+            (self.e0d.profit_per_days, profit_per_days0d, "Open Entry with dividend"),
         ]
         for result, expectation, name in test_scenarios:
             with self.subTest(result=result, expectation=expectation, name=name):
