@@ -519,7 +519,7 @@ class EntryMethodTest(TestCase):
         """
         # prepare
         holding_period11 = (self.o11s.datetime.date()  - self.o11b.datetime.date()).days + 1
-        holding_period0 = (date.today()  - self.o0b.datetime.date()).days + 1
+        holding_period0 = (datetime.now(timezone.utc)  - self.o0b.datetime).days + 1
         # test
         test_scenarios = [
             (self.e11.holding_period, holding_period11, "Closed Entry"),
@@ -539,10 +539,10 @@ class EntryMethodTest(TestCase):
             ) / ((self.o11s.datetime.date() - self.o11b.datetime.date()).days + 1) 
         profit_per_days0 = (
             (self.s0.latest_val - self.o0b.val) * self.o0b.num - self.o0b.commission
-            ) / ((date.today() - self.o0b.datetime.date()).days + 1) 
+            ) / ((datetime.now(timezone.utc) - self.o0b.datetime).days + 1) 
         profit_per_days0d = (
             (self.s0.latest_val - self.o0db.val) * self.o0db.num - self.o0db.commission + self.div0.val
-            ) / ((date.today() - self.o0db.datetime.date()).days + 1) 
+            ) / ((datetime.now(timezone.utc) - self.o0db.datetime).days + 1) 
         # test
         test_scenarios = [
             (self.e11.profit_per_days, profit_per_days11, "Closed Entry"),
