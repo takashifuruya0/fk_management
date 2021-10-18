@@ -58,10 +58,7 @@ class Command(BaseCommand):
                         self.stdout.write("{} already existed".format(r['pk']))
                         continue
                     # currency
-                    if r['memo'] and "USD" in r['memo']:
-                        currency = "USD"
-                    else:
-                        currency = "JPY"
+                    currency = r['currency']
                     pprint.pprint(f"currency: {currency}")
                     # usage
                     if r['usage']:
