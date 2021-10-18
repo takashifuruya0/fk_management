@@ -143,7 +143,7 @@ class SharedKakeibo(BaseModel):
 
 
 class Kakeibo(BaseModel):
-    fee = models.IntegerField("金額")
+    fee = models.FloatField("金額")
     date = models.DateField("日付")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
