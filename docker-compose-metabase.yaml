@@ -2,6 +2,7 @@ version: '3'
 services:
   db2:
     image: gcr.io/cloudsql-docker/gce-proxy:1.16
+    restart: always
     volumes:
       - ~/Documents/Local/gcloud/testiam.json:/config
     ports:
@@ -12,6 +13,7 @@ services:
     ]
   backend:
     build: .
+    restart: always
     command: >
       bash -c '
         python3 manage.py migrate --settings=${SETTINGS} &&
@@ -30,6 +32,7 @@ services:
 
   web:
     image: nginx:1.21
+    restart: always
     volumes:
       - .:/etc/nginx/conf.d
       - ./static:/var/www/html/static
