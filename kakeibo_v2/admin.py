@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Resource, Credit, Usage, Event, SharedKakeibo, CronKakeibo, Kakeibo, Target
-from .models import Budget, Exchange
+from .models.models_kakeibo import Resource, Credit, Usage, Event, CronKakeibo, Kakeibo, Target
+from .models.models_kakeibo import Budget, Exchange, SharedKakeibo
 # Register your models here.
 
 from import_export import resources
@@ -78,7 +78,7 @@ class BudgetAdmin(admin.ModelAdmin):
 class KakeiboAdmin(ImportExportModelAdmin):
     resource_class = KakeiboResource
     list_display = [
-        "pk", "is_active", "date", "usage", "way", "fee", "memo"
+        "pk", "is_active", "date", "usage", "way", "fee", "fee_converted", "memo"
     ]
     autocomplete_fields = ("usage",)
     list_filter = ("way", "usage", "date", )

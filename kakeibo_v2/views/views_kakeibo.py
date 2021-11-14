@@ -4,22 +4,31 @@ from django.contrib import messages
 from django.views.generic import TemplateView, CreateView
 from datetime import date
 from ..forms import IncomeForm, ExchangeForm, ExpenseForm, TransferForm
-from ..models import Kakeibo, Exchange
+from ..models.models_kakeibo import Kakeibo, Exchange, Resource
 
 
 class KakeiboTop(TemplateView):
     template_name = "v2/kakeibo_top.html"
 
     def get_context_data(self, **kwargs):
+        res = super().get_context_data(**kwargs)
         initial_values = {
             "date": date.today(),
         }
-        res = super().get_context_data(**kwargs)
+        total = Kakeibo.objects.filter(is_active=True, resource_from=None) \
+                    .exclude(resource_to=None) \
+                    .aggregate(s=models.Sum('fee_converted'))['s'] \
+                - Kakeibo.objects.filter(is_active=True, resource_to=None) \
+                    .exclude(resource_from=None) \
+                    .aggregate(s=models.Sum('fee_converted'))['s']
         data = {
             'income_form': IncomeForm(initial=initial_values),
             'expense_form': ExpenseForm(initial=initial_values),
             "exchange_form": ExchangeForm(initial=initial_values),
-            "transfer_form": TransferForm(initial=initial_values)
+            "transfer_form": TransferForm(initial=initial_values),
+            "total": total,
+            "kakeibos": Kakeibo.objects.all_active().order_by("-pk")[:5],
+            "resources": Resource.objects.all_active()
         }
         res.update(data)
         return res

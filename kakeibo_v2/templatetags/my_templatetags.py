@@ -4,6 +4,15 @@ register = template.Library()
 
 
 @register.filter
+def comma(val, digit=0):
+    if not val:
+        return "-"
+    elif digit == 0:
+        return "{:,}".format(round(val))
+    elif digit > 0:
+        return "{:,}".format(round(val, digit))
+
+@register.filter
 def yen(val, digit=0):
     if not val:
         return "-"

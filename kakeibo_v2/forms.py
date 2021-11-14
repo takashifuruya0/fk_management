@@ -1,9 +1,12 @@
 # coding: UTF-8
 from django import forms
 from django.contrib.auth import get_user_model
-from .models import CHOICES_CURRENCY, Kakeibo, Usage, SharedKakeibo, Event, Resource, Exchange
 from dal import autocomplete
 from django.conf import settings
+from .models.models_kakeibo import Kakeibo, Usage, Event, Resource, Exchange
+from .models.models_base import CHOICES_CURRENCY
+from .functions import money
+
 
 
 class IncomeForm(forms.ModelForm):
@@ -12,6 +15,10 @@ class IncomeForm(forms.ModelForm):
     """
     usage = forms.ModelChoiceField(
         label="収入種類", queryset=Usage.objects.filter(is_active=True, way="収入").order_by('name'),
+        required=True, widget=forms.Select(attrs={"class": "form-control"})
+    )
+    resource_to = forms.ModelChoiceField(
+        label="口座", queryset=Resource.objects.all_active(),
         required=True, widget=forms.Select(attrs={"class": "form-control"})
     )
 
@@ -23,7 +30,6 @@ class IncomeForm(forms.ModelForm):
         )
         widgets = {
             "currency": forms.Select(attrs={"class": "form-control"}),
-            'resource_to': forms.Select(attrs={"class": "form-control"}),
             'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
             "fee": forms.NumberInput(attrs={"class": "form-control"}),
@@ -57,7 +63,7 @@ class ExpenseForm(forms.ModelForm):
         model = Kakeibo
         fields = (
             "date", "fee", "currency",
-            'usage', "resource_from", 'rate', "memo",
+            'usage', "resource_from", "card", 'rate', "memo",
             "event", "is_shared"
         )
         widgets = {
