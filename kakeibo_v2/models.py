@@ -1,15 +1,44 @@
 from django.db import models
-from django.conf import settings
 from datetime import date
 from django.db.models import Sum, Avg
 from django_currentuser.middleware import get_current_authenticated_user
 from django.contrib.auth import get_user_model
-from django.conf import settings
 from django_currentuser.db.models import CurrentUserField
 import math
 
 
 # Create your models here.
+CHOICES_WAY = (
+    ("収入", "収入"), 
+    ("支出", "支出"), 
+    ("振替", "振替"), 
+    ("両替", "両替"), 
+    ("その他", "その他"),
+)
+CHOICES_CARD = (
+    ("SFC", "SFC"), 
+    ("SFC（家族）", "SFC（家族）"), 
+    ("GoldPoint", "GoldPoint"),
+    ("ANA USA", "ANA USA")
+)
+CHOICES_KIND_CRON_KAKEIBO = (
+    ("monthly", "月次"),
+    ("yearly_01", "年次（1月）"), ("yearly_02", "年次（2月）"), ("yearly_03", "年次（3月）"),
+    ("yearly_04", "年次（4月）"), ("yearly_05", "年次（5月）"), ("yearly_06", "年次（6月）"),
+    ("yearly_07", "年次（7月）"), ("yearly_08", "年次（8月）"), ("yearly_09", "年次（9月）"),
+    ("yearly_10", "年次（10月）"), ("yearly_11", "年次（11月）"), ("yearly_12", "年次（12月）"),
+)
+CHOICES_KIND_TARGET = (
+    ("総資産", "総資産"),
+    ("流動資産", "流動資産"),
+)
+CHOICES_CURRENCY = (
+    ("JPY", "JPY"), ("USD", "USD"),
+)
+CHOICES_EXCHANGE_METHOD = (
+    ("Wise", "Wise"), ("prestia", "prestia"), ("その他", "その他")
+)
+
 
 class BaseManager(models.Manager):
     def all_active(self):
@@ -46,10 +75,9 @@ class Resource(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
     is_investment = models.BooleanField("投資フラグ")
-    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="JPY")
 
     def __str__(self) -> str:
-        return "{} ({})".format(self.name, self.currency)
+        return self.name
 
     @property
     def total(self):
@@ -96,7 +124,8 @@ class Resource(BaseModel):
 class Usage(BaseModel):
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    is_expense = models.BooleanField("支出フラグ", default=True)
+    # is_expense = models.BooleanField("支出フラグ", default=True)
+    way = models.CharField("種別", choices=CHOICES_WAY, max_length=255)
     is_shared = models.BooleanField("共通フラグ", default=False)
 
     def __str__(self) -> str:
@@ -120,64 +149,72 @@ class Event(BaseModel):
 
 
 class Credit(BaseModel):
-    fee = models.IntegerField("金額")
+    fee = models.DecimalField('金額', max_digits=9, decimal_places=2)
     date = models.DateField("日付")
     debit_date = models.DateField("引き落とし日")
     name = models.CharField("名前", max_length=255)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    card = models.CharField("カード", max_length=255, choices=settings.CHOICES_CARD)
-    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="YEN")
-    fee_converted = models.IntegerField("金額（換算後）", null=True, blank=True)
-    rate = models.FloatField("レート", null=True, blank=True)
+    card = models.CharField("カード", max_length=255, choices=CHOICES_CARD)
+    currency = models.CharField("通貨", max_length=3, choices=CHOICES_CURRENCY, default="JPY")
+    fee_converted = models.IntegerField("金額（JPY）")
+    rate = models.FloatField("レート", help_text='JPY for 1 local currency', null=True, blank=True)
 
     def __str__(self):
         return "({}) {}".format(self.date, self.name)
 
 
+class CreditUsage(BaseModel):
+    name = models.CharField("名前", max_length=255)
+    usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
+    memo = models.CharField("備考", max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class SharedKakeibo(BaseModel):
-    fee = models.IntegerField("金額")
+    fee = models.DecimalField('金額', max_digits=9, decimal_places=2)
     date = models.DateField("日付")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    paid_by = models.ForeignKey(get_user_model(), verbose_name="支払者", on_delete=models.CASCADE, related_name='paid_by_v1')
+    paid_by = models.ForeignKey(get_user_model(), verbose_name="支払者", on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
 
 
 class Kakeibo(BaseModel):
-    fee = models.FloatField("金額")
+    fee = models.DecimalField('金額', max_digits=9, decimal_places=2)
     date = models.DateField("日付")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
     shared = models.ForeignKey(SharedKakeibo, verbose_name="共通家計簿", on_delete=models.CASCADE, null=True, blank=True)
     credit = models.ForeignKey(Credit, verbose_name="クレジット", on_delete=models.CASCADE, null=True, blank=True)
     event = models.ForeignKey(Event, verbose_name="イベント", on_delete=models.CASCADE, null=True, blank=True)
-    #
-    way = models.CharField("種別", choices=settings.CHOICES_WAY, max_length=255)
+    way = models.CharField("種別", choices=CHOICES_WAY, max_length=255)
     resource_from = models.ForeignKey(
         Resource, related_name="resource_from", null=True, blank=True, verbose_name="From", on_delete=models.CASCADE
     )
     resource_to = models.ForeignKey(
         Resource, related_name="resource_to", null=True, blank=True, verbose_name="To", on_delete=models.CASCADE
     )
-    currency = models.CharField("通貨", max_length=3, choices=settings.CHOICES_CURRENCY, default="JPY")
-    fee_converted = models.IntegerField("金額（換算後）", null=True, blank=True)
-    rate = models.FloatField("レート", null=True, blank=True)
+    currency = models.CharField("通貨", max_length=3, choices=CHOICES_CURRENCY, default="JPY")
+    fee_converted = models.IntegerField("金額（JPY）")
+    rate = models.FloatField("レート", help_text='JPY for 1 local currency', null=True, blank=True)
 
     def update_fee_converted(self):
-        self.fee_converted = math.floor(self.fee * self.rate)
+        self.fee_converted = int(float(self.fee) * self.rate)
         self.save()
 
     def save(self, *args, **kwargs):
         if self.currency == "JPY":
-            self.fee_converted = self.fee
+            self.fee_converted = int(self.fee)
         elif self.rate:
-            self.fee_converted = math.floor(self.fee * self.rate)
+            self.fee_converted = int(float(self.fee) * self.rate)
         return super(Kakeibo, self).save(*args, **kwargs)
 
 
 class CronKakeibo(BaseModel):
-    fee = models.IntegerField("金額")
+    fee = models.DecimalField('金額', max_digits=9, decimal_places=2)
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    way = models.CharField("種別", choices=settings.CHOICES_WAY, max_length=255)
+    way = models.CharField("種別", choices=CHOICES_WAY, max_length=255)
     resource_from = models.ForeignKey(
         Resource, related_name="cronkakeibo_resource_from", null=True, blank=True, verbose_name="From",
         on_delete=models.CASCADE)
@@ -186,14 +223,14 @@ class CronKakeibo(BaseModel):
         on_delete=models.CASCADE)
     usage = models.ForeignKey(Usage, verbose_name="用途", on_delete=models.CASCADE)
     is_coping_to_shared = models.BooleanField("共通コピーフラグ")
-    kind = models.CharField("種類", max_length=255, choices=settings.CHOICES_KIND_CRON_KAKEIBO)
+    kind = models.CharField("種類", max_length=255, choices=CHOICES_KIND_CRON_KAKEIBO)
 
 
 class Target(BaseModel):
     val = models.IntegerField("値")
     date = models.DateField("日付")
     memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    kind = models.CharField("種類", max_length=255, choices=settings.CHOICES_KIND_TARGET)
+    kind = models.CharField("種類", max_length=255, choices=CHOICES_KIND_TARGET)
 
     def __str__(self) -> str:
         return "Target_{}".format(self.date)
@@ -215,52 +252,9 @@ class Budget(BaseModel):
 
 class Exchange(BaseModel):
     date = models.DateField("Date")
-    method = models.CharField("Method", max_length=255, choices=settings.CHOICES_EXCHANGE_METHOD)
+    method = models.CharField("Method", max_length=255, choices=CHOICES_EXCHANGE_METHOD)
     kakeibo_from = models.OneToOneField(
         Kakeibo, related_name="exchange_from", on_delete=models.CASCADE, verbose_name="Kakeibo_From")
     kakeibo_to = models.OneToOneField(
         Kakeibo, related_name="exchange_to", on_delete=models.CASCADE, verbose_name="Kakeibo_To")
-    rate = models.FloatField("Rate (JPY)")
-    commission = models.FloatField("Commission")
-    currency = models.CharField("Currency of commission", max_length=3, choices=settings.CHOICES_CURRENCY)
-
-
-class SharedResource(BaseModel):
-    name = models.CharField('名前', max_length=255)
-    kind = models.CharField('種別', max_length=255, choices=settings.CHOICES_KIND_SHARED_RESOURCE)
-    date_open = models.DateField('開始日')
-    date_close = models.DateField('終了日', null=True, blank=True)
-    detail = models.TextField("詳細", blank=True, null=True)
-    val_goal = models.IntegerField("目標金額", help_text="「引き出し」の場合は、目標金額は0とする")
-
-    def __str__(self) -> str:
-        if self.kind == "引き出し" or self.val_goal == 0:
-            return f"【{self.kind}】{self.name}"
-        else:
-            return f"【{self.kind}】{self.name}:{self.val_goal:,}円"
-
-    @property
-    def val_actual(self):
-        val_sum = self.sharedtransaction_set.filter(is_active=True).aggregate(sum=Sum('val'))['sum']
-        return val_sum if val_sum else 0
-    
-    @property
-    def progress_100(self):
-        if self.kind == "引き出し" or self.val_goal == 0:
-            return 0
-        else:
-            return math.floor(self.val_actual / self.val_goal * 100)
-
-    @property
-    def is_done(self):
-        if self.kind == "引き出し" or self.val_goal == 0:
-            return False
-        else:
-            return self.val_actual >= self.val_goal 
-
-class SharedTransaction(BaseModel):
-    shared_resource = models.ForeignKey(SharedResource, verbose_name="共通口座", on_delete=models.CASCADE)
-    date = models.DateField('日付')
-    val = models.IntegerField('金額')
-    memo = models.CharField("備考", max_length=255, null=True, blank=True)
-    paid_by = models.ForeignKey(get_user_model(), verbose_name="支払者", on_delete=models.CASCADE)
+    rate = models.FloatField("レート", help_text='JPY for 1 local currency', null=True, blank=True)

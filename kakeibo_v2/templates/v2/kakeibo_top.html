@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load my_templatetags %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}
+KakeiboV2
+{% endblock %}
+
+{% block page-title %}
+KakeiboV2
+{% endblock %}
+
+{% block body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
+<div class="container-fluid">
+  <div class="row">
+    <!--基本メニュ-->
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Kakeibo V2</h2>
+        </div>
+        <div class="card-body table-responsive">
+          {% include "v2/modal/income_form.html" %}
+          {% include "v2/modal/expense_form.html" %}
+          {% include "v2/modal/exchange_form.html" %}
+          {% include "v2/modal/transfer_form.html" %}
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-secondary" href="#">
+            <i class="fas fa-list"></i> 家計簿一覧
+          </a>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

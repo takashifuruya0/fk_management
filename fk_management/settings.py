@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "kakeibo",
     "asset",
     "work",
+    "kakeibo_v2",
     # allauth
     'allauth',
     'django.contrib.sites',
