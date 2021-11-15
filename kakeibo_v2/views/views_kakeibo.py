@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms.fields import IntegerField
 from django.urls import reverse
 from django.contrib import messages
 from django.views.generic import TemplateView, CreateView
@@ -6,6 +7,7 @@ from datetime import date
 from .views_common import MyUserPasssesTestMixin
 from ..forms import IncomeForm, ExchangeForm, ExpenseForm, TransferForm, CreditImportForm
 from ..models.models_kakeibo import Kakeibo, Exchange, Resource
+from ..functions import money
 
 
 class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
@@ -16,12 +18,29 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
         initial_values = {
             "date": date.today(),
         }
+        # total
         total = Kakeibo.objects.filter(is_active=True, resource_from=None) \
                     .exclude(resource_to=None) \
                     .aggregate(s=models.Sum('fee_converted'))['s'] \
                 - Kakeibo.objects.filter(is_active=True, resource_to=None) \
                     .exclude(resource_from=None) \
                     .aggregate(s=models.Sum('fee_converted'))['s']
+        # total-c
+        sum_to = Kakeibo.objects.filter(is_active=True, resource_from=None) \
+                    .exclude(resource_to=None).values('currency') \
+                    .annotate(sum=models.Sum('fee'), pm=models.Value(1, models.IntegerField()))
+        sum_from = Kakeibo.objects.filter(is_active=True, resource_to=None) \
+                    .exclude(resource_from=None).values('currency') \
+                    .annotate(sum=models.Sum('fee'), pm=models.Value(-1, models.IntegerField()))
+        rate = {"JPY": 1}
+        total_calculated = 0
+        for d in sum_from.union(sum_to):
+            if rate.get(d['currency'], None) is None:
+                rate[d['currency']] = money.get_rate(d['currency'])
+            r = rate.get(d['currency'])
+            total_calculated += (float(d["sum"]) * r * d["pm"])
+        total_calculated = int(total_calculated)
+        # data
         data = {
             'income_form': IncomeForm(initial=initial_values),
             'expense_form': ExpenseForm(initial=initial_values),
@@ -29,6 +48,7 @@ class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
             "transfer_form": TransferForm(initial=initial_values),
             "credit_import_form": CreditImportForm(initial={"date_debit":date.today().strftime("%Y-%m")}),
             "total": total,
+            "total_calculated": total_calculated,
             "kakeibos": Kakeibo.objects.all_active().order_by("-pk")[:5],
             "resources": Resource.objects.all_active()
         }

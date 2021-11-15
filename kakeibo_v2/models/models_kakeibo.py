@@ -1,6 +1,6 @@
 from django.db import models
 from datetime import date
-from django.db.models import Sum
+from django.db.models import Sum, Value
 from django.contrib.auth import get_user_model
 import math
 from ..functions import money
@@ -21,14 +21,32 @@ class Resource(BaseModel):
     @property
     def total(self):
         sum_from = Kakeibo.objects.select_related('resource_from').filter(
-            currency=self.currency, resource_from=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
+            resource_from=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
         sum_to = Kakeibo.objects.select_related('resource_to').filter(
-            currency=self.currency, resource_to=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
+            resource_to=self, is_active=True).aggregate(sum=Sum('fee'))['sum']
         if sum_from and sum_to:
             val = sum_to - sum_from
         else:
             val = sum_to if sum_to else 0
         return val
+
+    @property
+    def total_calculated(self):
+        sum_from = Kakeibo.objects.select_related('resource_from') \
+            .filter(resource_from=self, is_active=True) \
+            .values("currency").annotate(sum=Sum('fee'), pm=Value(-1, models.IntegerField()))
+        sum_to = Kakeibo.objects.select_related('resource_to') \
+            .filter(resource_to=self, is_active=True) \
+            .values("currency").annotate(sum=Sum('fee'), pm=Value(1, models.IntegerField()))
+        rate = {"JPY": 1}
+        total = 0
+        data = sum_from.union(sum_to)
+        for d in data:
+            if rate.get(d['currency'], None) is None:
+                rate[d['currency']] = money.get_rate(d['currency'])
+            r = rate.get(d['currency'])
+            total += (float(d["sum"]) * r * d["pm"])
+        return int(total)
     
     @property
     def total_converted(self):

@@ -145,7 +145,7 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.WARNING("--------------------------------"))
                 self.stdout.write(self.style.SUCCESS("Success: {}".format(len(kakeibo_list))))
                 self.stdout.write(self.style.ERROR("Fail: {}".format(len(error_list))))
-                self.stdout.write("Total: {}".format(len(json_data['count'])))
+                self.stdout.write("Total: {}".format(json_data['count']))
                 self.stdout.write("======================================")
                 break
             url = json_data['next']

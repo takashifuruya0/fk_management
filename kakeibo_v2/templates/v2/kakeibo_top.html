@@ -25,7 +25,7 @@ KakeiboV2
         </div>
         <div class="card-body table-responsive">
           <div>
-            総資産：{{total | yen |safe}}
+            総資産：{{total | yen}} / {{total_calculated |yen}}
           </div>
           <hr>
           <div class="btn-group" role="group" aria-label="Basic menus">
@@ -47,11 +47,13 @@ KakeiboV2
         <tr>
           <th>Name</th>
           <th class="right">Value (JPY)</th>
+          <th class="right">ValueC (JPY)</th>
         </tr>
         {% for r in resources %}
         <tr>
           <td>{{r.name}}</td>
           <td class="right">{{r.total_converted |yen}}</td>
+          <td class="right">{{r.total_calculated |yen}}</td>
         </tr>
         {% endfor %}
       </table>

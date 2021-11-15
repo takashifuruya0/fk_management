@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.db.models import Sum
+import json
 from .models.models_kakeibo import Resource, Credit, Usage, Event, CronKakeibo, Kakeibo, Target
 from .models.models_kakeibo import Budget, Exchange, SharedKakeibo
 # Register your models here.
@@ -51,6 +53,29 @@ class ResourceAdmin(ImportExportModelAdmin):
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
     search_fields = ("name", )
+    readonly_fields = ("_sum_kakeibo", "_sum_kakeibo_jpy", "_sum_kakeibo_usd", "total_calculated")
+    
+    def _sum_kakeibo(self, obj):
+        total = Kakeibo.objects.filter(is_active=True, resource_to=obj) \
+                    .aggregate(s=Sum('fee_converted'))['s'] \
+                - Kakeibo.objects.filter(is_active=True, resource_from=obj) \
+                    .aggregate(s=Sum('fee_converted'))['s']
+        return total
+    _sum_kakeibo.short_description = '合計（JPY）'
+
+    def _sum_kakeibo_usd(self, obj):
+        total = Kakeibo.objects.filter(is_active=True, resource_to=obj, currency="USD") \
+                    .aggregate(s=Sum('fee'))['s'] \
+                - Kakeibo.objects.filter(is_active=True, resource_from=obj, currency="USD") \
+                    .aggregate(s=Sum('fee'))['s']
+        return total
+
+    def _sum_kakeibo_jpy(self, obj):
+        total = Kakeibo.objects.filter(is_active=True, resource_to=obj, currency="JPY") \
+                    .aggregate(s=Sum('fee'))['s'] \
+                - Kakeibo.objects.filter(is_active=True, resource_from=obj, currency="JPY") \
+                    .aggregate(s=Sum('fee'))['s']
+        return total
 
 
 class UsageAdmin(ImportExportModelAdmin):
