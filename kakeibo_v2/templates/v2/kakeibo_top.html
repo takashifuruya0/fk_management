@@ -18,71 +18,77 @@ KakeiboV2
 <div class="container-fluid">
   <div class="row">
     <!--基本メニュ-->
-    <div class="col-lg-5">
+    <div class="col-lg-6">
       <div class="card">
         <div class="card-header bg-primary text-white">
           <h2 class="card-title">Kakeibo V2</h2>
         </div>
         <div class="card-body table-responsive">
           <div>
-            合計：{{total | yen |safe}}
+            総資産：{{total | yen |safe}}
           </div>
           <hr>
-          {% include "v2/modal/income_form.html" %}
-          {% include "v2/modal/expense_form.html" %}
+          <div class="btn-group" role="group" aria-label="Basic menus">
+            {% include "v2/modal/expense_form.html" %}
+            {% include "v2/modal/income_form.html" %}
+            {% include "v2/modal/transfer_form.html" %}
+          </div>
           {% include "v2/modal/exchange_form.html" %}
-          {% include "v2/modal/transfer_form.html" %}
-          <hr>
-          <h5>Resources</h5>
-          <table class="table table-striped">
-            <tr>
-              <th>Name</th>
-              <th>Value</th>
-            </tr>
-            {% for r in resources %}
-            <tr>
-              <td>{{r.name}}</td>
-              <td>{{r.total_converted |yen}}</td>
-            </tr>
-            {% endfor %}
-          </table>
+          {% include "v2/modal/credit_import_form.html" %}
         </div>
         <div class="card-footer">
+          <a href="#" class="btn btn-primary"><i class="fas fa-tachometer-alt"></i> Data Studio</a>
         </div>
       </div>
     </div>
-    <div class="col-lg-7">
-      <h5>Kakeibos</h5>
+    <div class="col-lg-6">
+      <h5>Resources</h5>
       <table class="table table-striped">
         <tr>
-          <th>ID</th>
-          <th>Date</th>
-          <th>Way</th>
-          <th>Usage</th>
-          <th>Fee</th>
-          <th>Currency</th>
-          <th>Fee (JPY)</th>
-          <th>From</th>
-          <th>To</th>
-          <th>Memo</th>
+          <th>Name</th>
+          <th class="right">Value (JPY)</th>
         </tr>
-        {% for k in kakeibos %}
+        {% for r in resources %}
         <tr>
-          <td>
-            <a href="/admin/kakeibo_v2/kakeibo/{{k.pk}}">{{k.pk}}</a>
-          </td>
-          <td>{{k.date}}</td>
-          <td>{{k.way}}</td>
-          <td>{{k.usage.name}}</td>
-          <td>{{k.fee |comma:2}}</td>
-          <td>{{k.currency}}</td>
-          <td>{{k.fee_converted |yen}}</td>
-          <td>{{k.resource_from.name}}</td>
-          <td>{{k.resource_to.name}}</td>
-          <td>{{k.memo |default:""}}</td>
+          <td>{{r.name}}</td>
+          <td class="right">{{r.total_converted |yen}}</td>
         </tr>
         {% endfor %}
       </table>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-12">
+      <h5>Kakeibos</h5>
+        <table class="table table-striped">
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Way</th>
+            <th>Usage</th>
+            <th class="right">Fee</th>
+            <th class="right">Fee (JPY)</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Memo</th>
+          </tr>
+          {% for k in kakeibos %}
+          <tr>
+            <td>
+              <a href="/admin/kakeibo_v2/kakeibo/{{k.pk}}">{{k.pk}}</a>
+            </td>
+            <td>{{k.date}}</td>
+            <td>{{k.way}}</td>
+            <td>{{k.usage.name}}</td>
+            <td class="right">{{k.currency}} {{k.fee |comma:2}}</td>
+            <td class="right">{{k.fee_converted |yen}}</td>
+            <td>{{k.resource_from.name}}</td>
+            <td>{{k.resource_to.name}}</td>
+            <td>{{k.memo |default:""}}</td>
+          </tr>
+          {% endfor %}
+        </table>
     </div>
   </div>
 </div>

@@ -2,23 +2,23 @@
 
 
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-outline-info btn-block" data-bs-toggle="modal" data-bs-target="#exchangeModal">
-  <i class="fas fa-dollar-sign"></i> Exchange
+<button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#credit-importModal">
+  <i class="fab fa-cc-visa"></i> Credit Import
 </button>
 
 <!-- Modal -->
-<div class="modal fade" id="exchangeModal" tabindex="-1" aria-labelledby="exchangeModalLabel" aria-hidden="true">
+<div class="modal fade" id="credit-importModal" tabindex="-1" aria-labelledby="credit-importModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <form class="form" method="POST" action="{%url 'kakeibo_v2:kakeibo_exchange_create'%}">
+      <form class="form" method="POST" action="{%url 'kakeibo_v2:kakeibo_credit_import'%}">
         <div class="modal-header">
-          <h5 class="modal-title" id="exchangeModalLabel">
-            <i class="fas fa-sticky-note"></i>　Exchange Form
+          <h5 class="modal-title" id="credit-importModalLabel">
+            <i class="fas fa-sticky-note"></i>　Credit Import Form
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          {% bootstrap_form exchange_form %}
+          {% bootstrap_form credit_import_form %}
           {% csrf_token %}
           <input type="hidden" name="source_path" value="{{request.get_full_path}}">
         </div>

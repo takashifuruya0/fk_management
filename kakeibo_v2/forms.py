@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from dal import autocomplete
 from django.conf import settings
 from .models.models_kakeibo import Kakeibo, Usage, Event, Resource, Exchange
-from .models.models_base import CHOICES_CURRENCY
+from .models.models_base import CHOICES_CURRENCY, CHOICES_CARD
 from .functions import money
 
 
@@ -87,15 +87,21 @@ class ExpenseForm(forms.ModelForm):
 
 class CreditImportForm(forms.Form):
     file = forms.FileField(
-        label="ファイル", required=True, widget=forms.FileInput(attrs={"class": "form-control"})
+        label="ファイル", required=True, 
+        widget=forms.FileInput(attrs={"class": "form-control"}
+        )
     )
     date_debit = forms.DateField(
-        label="請求年月", required=True, widget=forms.DateInput(attrs={"class": "form-control", "type": "date"})
+        label="請求年月", required=True, 
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "month"}
+        )
     )
-    card = forms.ChoiceField(label="カード", required=True, widget=forms.Select(attrs={"class": "form-control"}))
+    card = forms.ChoiceField(
+        label="カード", required=True, widget=forms.Select(attrs={"class": "form-control"})
+        )
 
     def __init__(self, *args, **kwargs):
-        self.base_fields['card'].choices = settings.CHOICES_CARD
+        self.base_fields['card'].choices = CHOICES_CARD
         super().__init__(*args, **kwargs)
 
 

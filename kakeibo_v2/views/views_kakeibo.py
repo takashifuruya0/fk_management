@@ -3,11 +3,12 @@ from django.urls import reverse
 from django.contrib import messages
 from django.views.generic import TemplateView, CreateView
 from datetime import date
-from ..forms import IncomeForm, ExchangeForm, ExpenseForm, TransferForm
+from .views_common import MyUserPasssesTestMixin
+from ..forms import IncomeForm, ExchangeForm, ExpenseForm, TransferForm, CreditImportForm
 from ..models.models_kakeibo import Kakeibo, Exchange, Resource
 
 
-class KakeiboTop(TemplateView):
+class KakeiboTop(MyUserPasssesTestMixin, TemplateView):
     template_name = "v2/kakeibo_top.html"
 
     def get_context_data(self, **kwargs):
@@ -26,6 +27,7 @@ class KakeiboTop(TemplateView):
             'expense_form': ExpenseForm(initial=initial_values),
             "exchange_form": ExchangeForm(initial=initial_values),
             "transfer_form": TransferForm(initial=initial_values),
+            "credit_import_form": CreditImportForm(initial={"date_debit":date.today().strftime("%Y-%m")}),
             "total": total,
             "kakeibos": Kakeibo.objects.all_active().order_by("-pk")[:5],
             "resources": Resource.objects.all_active()
@@ -34,7 +36,7 @@ class KakeiboTop(TemplateView):
         return res
 
 
-class KakeiboIncomeCreate(CreateView):
+class KakeiboIncomeCreate(MyUserPasssesTestMixin, CreateView):
     form_class = IncomeForm
     model = Kakeibo
 
@@ -44,7 +46,7 @@ class KakeiboIncomeCreate(CreateView):
         return success_url
 
 
-class KakeiboExpenseCreate(CreateView):
+class KakeiboExpenseCreate(MyUserPasssesTestMixin, CreateView):
     form_class = ExpenseForm
     model = Kakeibo
 
@@ -54,7 +56,7 @@ class KakeiboExpenseCreate(CreateView):
         return success_url
 
 
-class KakeiboExchangeCreate(CreateView):
+class KakeiboExchangeCreate(MyUserPasssesTestMixin, CreateView):
     form_class = ExchangeForm
     model = Exchange
 
@@ -67,7 +69,7 @@ class KakeiboExchangeCreate(CreateView):
         return success_url
 
 
-class KakeiboTransferCreate(CreateView):
+class KakeiboTransferCreate(MyUserPasssesTestMixin, CreateView):
     form_class = TransferForm
     model = Kakeibo
 

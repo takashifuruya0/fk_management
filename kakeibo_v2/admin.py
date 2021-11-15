@@ -59,6 +59,7 @@ class UsageAdmin(ImportExportModelAdmin):
         "pk", "is_active", "name", "way", "is_shared",
         "created_by", "created_at", "last_updated_by", "last_updated_at",
     ]
+    list_filter = ["way", "is_shared"]
     readonly_fields = ["_count_kakeibo", "_count_shared"]
     search_fields = ("name", "way")
 
