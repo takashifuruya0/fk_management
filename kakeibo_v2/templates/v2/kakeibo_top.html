@@ -33,7 +33,6 @@ KakeiboV2
             {% include "v2/modal/income_form.html" %}
             {% include "v2/modal/transfer_form.html" %}
           </div>
-          {% include "v2/modal/exchange_form.html" %}
           {% include "v2/modal/credit_import_form.html" %}
         </div>
         <div class="card-footer">
@@ -42,6 +41,7 @@ KakeiboV2
       </div>
     </div>
     <div class="col-lg-6">
+      {% include "v2/modal/exchange_form.html" %}
       <h5>Resources</h5>
       <table class="table table-striped">
         <tr>
@@ -97,4 +97,6 @@ KakeiboV2
 {% endblock %}
 
 {% block js %}
+{{income_form.media}}
+{{expense_form.media}}
 {% endblock %}
