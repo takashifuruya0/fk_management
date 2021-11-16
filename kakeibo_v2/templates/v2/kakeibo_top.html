@@ -32,17 +32,21 @@ KakeiboV2
         </div>
       </div>
       <hr>
-      <div class="btn-group" role="group" aria-label="Basic menus">
+
+      <div class="row">
+        <div class="col-6 d-grid ">
+          {% include "v2/modal/expense_form.html" %}
+          {% include "v2/modal/income_form.html" %}
+        </div>
+        <div class="col-6 d-grid ">
+          {% include "v2/modal/transfer_form.html" %}
+          {% include "v2/modal/exchange_form.html" %}
+          {% include "v2/modal/credit_import_form.html" %}
+        </div>
       </div>
-      <div class="d-grid">
-        {% include "v2/modal/expense_form.html" %}
-        {% include "v2/modal/income_form.html" %}
-        {% include "v2/modal/transfer_form.html" %}
-        {% include "v2/modal/exchange_form.html" %}
-        {% include "v2/modal/credit_import_form.html" %}
-      </div>
-      
+      <hr>
     </div>
+    
     <div class="col-lg-6">
       <h5>Resources</h5>
       <table class="table table-striped">
