@@ -2,13 +2,13 @@
 
 
 <!-- Button trigger modal -->
-<a href="#" type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#incomeModal" style="cursor:pointer;">
+<a href="#" type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#incomeModal">
   <i class="far fa-money-bill-alt"></i> Income
 </a>
 
 <!-- Modal -->
 <div class="modal fade" id="incomeModal" tabindex="-1" aria-labelledby="incomeModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <form class="form" method="POST" action="{%url 'kakeibo_v2:kakeibo_income_create'%}">
         <div class="modal-header">
