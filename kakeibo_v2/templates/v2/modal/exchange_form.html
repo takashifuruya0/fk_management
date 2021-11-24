@@ -18,7 +18,33 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          {% bootstrap_form exchange_form %}
+          {% comment %} {% bootstrap_form exchange_form %} {% endcomment %}
+          <div class='row'>
+            <div class="col-12">
+              {{ exchange_form.date.label }}
+              {{ exchange_form.date }}
+              {{ exchange_form.rate.label }}
+              {{ exchange_form.rate }}
+              {{ exchange_form.method.label }}
+              {{ exchange_form.method }}
+            </div>
+            <div class='col-6'>
+              {{ exchange_form.resource_from.label }}
+              {{ exchange_form.resource_from }}
+              {{ exchange_form.fee_from.label }}
+              {{ exchange_form.fee_from }}
+              {{ exchange_form.currency_from.label }}
+              {{ exchange_form.currency_from }}
+            </div>
+            <div class='col-6'>
+            {{ exchange_form.resource_to.label }}
+              {{ exchange_form.resource_to }}
+              {{ exchange_form.fee_to.label }}
+              {{ exchange_form.fee_to }}
+              {{ exchange_form.currency_to.label }}
+              {{ exchange_form.currency_to }}
+            </div>
+          </div>
           {% csrf_token %}
           <input type="hidden" name="source_path" value="{{request.get_full_path}}">
         </div>

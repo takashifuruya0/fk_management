@@ -113,20 +113,22 @@ class ExchangeForm(forms.ModelForm):
     fee_from = forms.DecimalField(label="Fee (From)", widget=forms.NumberInput(attrs={"class": "form-control"}))
     fee_to = forms.DecimalField(label="Fee (To)", widget=forms.NumberInput(attrs={"class": "form-control"}))
     currency_from = forms.ChoiceField(
-        label="Currency (From)", choices=CHOICES_CURRENCY, 
-        widget=forms.Select(attrs={"class": "form-control"})
+        label="Currency (From)", choices=CHOICES_CURRENCY, initial='JPY',
+        widget=forms.Select(attrs={"class": "form-control form-select"})
         )
     currency_to = forms.ChoiceField(
-        label="Currency (To)", choices=CHOICES_CURRENCY, 
-        widget=forms.Select(attrs={"class": "form-control"})
+        label="Currency (To)", choices=CHOICES_CURRENCY, initial='USD',
+        widget=forms.Select(attrs={"class": "form-control form-select"})
         )
     resource_from = forms.ModelChoiceField(
         label="From", queryset=Resource.objects.filter(is_active=True).order_by('-name'),
-        widget=forms.Select(attrs={"class": "form-control"}),
+        widget=forms.Select(attrs={"class": "form-control form-select"}),
+        required=True,
     )
     resource_to = forms.ModelChoiceField(
         label="To", queryset=Resource.objects.filter(is_active=True).order_by('-name'),
-        widget=forms.Select(attrs={"class": "form-control"}),
+        widget=forms.Select(attrs={"class": "form-control form-select"}),
+        required=True,
     )
 
     class Meta:
@@ -139,7 +141,7 @@ class ExchangeForm(forms.ModelForm):
         )
         widgets = {
             'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            "method": forms.Select(attrs={"class": "form-control"}),
+            "method": forms.Select(attrs={"class": "form-control form-select"}),
             "rate": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
@@ -169,6 +171,14 @@ class TransferForm(forms.ModelForm):
     """
     Form for Transfer
     """
+    resource_from = forms.ModelChoiceField(
+        label='From', required=True, widget=forms.Select(attrs={"class": "form-control form-select"}),
+        queryset=Resource.objects.all_active().order_by('-name')
+        )
+    resource_to = forms.ModelChoiceField(
+        label='To', required=True, widget=forms.Select(attrs={"class": "form-control form-select"}),
+        queryset=Resource.objects.all_active().order_by('-name')
+        )
 
     class Meta:
         model = Kakeibo
@@ -176,8 +186,7 @@ class TransferForm(forms.ModelForm):
             "date", "fee", "currency", "resource_from", 'resource_to', "memo",
         )
         widgets = {
-            'resource_from': forms.Select(attrs={"class": "form-control"}),
-            'resource_to': forms.Select(attrs={"class": "form-control"}),
+            'currency': forms.Select(attrs={"class": "form-control form-select"}),
             'date': forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "memo": forms.TextInput(attrs={"class": "form-control"}),
             "fee": forms.NumberInput(attrs={"class": "form-control"}),
