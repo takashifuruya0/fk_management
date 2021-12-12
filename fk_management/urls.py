@@ -18,6 +18,8 @@ from django.shortcuts import redirect
 from django.urls import path, include
 from django.conf import settings
 from django.views.generic import TemplateView
+from django.db import connection
+from django.http import JsonResponse
 
 
 class TopView(TemplateView):
@@ -33,7 +35,16 @@ class TopView(TemplateView):
             return redirect("kakeibo:shared_top")
 
 
+def index(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        return JsonResponse({ "message": "OK"}, status=200)
+    except Exception as ex:
+        return JsonResponse({ "error": str(ex) }, status=500)
+
 urlpatterns = [
+    path("/health", index, name="top"),
     path('admin/', admin.site.urls, name="admin"),
     path('auth/', include('allauth.urls')),
     path("kakeibo/", include("kakeibo.urls")),
