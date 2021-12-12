@@ -37,6 +37,7 @@ urlpatterns = [
     path('admin/', admin.site.urls, name="admin"),
     path('auth/', include('allauth.urls')),
     path("kakeibo/", include("kakeibo.urls")),
+    path("kakeibo/v2/", include("kakeibo_v2.urls")),
     path("", TopView.as_view(), name="top"),
 ]
 

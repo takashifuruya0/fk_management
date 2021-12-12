@@ -1,11 +1,6 @@
 {% load static %}
 {% load admin_urls %}
 {% load django_bootstrap5 %}
-{% bootstrap_css %}
-{% bootstrap_javascript %}
-{% bootstrap_messages %}
-
-
 <html>
   <head>
     <title>{% block title %}{% endblock %}:fk-management v2</title>
@@ -15,11 +10,15 @@
     <link rel="icon" href="{%static 'favicon.ico'%}">
     <link rel="stylesheet" href="{%static 'common.css'%}">
     <script src="https://kit.fontawesome.com/0e8797feee.js" crossorigin="anonymous"></script>
-    <!--datepicker-->
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% bootstrap_messages %}
+
+    {% comment %} <!--datepicker-->
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> {% endcomment %}
+    {% comment %} <script>
       $(function () {
           // 日付は、年-月-日 の形式でお願いする。
           let dateFormat = 'yy-mm-dd';
@@ -27,7 +26,7 @@
               dateFormat: dateFormat
           });
       });
-    </script>
+    </script> {% endcomment %}
   </head>
   <body>
     <nav class="navbar navbar-expand-lg bg-light navbar-light navbar-toggleable-lg">
@@ -66,6 +65,17 @@
                 <li><a class="dropdown-item disabled" href="#">
                   <i class="fas fa-flag-usa"></i>&nbsp;USD
                 </a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">
+                <i class="fas fa-yen-sign"></i>&nbsp;Kakeibo/v2
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{%url 'kakeibo_v2:kakeibo_top'%}">
+                  <i class="fas fa-tachometer-alt"></i> KakeiboDashboard
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
               </ul>
             </li>
             {% endif %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load my_templatetags %}
+{% load django_bootstrap5 %}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+
+{% block title %}
+KakeiboV2
+{% endblock %}
+
+{% block page-title %}
+KakeiboV2
+{% endblock %}
+
+{% block body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
+<div class="container-fluid">
+  <div class="row">
+    <!--基本メニュ-->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h2 class="card-title">Kakeibo V2</h2>
+        </div>
+        <div class="card-body table-responsive">
+          <div>
+            総資産：{{total | yen}} / {{total_calculated |yen}}
+          </div>
+          <hr>
+          <a href="#" class="btn btn-primary"><i class="fas fa-tachometer-alt"></i> Data Studio</a>
+        </div>
+      </div>
+      <hr>
+
+      <div class="row">
+        <div class="col-6 d-grid ">
+          {% include "v2/modal/expense_form.html" %}
+          {% include "v2/modal/income_form.html" %}
+        </div>
+        <div class="col-6 d-grid ">
+          {% include "v2/modal/transfer_form.html" %}
+          {% include "v2/modal/exchange_form.html" %}
+          {% include "v2/modal/credit_import_form.html" %}
+        </div>
+      </div>
+      <hr>
+    </div>
+    
+    <div class="col-lg-6">
+      <h5>Resources</h5>
+      <table class="table table-striped">
+        <tr>
+          <th>Name</th>
+          <th class="right">Value (JPY)</th>
+          <th class="right">ValueC (JPY)</th>
+        </tr>
+        {% for r in resources %}
+        <tr>
+          <td>{{r.name}}</td>
+          <td class="right">{{r.total_converted |yen}}</td>
+          <td class="right">{{r.total_calculated |yen}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  <hr>
+  <div class="row">
+    <div class="col-12 table-responsive">
+      <h5>Kakeibos</h5>
+      <table class="table table-striped table-responsive">
+        <tr>
+          <th>ID</th>
+          <th>Date</th>
+          <th>Way</th>
+          <th>Usage</th>
+          <th class="right">Fee</th>
+          <th class="right">Fee (JPY)</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Memo</th>
+        </tr>
+        {% for k in kakeibos %}
+        <tr>
+          <td>
+            <a href="/admin/kakeibo_v2/kakeibo/{{k.pk}}">{{k.pk}}</a>
+          </td>
+          <td>{{k.date}}</td>
+          <td>{{k.way}}</td>
+          <td>{{k.usage.name}}</td>
+          <td class="right">{{k.currency}} {{k.fee |comma:2}}</td>
+          <td class="right">{{k.fee_converted |yen}}</td>
+          <td>{{k.resource_from.name}}</td>
+          <td>{{k.resource_to.name}}</td>
+          <td>{{k.memo |default:""}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

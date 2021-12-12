@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from kakeibo.models import Resource, Kakeibo, Usage
+from ...models.models_kakeibo import Resource, Kakeibo, Usage
 import requests
 import pprint
 import logging
@@ -11,9 +11,26 @@ logger = logging.getLogger('django')
 class Command(BaseCommand):
     # python manage.py help count_entryで表示されるメッセージ
     help = 'Get Kakeibo data'
-    mapping_resource = settings.MAPPING_RESOURCE
-    mapping_way = settings.MAPPING_WAY
-    mapping_usage = settings.MAPPING_USAGE
+    mapping_resource = {
+        "SBI敬士": "SBI",
+        "投資口座": "投資元本",
+        "一般財形": "財形",
+    }
+    mapping_way = {
+        "支出（現金）": "支出",
+        "支出（クレジット）": "支出",
+        "支出（Suica）": "その他",
+        "引き落とし": "支出",
+        "収入": "収入",
+        "振替": "振替",
+        "共通支出": "その他",
+        "その他": "その他",
+    }
+    mapping_usage = {
+        "書籍": "自己研鑽",
+        "喫茶店": "娯楽費",
+    }
+    
 
     # コマンドライン引数を指定します。(argparseモジュール https://docs.python.org/2.7/library/argparse.html)
     def add_arguments(self, parser):
@@ -63,7 +80,7 @@ class Command(BaseCommand):
                     # usage
                     if r['usage']:
                         name = self.mapping_usage.get(r['usage']['name'], r['usage']['name'])
-                        usages = Usage.objects.filter(name=name)
+                        usages = Usage.objects.filter(name=name, is_active=True)
                         if (n:=usages.count()) != 1:
                             raise Exception(f"Multiple Found Error: {n} Usage {name} were found")
                         else:
@@ -78,23 +95,25 @@ class Command(BaseCommand):
                     resource_from = None
                     if r['move_from']:
                         name = self.mapping_resource.get(r['move_from']['name'], r['move_from']['name'])
-                        resources_from = Resource.objects.filter(name=name, currency=currency)
+                        resources_from = Resource.objects.filter(name=name, is_active=True)
                         if (n:=resources_from.count()) != 1:
-                            raise Exception(f"Multiple Found Error: {n} ResourceFrom {name} {currency} were found")
+                            raise Exception(f"Multiple Found Error: {n} ResourceFrom {name} were found")
                         else:
                             resource_from = resources_from[0]
                         pprint.pprint(f"resource_from: {resource_from}")
                     resource_to = None
                     if r['move_to']:
                         name = self.mapping_resource.get(r['move_to']['name'], r['move_to']['name'])
-                        resources_to = Resource.objects.filter(name=name, currency=currency)
+                        resources_to = Resource.objects.filter(name=name, is_active=True)
                         if (n:=resources_to.count()) != 1:
-                            raise Exception(f"Multiple Found Error: {n} ResourceTo {name} {currency} were found")
+                            raise Exception(f"Multiple Found Error: {n} ResourceTo {name} were found")
                         else:
                             resource_to = resources_to[0]
                         pprint.pprint(f"resource_to: {resource_to}")
                     # way
                     way = self.mapping_way[r['way']]
+                    if "Exchange" in usage.name:
+                        way = "両替"
                     pprint.pprint(f"way: {way}")
                     # init Kakeibo
                     d = {
@@ -105,9 +124,10 @@ class Command(BaseCommand):
                         "usage": usage,
                         "resource_from": resource_from,
                         "resource_to": resource_to,
-                        "fee_converted": r['fee'],  # save以外は自動算出されない
+                        "fee_converted": r['fee_converted'],  # save以外は自動算出されない
                         "legacy_id": r['pk'],
                         "currency": currency,
+                        "rate": r['rate'],
                     }
                     k = Kakeibo(**d)
                     kakeibo_list.append(k)
@@ -117,15 +137,18 @@ class Command(BaseCommand):
                     error_list.append({"msg": e, "data": r})
                     self.stderr.write(str(e))
             if not json_data['next']:
-                self.stdout.write(
-                    ("=================={}/{}====================".format(len(kakeibo_list), json_data['count']))
-                )
+                Kakeibo.objects.bulk_create(kakeibo_list)
+                self.stdout.write("======================================")
+                if error_list:
+                    self.stdout.write(self.style.WARNING("------------ Errors ------------"))
+                    pprint.pprint(error_list)
+                    self.stdout.write(self.style.WARNING("--------------------------------"))
+                self.stdout.write(self.style.SUCCESS("Success: {}".format(len(kakeibo_list))))
+                self.stdout.write(self.style.ERROR("Fail: {}".format(len(error_list))))
+                self.stdout.write("Total: {}".format(json_data['count']))
+                self.stdout.write("======================================")
                 break
             url = json_data['next']
-        if error_list:
-            self.stdout.write("====================")
-            pprint.pprint(error_list)
-        Kakeibo.objects.bulk_create(kakeibo_list)
 
 # {
 #     "pk": 1536,

@@ -104,3 +104,43 @@ spec:
       nodePort: 30001
   selector:
     app: fk-management-app
+
+
+---
+# ------------------------
+# Certificate
+# ------------------------
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: managed-cert
+  namespace: fk-management
+spec:
+  domains: 
+  - gke.fk-management.com
+
+---
+
+# ------------------------
+# Ingress
+# ------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: managed-cert-ingress
+  namespace: fk-management
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: gke2
+    networking.gke.io/managed-certificates: managed-cert
+    # kubernetes.io/ingress.class: "gce"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: fk-management-nodeport
+            port:
+              number: 80

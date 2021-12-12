@@ -1,0 +1,60 @@
+{% load django_bootstrap5 %}
+
+
+<!-- Button trigger modal -->
+<a href="#" type="button" class="btn btn-outline-info btn-block" data-bs-toggle="modal" data-bs-target="#exchangeModal">
+  <i class="fas fa-dollar-sign"></i> Exchange
+</a>
+
+<!-- Modal -->
+<div class="modal fade" id="exchangeModal" tabindex="-1" aria-labelledby="exchangeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form class="form" method="POST" action="{%url 'kakeibo_v2:kakeibo_exchange_create'%}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exchangeModalLabel">
+            <i class="fas fa-sticky-note"></i>　Exchange Form
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% comment %} {% bootstrap_form exchange_form %} {% endcomment %}
+          <div class='row'>
+            <div class="col-12">
+              {{ exchange_form.date.label }}
+              {{ exchange_form.date }}
+              {{ exchange_form.rate.label }}
+              {{ exchange_form.rate }}
+              {{ exchange_form.method.label }}
+              {{ exchange_form.method }}
+            </div>
+            <div class='col-6'>
+              {{ exchange_form.resource_from.label }}
+              {{ exchange_form.resource_from }}
+              {{ exchange_form.fee_from.label }}
+              {{ exchange_form.fee_from }}
+              {{ exchange_form.currency_from.label }}
+              {{ exchange_form.currency_from }}
+            </div>
+            <div class='col-6'>
+            {{ exchange_form.resource_to.label }}
+              {{ exchange_form.resource_to }}
+              {{ exchange_form.fee_to.label }}
+              {{ exchange_form.fee_to }}
+              {{ exchange_form.currency_to.label }}
+              {{ exchange_form.currency_to }}
+            </div>
+          </div>
+          {% csrf_token %}
+          <input type="hidden" name="source_path" value="{{request.get_full_path}}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" value="Create">
+            <i class="fas fa-plus"></i> Create
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

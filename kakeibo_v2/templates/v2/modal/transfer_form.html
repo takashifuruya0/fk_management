@@ -1,0 +1,56 @@
+{% load django_bootstrap5 %}
+
+
+<!-- Button trigger modal -->
+<a href="#" type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#transferModal">
+  <i class="fas fa-exchange-alt"></i> Transfer
+</a>
+
+<!-- Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form class="form" method="POST" action="{%url 'kakeibo_v2:kakeibo_transfer_create'%}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="transferModalLabel">
+            <i class="fas fa-sticky-note"></i>　Transfer Form
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {% comment %} {% bootstrap_form transfer_form %} {% endcomment %}
+          <div class='row'>
+            <div class="col-12">
+              {{ transfer_form.date.label }}
+              {{ transfer_form.date }}
+              {{ transfer_form.fee.label }}
+              {{ transfer_form.fee }}
+              {{ transfer_form.currency.label }}
+              {{ transfer_form.currency }}
+            </div>
+            <div class='col-6'>
+              {{ transfer_form.resource_from.label }}
+              {{ transfer_form.resource_from }}
+            </div>
+            <div class='col-6'>
+            {{ transfer_form.resource_to.label }}
+              {{ transfer_form.resource_to }}
+            </div>
+            <div class='col-12'>
+              {{ transfer_form.memo.label }}
+              {{ transfer_form.memo }}
+            </div>
+          </div>
+          {% csrf_token %}
+          <input type="hidden" name="source_path" value="{{request.get_full_path}}">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" value="Create">
+            <i class="fas fa-plus"></i> Create
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
