@@ -44,7 +44,7 @@ def index(request):
         return JsonResponse({ "error": str(ex) }, status=500)
 
 urlpatterns = [
-    path("/health", index, name="top"),
+    path("health/", index, name="top"),
     path('admin/', admin.site.urls, name="admin"),
     path('auth/', include('allauth.urls')),
     path("kakeibo/", include("kakeibo.urls")),
