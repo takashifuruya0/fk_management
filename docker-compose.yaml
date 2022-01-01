@@ -46,6 +46,12 @@ services:
       - 80:80
     depends_on:
       - backend
+  
+  selenium:
+    image: selenium/standalone-chrome:96.0
+    ports:
+      - 4444:4444
+      - 5900:5900
 
 volumes:
   postgres_data:
