@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from ...models import Event, Kakeibo
+from ...models.models_kakeibo import Event, Kakeibo
 import requests
 import logging
 logger = logging.getLogger('django')

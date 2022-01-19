@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from ...models import SharedKakeibo, Usage
+from ...models.models_kakeibo import SharedKakeibo, Usage
 import requests
 import pprint
 import logging
